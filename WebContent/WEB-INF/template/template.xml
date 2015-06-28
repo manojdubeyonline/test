@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN"
+       "http://tiles.apache.org/dtds/tiles-config_2_1.dtd">
+
+<tiles-definitions>
+
+  <definition name="main" template="/WEB-INF/template/template.jsp">
+  	<put-attribute name="title" value="Railtech......purchase order" type="string" />
+ 	<put-attribute name="header" value="/WEB-INF/template/layouts/header.jsp" />
+    <put-attribute name="body" value="/WEB-INF/template/layouts/body.jsp" />
+    <put-attribute name="footer" value="/WEB-INF/template/layouts/footer.jsp" />
+  </definition>
+  
+  <definition name="flexigrid" template="/WEB-INF/layouts/flexigrid.jsp">
+  	<put-attribute name="title" value="ev" type="string" />
+    <put-attribute name="header" value="/WEB-INF/template/layouts/header.jsp" />
+    <put-attribute name="footer" value="/WEB-INF/template/layouts/footer.jsp" />
+  </definition>
+  
+  <definition name="empty" template="/WEB-INF/layouts/empty.jsp">
+  	<put-attribute name="title" value="ev" type="string" />
+  </definition>
+
+</tiles-definitions>

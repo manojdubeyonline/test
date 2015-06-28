@@ -1,0 +1,38 @@
+body {
+    /*font: 85%/1.45em "Helvetica Neue",HelveticaNeue,Helvetica,Verdana,Arial,sans-serif;*/
+    font-weight:normal;
+    color: #333;
+}
+
+th {
+    font-weight: normal !important;
+}
+
+label {
+	font-weight: normal;
+}
+
+#left_menu {
+	margin-top:-50px;
+	margin-left:-40px;
+	padding:50px;
+	height:500px;
+	width: 420px;
+}
+
+.error-message {
+	color: #DC381F;
+	/*border: dotted #9F000F 1px;*/
+	padding: 10px;
+	margin-bottom: 10px;
+	/*display: none;*/
+}
+
+.success-message {
+	color: #64E986;
+	/*border: dotted #9F000F 1px;*/
+	font-weight: bold;
+	padding: 10px;
+	margin-bottom: 10px;
+	/*display: none;*/
+}
