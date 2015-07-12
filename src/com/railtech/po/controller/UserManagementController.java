@@ -69,7 +69,7 @@ public class UserManagementController {
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = { "usercrud" }, method = { RequestMethod.POST })
+	/*@RequestMapping(value = { "usercrud" }, method = { RequestMethod.POST })
 	public ModelAndView addModifyUser(@RequestParam("file") MultipartFile file,
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
@@ -94,8 +94,8 @@ public class UserManagementController {
 				user = new User();
 				user.setUserName(userName);
 			}
-			user.setFirstName(firstName);
-			user.setLastName(lastName);
+			//user.setFirstName(firstName);
+			//user.setLastName(lastName);
 			user.setEmail(email);
 
 			Set<Profile> userProfiles = new HashSet<Profile>();
@@ -110,25 +110,25 @@ public class UserManagementController {
 
 			}
 
-			user.setUserProfiles(userProfiles);
+			//user.setUserProfiles(userProfiles);
 			user.setStatus(status);
 			if (!file.isEmpty()) {
 				try {
 					byte[] bytes = file.getBytes();
-					user.setPhoto(bytes);
+					//user.setPhoto(bytes);
 				} catch (Exception e) {
 				}
 			}
 
-			user.setPassword(Crypto.encrypt(PasswordUtil.generatePassword()));
+		//	user.setPassword(Crypto.encrypt(PasswordUtil.generatePassword()));
 
-			if (user.getId() == null) {
-				user.setCreatedDate(new Date());
-				userService.addUser(user);
-
-			} else {
-				user.setUpdatedDate(new Date());
-				userService.modifyUser(user);
+		//	if (user.getId() == null) {
+			//	user.setCreatedDate(new Date());
+			//	userService.addUser(user);
+//
+			//} else {
+			//	user.setUpdatedDate(new Date());
+			//	userService.modifyUser(user);
 			}
 		} catch (Exception e) {
 			logger.error(e);
@@ -145,7 +145,7 @@ public class UserManagementController {
 		logger.info("exiting addModifyUser ");
 		return mav;
 	}
-
+*/
 	/**
 	 * 
 	 * @param request
@@ -184,7 +184,7 @@ public class UserManagementController {
 	/**
 	 * Method to delete the users
 	 */
-	@RequestMapping(value = { "delete" }, method = { RequestMethod.POST })
+	/*@RequestMapping(value = { "delete" }, method = { RequestMethod.POST })
 	public ModelAndView deleteCustomer(@RequestParam Long id,
 			HttpServletRequest request, HttpServletResponse response) {
 
@@ -208,9 +208,9 @@ public class UserManagementController {
 		mav.addObject("appUserList", users);
 
 		return mav;
-	}
+	}*/
 
-	@RequestMapping(value = "/getUserImage/{id}")
+	/*@RequestMapping(value = "/getUserImage/{id}")
 	public void getUserImage(HttpServletResponse response,
 			@PathVariable("id") Long id) throws IOException {
 		response.setContentType("image/jpeg");
@@ -219,7 +219,7 @@ public class UserManagementController {
 		InputStream in1 = new ByteArrayInputStream(buffer);
 		IOUtils.copy(in1, response.getOutputStream());
 	}
-
+*/
 	/**
 	 * 
 	 * @param request

@@ -1,173 +1,150 @@
 package com.railtech.po.entity;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.Set;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.Lob;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
+import java.sql.Timestamp;
 
 
 /**
- * The persistent class for the user database table.
+ * The persistent class for the tbl_users database table.
  * 
  */
 @Entity
-@Table(name="user")
+@Table(name="tbl_users")
 public class User implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
-	@Column(unique=true, nullable=false)
-	private Long id;
-	
-	@Column(name="USERNAME", nullable=false)
-	private String userName;
-	
-	@Column(name="PASSWORD", nullable=false)
-	private String password;
+	@Column(name="user_id")
+	private Integer userId;
 
-	@Column(name="FIRSTNAME", nullable=false)
-	private String firstName;
+	private byte access;
 
-	@Column(name="LASTNAME", nullable=false)
-	private String lastName;
-	
-	@Column(name="EMAIL", nullable=true)
+	private Integer access1;
+
 	private String email;
 
+	@Column(name="landing_page")
+	private String landingPage;
+
+	@Column(name="last_modified")
+	private Timestamp lastModified;
+
+	@Column(name="modified_by")
+	private Integer modifiedBy;
+
 	@Lob
-	@Column(name="PHOTO")
-	private byte[] photo;
+	private String remarks;
 
-	@Column(name="STATUS", nullable=false)
+	@Column(name="role_id")
+	private Integer roleId;
+
 	private String status;
-	
-	@Column(name="CREATEDDATE", nullable=false)
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date createdDate;
-	
-	@Column(name="UPDATEDDATE")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date updatedDate;
 
-	
-	@OneToMany(fetch=FetchType.EAGER)
-	@JoinTable(
-		name="userProfile"
-		, joinColumns={
-			@JoinColumn(name="USERID")
-			}
-		, inverseJoinColumns={
-			@JoinColumn(name="PROFILEID")
-			}
-		)
-	private Set<Profile> userProfiles;
-	
-	public Long getId() {
-		return id;
+	@Column(name="user_name")
+	private String userName;
+
+	@Column(name="user_password")
+	private String userPassword;
+
+	public User() {
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public Integer getUserId() {
+		return this.userId;
 	}
 
-	public String getUserName() {
-		return userName;
+	public void setUserId(Integer userId) {
+		this.userId = userId;
 	}
 
-	public void setUserName(String userName) {
-		this.userName = userName;
+	public byte getAccess() {
+		return this.access;
 	}
 
-	public String getPassword() {
-		return password;
+	public void setAccess(byte access) {
+		this.access = access;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
+	public Integer getAccess1() {
+		return this.access1;
 	}
 
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
+	public void setAccess1(Integer access1) {
+		this.access1 = access1;
 	}
 
 	public String getEmail() {
-		return email;
+		return this.email;
 	}
 
 	public void setEmail(String email) {
 		this.email = email;
 	}
 
-	public byte[] getPhoto() {
-		return photo;
+	public String getLandingPage() {
+		return this.landingPage;
 	}
 
-	public void setPhoto(byte[] photo) {
-		this.photo = photo;
+	public void setLandingPage(String landingPage) {
+		this.landingPage = landingPage;
+	}
+
+	public Timestamp getLastModified() {
+		return this.lastModified;
+	}
+
+	public void setLastModified(Timestamp lastModified) {
+		this.lastModified = lastModified;
+	}
+
+	public Integer getModifiedBy() {
+		return this.modifiedBy;
+	}
+
+	public void setModifiedBy(Integer modifiedBy) {
+		this.modifiedBy = modifiedBy;
+	}
+
+	public String getRemarks() {
+		return this.remarks;
+	}
+
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
+	public Integer getRoleId() {
+		return this.roleId;
+	}
+
+	public void setRoleId(Integer roleId) {
+		this.roleId = roleId;
 	}
 
 	public String getStatus() {
-		return status;
+		return this.status;
 	}
 
 	public void setStatus(String status) {
 		this.status = status;
 	}
 
-	public Date getCreatedDate() {
-		return createdDate;
+	public String getUserName() {
+		return this.userName;
 	}
 
-	public void setCreatedDate(Date createdDate) {
-		this.createdDate = createdDate;
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 
-	public Date getUpdatedDate() {
-		return updatedDate;
+	public String getUserPassword() {
+		return this.userPassword;
 	}
 
-	public void setUpdatedDate(Date updatedDate) {
-		this.updatedDate = updatedDate;
+	public void setUserPassword(String userPassword) {
+		this.userPassword = userPassword;
 	}
 
-	/**
-	 * @return the userProfiles
-	 */
-	public Set<Profile> getUserProfiles() {
-		return userProfiles;
-	}
-
-	/**
-	 * @param userProfiles the userProfiles to set
-	 */
-	public void setUserProfiles(Set<Profile> userProfiles) {
-		this.userProfiles = userProfiles;
-	}
-	
 }

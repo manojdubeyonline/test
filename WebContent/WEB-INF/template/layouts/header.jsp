@@ -1,24 +1,12 @@
-<nav class="navbar navbar-default" role="navigation">
-	<div class="container-fluid">
-		<!-- Brand and toggle get grouped for better mobile display -->
-		<div class="navbar-header">
-			<a class="navbar-brand" href="#">Home</a>
-		</div>
-		<!-- Collect the nav links, forms, and other content for toggling -->
-		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-			<div class="btn-toolbar">
-			    <div class="btn-group nav navbar-nav navbar-right">
-			        <button class="btn btn-default" type="button">
-			        	<span class="glyphicon glyphicon-home"></span> Home
-			        </button>
-			        <button class="btn btn-default" type="button">
-			        	<span class="glyphicon glyphicon-cog"></span> Settings
-			        </button>
-			        <button class="btn btn-default" type="button">
-			        	<span class="glyphicon glyphicon-off"></span> Logout
-			        </button>
-			    </div>
-			</div>
-		</div>
-	</div>
-</nav>
+<div style='height:10px;'>&nbsp;</div>
+<div>
+<ul class="nav nav-tabs">
+  <li role="presentation" class="active"><a href="#">My Requisitions</a></li>
+  <li role="presentation"><a href="#">Requisition Pending Approval</a></li>
+  <li role="presentation"><a href="#">Approved Requisitions</a></li>
+   <li role="presentation"><a href="#">Purchase Orders</a></li>
+    <li role="presentation"><a href="#">Purchase Orders Pending Approval</a></li>
+     <li role="presentation"><a href="#">GRPO</a></li>
+</ul>
+</div>
+<div style='height:10px;'>&nbsp;</div>
