@@ -5,8 +5,11 @@ package com.railtech.po.service;
 
 import java.util.Set;
 
+import com.railtech.po.entity.Code;
 import com.railtech.po.entity.Firm;
 import com.railtech.po.entity.Item;
+import com.railtech.po.entity.PL;
+import com.railtech.po.entity.Unit;
 import com.railtech.po.entity.User;
 import com.railtech.po.entity.Warehouse;
 import com.railtech.po.exeception.RailtechException;
@@ -36,6 +39,16 @@ public interface MasterInfoService {
 	public Firm getFirmByCode(String firmCode) throws RailtechException;
 
 	public Warehouse getWareHouseById(String warehouseId) throws RailtechException;
+
+	public Set<Unit> getUnits() throws RailtechException;
+
+	public Unit getUnitById(Integer unitId) throws RailtechException;
+
+	public Set<PL> getPLList() throws RailtechException;
+
+	public Set<Code> getCodeList() throws RailtechException;
+
+	public Code getCodeById(Integer codeId);
 	
 	
 

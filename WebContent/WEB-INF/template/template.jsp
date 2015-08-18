@@ -7,6 +7,7 @@
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Railtech Purchase Order Management</title>
+		<script	type="text/javascript"  src="<c:url value="/resources/js/lib/moment.min.js"/>"></script>
 <%-- 		<script	type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
 		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/css/datepicker.min.css" />
@@ -32,13 +33,14 @@
 
 		<!-- Optional theme -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
-
+<script	type="text/javascript" src="https://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.7/css/jquery.dataTables.min.css"> 
 		<!-- Latest compiled and minified JavaScript -->
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 		
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-migrate/1.2.1/jquery-migrate.js"></script>
 		<script src="<c:url value="/resources/js/lib/flexigrid.js"/>"></script>
-		
+	
 		<link href="<c:url value="/resources/css/lib/flexigrid.css"/>" rel="stylesheet"/><%-- 
 		<link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/lib/bootstrap.min.css"/>" media="screen"/>
 		
@@ -47,6 +49,8 @@
 		<link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/lib/bootstrap-theme.min.css"/>" /> --%>
 		<link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/style.css"/>"/>
 		<link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/lib/bootstrap-dialog.min.css"/>" />
+		
+
 	</head>
 
 	<body>

@@ -16,8 +16,11 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.railtech.po.entity.Code;
 import com.railtech.po.entity.Firm;
 import com.railtech.po.entity.Item;
+import com.railtech.po.entity.PL;
+import com.railtech.po.entity.Unit;
 import com.railtech.po.entity.User;
 import com.railtech.po.entity.Warehouse;
 import com.railtech.po.exeception.RailtechException;
@@ -75,6 +78,46 @@ public class MasterInfoServiceImpl implements MasterInfoService {
 	}
 	
 	@Override
+	public Set<Unit> getUnits() throws RailtechException {
+		logger.info("entering getUnits");
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from Unit unit order by unit.unitName");
+		@SuppressWarnings("unchecked")
+		Set <Unit> unitList = new HashSet<Unit>(query.list());
+		logger.debug("returnVal No of units:"+unitList.size());
+		logger.info("exiting getUnits");
+		return unitList;
+
+	}
+	
+	@Override
+	public Set<PL> getPLList() throws RailtechException {
+		logger.info("entering getPLs");
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from PL pl order by pl.itemDesc");
+		@SuppressWarnings("unchecked")
+		Set <PL> plList = new HashSet<PL>(query.list());
+		logger.debug("returnVal No of pls:"+plList.size());
+		logger.info("exiting getPLList");
+		return plList;
+
+	}
+	
+	@Override
+	public Set<Code> getCodeList() throws RailtechException {
+		logger.info("entering getCodeList");
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from Code code order by code.itemName");
+		@SuppressWarnings("unchecked")
+		Set <Code> codeList = new HashSet<Code>(query.list());
+		logger.debug("returnVal No of codes:"+codeList.size());
+		logger.info("exiting getCodeList");
+		return codeList;
+
+	}
+		
+	
+	@Override
 	public Set<Warehouse> getWareHouses() throws RailtechException {
 		logger.info("entering getWareHouses");
 		Session session = sessionFactory.getCurrentSession();
@@ -111,6 +154,17 @@ public class MasterInfoServiceImpl implements MasterInfoService {
 		return item;
 	}
 
+	@Override
+	public Unit getUnitById(Integer unitId) throws RailtechException {
+		logger.info("entering getUnitById");
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from Unit unit where unit.unitId =:unitId").setInteger("unitId", unitId);
+		Unit unit = (Unit)query.uniqueResult();
+		logger.debug("returnVal unit:"+unit.toString());
+		logger.info("exiting getUnitById");
+		return unit;
+	}
+	
 	@Override
 	public User getUserById(String userId) throws RailtechException {
 		logger.info("entering getUserById");
@@ -154,6 +208,17 @@ public class MasterInfoServiceImpl implements MasterInfoService {
 		logger.debug("returnVal No of user:"+warehouse.toString());
 		logger.info("exiting getWareHouseById");
 		return warehouse;
+	}
+
+	@Override
+	public Code getCodeById(Integer codeId) {
+		logger.info("entering getCodeById. Param:"+codeId);
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from Code code where code =:codeId").setInteger("codeId", codeId);
+		Code code = (Code)query.uniqueResult();
+		logger.debug("returnVal  of code:"+code);
+		logger.info("exiting getCodeById");
+		return code;
 	}
 
 

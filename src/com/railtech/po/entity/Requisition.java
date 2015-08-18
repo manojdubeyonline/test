@@ -2,13 +2,18 @@ package com.railtech.po.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -24,6 +29,10 @@ public class Requisition implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private String requisitionId;
+	
+	@Column(name="requisition_ref_no")
+	private String requisitionRefNo;
+
 
 	private String approvalComments;
 
@@ -36,19 +45,7 @@ public class Requisition implements Serializable {
 	@Temporal(TemporalType.DATE)
 	private Date dueDate;
 
-	@ManyToOne
-	@JoinColumn(name="FullFilledByUser")
-	private User fullFilledByUser;
-
-	private int fullFillmentComments;
-
 	private String fullFillmentStatus;
-
-	@ManyToOne
-	@JoinColumn(name="ItemCode")
-	private Item item;
-
-	private double qty;
 
 	private String remarks;
 
@@ -66,6 +63,10 @@ public class Requisition implements Serializable {
 	@ManyToOne
 	@JoinColumn(name="RequestedAtWareHouse")
 	private Warehouse requestedAtWareHouse;
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "requisition", cascade=CascadeType.ALL)
+	private Set<RequisitionItem> requisitionItems;
+	
 
 	public Requisition() {
 	}
@@ -105,28 +106,12 @@ public class Requisition implements Serializable {
 	}
 
 	
-	public int getFullFillmentComments() {
-		return this.fullFillmentComments;
-	}
-
-	public void setFullFillmentComments(int fullFillmentComments) {
-		this.fullFillmentComments = fullFillmentComments;
-	}
-
 	public String getFullFillmentStatus() {
 		return this.fullFillmentStatus;
 	}
 
 	public void setFullFillmentStatus(String fullFillmentStatus) {
 		this.fullFillmentStatus = fullFillmentStatus;
-	}
-
-	public double getQty() {
-		return this.qty;
-	}
-
-	public void setQty(double qty) {
-		this.qty = qty;
 	}
 
 	public String getRemarks() {
@@ -157,34 +142,6 @@ public class Requisition implements Serializable {
 	 */
 	public void setApprovedByUser(User approvedByUser) {
 		this.approvedByUser = approvedByUser;
-	}
-
-	/**
-	 * @return the fullFilledByUser
-	 */
-	public User getFullFilledByUser() {
-		return fullFilledByUser;
-	}
-
-	/**
-	 * @param fullFilledByUser the fullFilledByUser to set
-	 */
-	public void setFullFilledByUser(User fullFilledByUser) {
-		this.fullFilledByUser = fullFilledByUser;
-	}
-
-	/**
-	 * @return the item
-	 */
-	public Item getItem() {
-		return item;
-	}
-
-	/**
-	 * @param item the item to set
-	 */
-	public void setItem(Item item) {
-		this.item = item;
 	}
 
 	/**
@@ -229,6 +186,35 @@ public class Requisition implements Serializable {
 		this.requestedAtWareHouse = requestedAtWareHouse;
 	}
 
+	/**
+	 * @return the requisitionRefNo
+	 */
+	public String getRequisitionRefNo() {
+		return requisitionRefNo;
+	}
+
+	/**
+	 * @param requisitionRefNo the requisitionRefNo to set
+	 */
+	public void setRequisitionRefNo(String requisitionRefNo) {
+		this.requisitionRefNo = requisitionRefNo;
+	}
+
+	/**
+	 * @return the requisitionItems
+	 */
+	public Set<RequisitionItem> getRequisitionItems() {
+		return requisitionItems;
+	}
+
+	/**
+	 * @param requisitionItems the requisitionItems to set
+	 */
+	public void setRequisitionItems(Set<RequisitionItem> requisitionItems) {
+		this.requisitionItems = requisitionItems;
+	}
+
+	
 	
 	
 	

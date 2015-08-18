@@ -10,18 +10,19 @@ $(document).ready(function(){
 			populateRequisitionPopup(recordId, null);
 			});
 		});
-	$("#requisitions").attr("class","active");
+	$("#pendingStockIssue").attr("class","active");
 var w=1000;
 $('#flex1').flexigrid({
-url:'getRequisitions',
+url:'getPendingStockIssue',
 method: 'POST',
 dataType : 'json',
 	  
 	  colModel : [
-	       	{display: '', name : 'requisitionId', width:w*0.035, sortable : false, align: 'center'},
+	       	{display: '', name : 'ite', width:w*0.035, sortable : false, align: 'center'},
 			{display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
 			{display: 'Requisition Ref No', name : 'requisitionRefNo', sortable : true, align: 'left',width:120},
-			{display: 'Item(s)', name : '', width:300, sortable : false, align: 'left'},
+			{display: 'Item', name : '', width:300, sortable : true, align: 'left'},
+			{display: 'Qty', name : '', width:30, sortable : true, align: 'left'},
 			{display: 'Request Date', name : 'requestedDate', width:120, sortable : true, align: 'center'},
 			{display: 'Requested By', name : 'requestedByUser', width:120, sortable : true, align: 'center'},
 			{display: 'Due Date', name : 'dueDate', width:120, sortable : true, align: 'center'},
@@ -31,7 +32,7 @@ dataType : 'json',
 				],
 	  buttons : [
 				{name: 'Add', bclass: 'add', onpress : add},
-			 	{name: 'Edit', bclass: 'print_excel', onpress : open},
+			 	{name: 'Edit', bclass: 'edit', onpress : open},
       
               {separator: true}
       ],
@@ -357,7 +358,7 @@ getWarehouses("warehouse");
 	}
 </script>
 
-<table width="100%" id="flex1"></table>
+<table style="width:100%" id="flex1"></table>
 <%@ include file="include/addReq.jsp" %>
 <script>
 $(document).ready(function() {

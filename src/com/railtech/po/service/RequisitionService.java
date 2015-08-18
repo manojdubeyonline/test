@@ -23,5 +23,9 @@ public interface RequisitionService {
 	
 	void saveOrUpdate(Requisition requisition) throws RailtechException;
 
+	public String generateRequisitionRefNo(String firmId, String storeId);
+
+	public Requisition getRequisitionByRefNo(String refNo);
+
 
 }
