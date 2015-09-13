@@ -17,6 +17,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.google.gson.annotations.Expose;
+
 
 /**
  * The persistent class for the requisition database table.
@@ -28,7 +30,7 @@ public class Requisition implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
-	private String requisitionId;
+	private Long requisitionId;
 	
 	@Column(name="requisition_ref_no")
 	private String requisitionRefNo;
@@ -38,11 +40,10 @@ public class Requisition implements Serializable {
 
 	private String approvalStatus;
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="ApprovedByUser")
 	private User approvedByUser;
 
-	@Temporal(TemporalType.DATE)
 	private Date dueDate;
 
 	private String fullFillmentStatus;
@@ -53,7 +54,6 @@ public class Requisition implements Serializable {
 	@JoinColumn(name="RequestedByUserId")
 	private User requestedByUser;
 
-	@Temporal(TemporalType.DATE)
 	private Date requestedDate;
 	
 	@ManyToOne
@@ -64,6 +64,7 @@ public class Requisition implements Serializable {
 	@JoinColumn(name="RequestedAtWareHouse")
 	private Warehouse requestedAtWareHouse;
 	
+	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "requisition", cascade=CascadeType.ALL)
 	private Set<RequisitionItem> requisitionItems;
 	
@@ -71,11 +72,11 @@ public class Requisition implements Serializable {
 	public Requisition() {
 	}
 
-	public String getRequisitionId() {
+	public Long getRequisitionId() {
 		return this.requisitionId;
 	}
 
-	public void setRequisitionId(String requisitionId) {
+	public void setRequisitionId(Long requisitionId) {
 		this.requisitionId = requisitionId;
 	}
 

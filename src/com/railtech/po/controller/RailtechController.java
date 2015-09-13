@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,6 +46,9 @@ import com.railtech.po.util.Util;
  */
 @Controller
 public class RailtechController {
+	private static Logger logger = Logger
+			.getLogger(RailtechController.class);
+	
 	@Autowired
 	RequisitionService requisitionService;
 	
@@ -266,7 +270,7 @@ public class RailtechController {
 			String itemCodeId = request.getParameter("codeId" + i);
 
 			if (itemCodeId != null) {
-				Integer codeId = Integer.parseInt(itemCodeId);
+				Integer codeId = Integer.parseInt(itemCodeId.trim());
 
 				Integer unitId = Integer.parseInt(request.getParameter("unit"+ i));
 				Code itemCode = masterservice.getCodeById(codeId);

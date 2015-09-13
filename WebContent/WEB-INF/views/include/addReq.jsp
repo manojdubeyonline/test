@@ -23,12 +23,16 @@
 							<option value="" selected>Store</option>
 						</select>
 					</div>
-					
-					<div class="form-group" >
+
+					<div class="input-append" id="datetimepicker">
 						<input type="text" class="form-control" name="dueDate"
 							id="dueDate" placeholder="Required By Date(dd/mm/yyyy)" />
+						
+						<span class="add-on"> <i data-time-icon="icon-time"
+							data-date-icon="icon-calendar"></i>
+						</span>
 					</div>
-					
+
 					<div class="form-group">
 						<input type="text" class="form-control" name="requisitionRefNo"
 							id="requisitionRefNo" placeholder=" Reference Number" readonly  required/>
@@ -52,8 +56,6 @@
 											<button type="button" class="btn btn-default" id="addReqSave"
 												onClick="saveUpdateRequisition()"><span class="glyphicon glyphicon-floppy-save"></span></button>
 											
-											<button type="button" class="btn btn-default"
-												data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span></button>
 										</div>
 									</td>
 								</tr>
@@ -69,7 +71,7 @@
 								<%
 									int count = 0;
 								%>
-
+								<div id='itemData'>
 								<tr>
 									<td></td>
 									<td><select class="form-control" name="priority<%=count%>"
@@ -81,14 +83,14 @@
 									</select></td>
 									<td>
 										<input type="text" name="codeId<%=count%>" readOnly placeHolder="Click to pick the Item"
-											class="form-control" id="codeId<%=count%>" onClick="popPicker('<%=count%>')">
+											class="form-control col-xs-2" id="codeId<%=count%>" onClick="popPicker('<%=count%>')">
 									</td>
 									<td><input type="text" name="pl_no<%=count%>"
 										id="pl_no<%=count%>" class="form-control" placeholder="PL No" /></td>
 									<td><input type="text" placeholder="Item Description"
 										name="item_desc<%=count%>" id="item_desc<%=count%>"
-										class="form-control" /></td>
-									<td><input type="text" class="form-control"
+										class="form-control input-sm" /></td>
+									<td><input type="text" class="form-control col-xs-2" 
 										id="qty<%=count%>" name="qty<%=count%>" placeholder="Quantity"></td>
 									<td><select class="form-control" id="unit<%=count%>"
 										name="unit<%=count%>">
@@ -100,6 +102,7 @@
 							</script></td>
 
 								</tr>
+								</div>
 							</table>
 							<input type="hidden" name="rowhid" id="rowhid" value="<%=++count %>"/>
 

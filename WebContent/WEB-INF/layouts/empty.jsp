@@ -5,9 +5,16 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Insert title here</title>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<script	type="text/javascript" src="https://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.7/css/jquery.dataTables.min.css"> 
+<script type="text/javascript"
+	src="<c:url value="/resources/js/lib/jquery.min.js"/>"></script>
+	<script type="text/javascript"
+	src="<c:url value="/resources/js/lib/jquery.dataTables.min.js"/>"></script>
+
+<!-- Optional theme -->
+
+<link rel="stylesheet" type="text/css"
+	href="<c:url value="/resources/css/lib/jquery.dataTables.min.css"/>"
+	media="screen" />
 </head>
 <body>
 

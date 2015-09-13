@@ -4,6 +4,10 @@
 <script type="text/javascript">
 $(document).ready(function(){
 
+    $('#datetimepicker').datetimepicker({
+      format: 'dd/MM/yyyy hh:mm:ss'
+    });
+ 
 	$("#flex1").dblclick(function(event){
 		$('.trSelected',this).each( function(){
 			var recordId = $('td[abbr="requisitionRefNo"] >div', this).html();
@@ -31,7 +35,7 @@ dataType : 'json',
 				],
 	  buttons : [
 				{name: 'Add', bclass: 'add', onpress : add},
-			 	{name: 'Edit', bclass: 'print_excel', onpress : open},
+			 	{name: 'Edit', bclass: 'edit', onpress : open},
       
               {separator: true}
       ],
@@ -107,15 +111,70 @@ getWarehouses("warehouse");
 			type : 'POST',
 			data : JSON.stringify(jsonRecord),
 			contentType : 'application/json',
-			dataType : 'json',
+			
 			success : function(data) {
 				$("#requisitionId").val(data.requisitionId);
 				//$("#qty").val(data.qty);
 
-				//$("#dueDate").val(data.dueDate);
+				$("#requisitionRefNo").val(data.requisitionRefNo);
+				$("#dueDate").val(data.dueDate);
 				$("#firm").val(data.requestedForFirm.firmId);
 				//$("#item").val(data.item.itemId);
 				$("#warehouse").val(data.requestedAtWareHouse.wareId);
+
+				var count = $("#rowhid").val();
+				removeRow(1);
+				var tbl = document.getElementById("reqItemTable");
+				
+				 $('#reqItemTable tr:last-child').remove();
+				var lastRow = 2;
+				for(var r=0;r<data.requisitionItems.length;r++){
+					var newRow = tbl.insertRow(lastRow);
+
+					var content = "<td><a href='#' onclick='removeRow("
+							+ count
+							+ ")'><span class=\"glyphicon glyphicon-trash\"></span></a></td>"
+							+ " <td><select class=\"form-control\" name=\"priority"+count+"\""
+					+" 	id=\"priority"+count+"\">"
+							+ " 		<option value=\"0\">Normal</option>"
+							+ " 		<option value=\"1\">High</option>"
+							+ " 		<option value=\"2\">Urgent</option>"
+							+ " </select></td>"
+							+ " <td><input type=\"text\" required readonly name=\"codeId"
+							+ count
+							+ "\""
+							+ " 	class=\"form-control\" id=\"codeId"
+							+ count
+							+ "\" onclick=\"popPicker('"
+							+ count
+							+ "')\" / placeHolder=\"Click to pick item\" value=\""+data.requisitionItems[r].itemCode.codeId+" \" ></td>"
+							+ " 	<td><input type=\"text\" name=\"pl_no"+count+"\""
+					+" 	id=\"pl_no"+count+"\" class=\"form-control\" placeholder=\"PL No\" value=\""+data.requisitionItems[r].itemCode.code+" \" /></td>"
+							+ " <td><input type=\"text\" placeholder=\"Item Description\""
+					+" 	name=\"item_desc"+count+"\" id=\"item_desc"+count+"\""
+					+" 	class=\"form-control\" value=\""+data.requisitionItems[r].itemCode.codeDesc+" \"/></td>"
+							+ " <td><input type=\"text\" class=\"form-control\""
+					+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\" value=\""+data.requisitionItems[r].qty+" \"></td>"
+							+ " <td><select class=\"form-control\" id=\"unit"+count+"\""
+					+" 	name=\"unit"+count+"\">"
+							+ " </select> "
+
+							+ " </td>"
+
+					newRow.innerHTML = content;
+					$(newRow).attr("id", "reqItemTableRow" + count);
+					getUnits('unit' + count);
+					$("#rowhid").val(++count);
+
+					$("#unit"+count).val(data.requisitionItems[r].unit.unitId);
+
+
+				}
+				
+
+
+
+				
 				$('#modal-add-req').modal({
 					keyboard : true
 				});
@@ -123,7 +182,7 @@ getWarehouses("warehouse");
 			},
 			error : function(data) {
 				BootstrapDialog.alert('Error Pulling Requistion' + data);
-				return;
+			
 			}
 
 		});

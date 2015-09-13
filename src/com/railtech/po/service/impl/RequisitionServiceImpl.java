@@ -80,6 +80,7 @@ public class RequisitionServiceImpl implements RequisitionService {
 	}
 
 	@Override
+	@Transactional
 	public Requisition getRequisitionById(Long requisitionId) {
 		logger.info("entering getRequisitionByRequisitionId");
 		logger.debug("param:" + requisitionId);
