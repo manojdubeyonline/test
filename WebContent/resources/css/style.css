@@ -1,22 +1,23 @@
 body {
-    /*font: 85%/1.45em "Helvetica Neue",HelveticaNeue,Helvetica,Verdana,Arial,sans-serif;*/
-    font-size: 12px;
+    font: 85%/1.45em "Helvetica Neue",HelveticaNeue,Helvetica,Verdana,Arial,sans-serif;
+    font-size: 11px;
     font-weight:normal;
     color: #333;
 }
 
  td {
     font-weight: Normal !important;
-    font-size:12px;
+    font-size:11px;
 }
 
 th  {
     font-weight: Normal !important;
-    font-size:12px;
+    font-size:11px;
 }
 
 label {
 	font-weight: normal;
+	 font-size:11px;
 }
 
 #left_menu {

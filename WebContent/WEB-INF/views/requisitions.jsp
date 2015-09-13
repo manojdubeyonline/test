@@ -75,6 +75,7 @@ getWarehouses("warehouse");
 			keyboard : true
 		});
 		$('#modal-add-req').modal("show");
+		addRow();
 	}
 	function saveUpdateRequisition() {
 		$('.close').click();
@@ -123,11 +124,11 @@ getWarehouses("warehouse");
 				$("#warehouse").val(data.requestedAtWareHouse.wareId);
 
 				var count = $("#rowhid").val();
-				removeRow(1);
+				//removeRow(1);
 				var tbl = document.getElementById("reqItemTable");
 				
-				 $('#reqItemTable tr:last-child').remove();
-				var lastRow = 2;
+				// $('#reqItemTable tr:last-child').remove();
+				var lastRow = 1;
 				for(var r=0;r<data.requisitionItems.length;r++){
 					var newRow = tbl.insertRow(lastRow);
 

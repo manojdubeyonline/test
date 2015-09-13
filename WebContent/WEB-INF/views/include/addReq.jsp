@@ -5,9 +5,9 @@
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
-				<h4 class='modal-title'>Add Requisition</h4>
+				<h5 class='modal-title'>Add Requisition</h5>
 					<button type="button" class="close" data-dismiss="modal"
-						aria-label="Close">
+						aria-label="Close" >
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
@@ -41,13 +41,8 @@
 					<input type="hidden" name="requisitionId" />
 				
 					<div class="panel panel-default">
-					<div class="panel-heading"> Requisition Items</div>
- 					 <div class="panel-body">
-
-							<table class="table table-bordered table-hover" id="reqItemTable">
-								<tr>
-									<td colspan="7">
-										<div class="btn-group" style="float: right">
+					<div class="panel-heading"> Requisition Items
+					<div class="btn-group" style="float: right">
 											<button type="button" class="btn btn-default"
 												onclick="addRow()">
 												<span class="glyphicon glyphicon-plus"></span>
@@ -57,8 +52,11 @@
 												onClick="saveUpdateRequisition()"><span class="glyphicon glyphicon-floppy-save"></span></button>
 											
 										</div>
-									</td>
-								</tr>
+					</div>
+ 					 <div class="panel-body" style="padding: 0px;">
+
+							<table class="table table-bordered table-hover" id="reqItemTable" style="margin-top: 0px; width:100%; valign:top;">
+								
 								<tr class="active">
 									<th></th>
 									<th>Priority</th>
@@ -71,7 +69,6 @@
 								<%
 									int count = 0;
 								%>
-								<div id='itemData'>
 								<tr>
 									<td></td>
 									<td><select class="form-control" name="priority<%=count%>"
@@ -102,7 +99,6 @@
 							</script></td>
 
 								</tr>
-								</div>
 							</table>
 							<input type="hidden" name="rowhid" id="rowhid" value="<%=++count %>"/>
 
