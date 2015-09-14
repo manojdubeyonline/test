@@ -233,8 +233,8 @@ public class RailtechController {
 		Requisition requisition =null;
 		String requisitionId = request.getParameter("requisitionId");
 		String requisitionRefNo = request.getParameter("requisitionRefNo");
-		if(!StringUtils.isEmpty(requisitionId)){
-			requisition = requisitionService.getRequisitionById(Long.getLong(requisitionId));
+		if(!StringUtils.isEmpty(requisitionRefNo)){
+			requisition = requisitionService.getRequisitionByRefNo(requisitionRefNo);
 		}else{
 			requisition  = new Requisition();
 			

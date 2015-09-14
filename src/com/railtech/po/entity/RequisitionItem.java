@@ -239,5 +239,37 @@ public class RequisitionItem implements Serializable {
 		this.remarks = remarks;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((itemCode == null) ? 0 : itemCode.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RequisitionItem other = (RequisitionItem) obj;
+		if (itemCode == null) {
+			if (other.itemCode != null)
+				return false;
+		} else if (!itemCode.equals(other.itemCode))
+			return false;
+		return true;
+	}
+
 	
 }

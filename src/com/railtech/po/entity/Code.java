@@ -1,7 +1,9 @@
 package com.railtech.po.entity;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+
 import java.sql.Timestamp;
 
 
@@ -341,6 +343,39 @@ public class Code implements Serializable {
 	 */
 	public void setCodeDesc(String codeDesc) {
 		this.codeDesc = codeDesc;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((codeId == null) ? 0 : codeId.hashCode());
+		return result;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Code other = (Code) obj;
+		if (codeId == null) {
+			if (other.codeId != null)
+				return false;
+		} else if (!codeId.equals(other.codeId))
+			return false;
+		return true;
 	}
 	
 	

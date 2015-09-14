@@ -75,6 +75,7 @@ getWarehouses("warehouse");
 			keyboard : true
 		});
 		$('#modal-add-req').modal("show");
+		$("#reqItemTable").find("tr:gt(0)").remove();
 		addRow();
 	}
 	function saveUpdateRequisition() {
@@ -124,17 +125,23 @@ getWarehouses("warehouse");
 				$("#warehouse").val(data.requestedAtWareHouse.wareId);
 
 				var count = $("#rowhid").val();
+				var existingRows = count;
 				//removeRow(1);
 				var tbl = document.getElementById("reqItemTable");
-				
+				$("#reqItemTable").find("tr:gt(0)").remove();
 				// $('#reqItemTable tr:last-child').remove();
-				var lastRow = 1;
+				
 				for(var r=0;r<data.requisitionItems.length;r++){
+					var lastRow = tbl.rows.length;
 					var newRow = tbl.insertRow(lastRow);
-
-					var content = "<td><a href='#' onclick='removeRow("
+					
+					var content = "<td>";
+					if(r >0){
+						content+="<a href='#' onclick='removeRow("
 							+ count
-							+ ")'><span class=\"glyphicon glyphicon-trash\"></span></a></td>"
+							+ ")'><span class=\"glyphicon glyphicon-trash\"></span></a>";
+						}
+					content+="</td>"
 							+ " <td><select class=\"form-control\" name=\"priority"+count+"\""
 					+" 	id=\"priority"+count+"\">"
 							+ " 		<option value=\"0\">Normal</option>"
@@ -162,17 +169,21 @@ getWarehouses("warehouse");
 
 							+ " </td>"
 
-					newRow.innerHTML = content;
+					$(newRow).html(content);
 					$(newRow).attr("id", "reqItemTableRow" + count);
 					getUnits('unit' + count);
 					$("#rowhid").val(++count);
 
-					$("#unit"+count).val(data.requisitionItems[r].unit.unitId);
+					
 
 
 				}
 				
-
+				for(var r=0;r<data.requisitionItems.length;r++){
+					$("#priority"+existingRows).val(data.requisitionItems[r].priority);
+					$("#unit"+existingRows).val(data.requisitionItems[r].unit.unitId);
+					existingRows++;
+				}
 
 
 				
@@ -375,11 +386,16 @@ getWarehouses("warehouse");
 		var count = $("#rowhid").val();
 		var tbl = document.getElementById("reqItemTable");
 		var lastRow = tbl.rows.length;
+		//alert(lastRow)
 		var newRow = tbl.insertRow(lastRow);
 
-		var content = "<td><a href='#' onclick='removeRow("
+		var content = "<td>";
+		if(lastRow >1){
+			content+="<a href='#' onclick='removeRow("
 				+ count
-				+ ")'><span class=\"glyphicon glyphicon-trash\"></span></a></td>"
+				+ ")'><span class=\"glyphicon glyphicon-trash\"></span></a>";
+			}
+		content+="</td>"
 				+ " <td><select class=\"form-control\" name=\"priority"+count+"\""
 		+" 	id=\"priority"+count+"\">"
 				+ " 		<option value=\"0\">Normal</option>"

@@ -625,7 +625,7 @@ div.pGroup {
 background-image:url(images/add.png); background-repeat:no-repeat; vertical-align:middle;
 }
 .edit{
-background-image:url(images/edit_icon.png); background-repeat:no-repeat; vertical-align:middle;
+background-image:url(images/edit-icon.png); background-repeat:no-repeat left; vertical-align:middle;align:left;
 }
 .print{
 background-image:url(images/pdf.gif); background-repeat:no-repeat; vertical-align:middle;

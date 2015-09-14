@@ -46,7 +46,7 @@ public class RequisitionServiceImpl implements RequisitionService {
 	@Override
 	public void saveOrUpdate(Requisition requisition) throws RailtechException {
 		Session session = sessionFactory.getCurrentSession();
-		session.save(requisition);
+		session.saveOrUpdate(requisition);
 
 	}
 
@@ -76,6 +76,7 @@ public class RequisitionServiceImpl implements RequisitionService {
 	public void delete(Requisition requisition) {
 		Session session = sessionFactory.getCurrentSession();
 		session.delete(requisition);
+		session.clear();
 
 	}
 

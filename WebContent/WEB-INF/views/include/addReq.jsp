@@ -66,41 +66,10 @@
 									<th>Qty</th>
 									<th>Unit</th>
 								</tr>
-								<%
-									int count = 0;
-								%>
-								<tr>
-									<td></td>
-									<td><select class="form-control" name="priority<%=count%>"
-										id="priority<%=count%>">
-											<option value="0">Normal</option>
-											<option value="1">High</option>
-											<option value="2">Urgent</option>
-
-									</select></td>
-									<td>
-										<input type="text" name="codeId<%=count%>" readOnly placeHolder="Click to pick the Item"
-											class="form-control col-xs-2" id="codeId<%=count%>" onClick="popPicker('<%=count%>')">
-									</td>
-									<td><input type="text" name="pl_no<%=count%>"
-										id="pl_no<%=count%>" class="form-control" placeholder="PL No" /></td>
-									<td><input type="text" placeholder="Item Description"
-										name="item_desc<%=count%>" id="item_desc<%=count%>"
-										class="form-control input-sm" /></td>
-									<td><input type="text" class="form-control col-xs-2" 
-										id="qty<%=count%>" name="qty<%=count%>" placeholder="Quantity"></td>
-									<td><select class="form-control" id="unit<%=count%>"
-										name="unit<%=count%>">
-									</select> <script>
-							$(document).ready(function(){
-								getUnits('unit<%=count%>');
-							});
-
-							</script></td>
-
-								</tr>
+								
+							
 							</table>
-							<input type="hidden" name="rowhid" id="rowhid" value="<%=++count %>"/>
+							<input type="hidden" name="rowhid" id="rowhid" value="0"/>
 
 						</div>
 					</div>
