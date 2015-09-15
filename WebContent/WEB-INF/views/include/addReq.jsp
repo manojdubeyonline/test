@@ -38,7 +38,7 @@
 							id="requisitionRefNo" placeholder=" Reference Number" readonly  required/>
 					</div>
 					
-					<input type="hidden" name="requisitionId" />
+					<input type="hidden" name="requisitionId" id="requisitionId"  />
 				
 					<div class="panel panel-default">
 					<div class="panel-heading"> Requisition Items

@@ -44,9 +44,11 @@ public class RequisitionServiceImpl implements RequisitionService {
 	MasterInfoService masterInfoService;
 
 	@Override
+	@Transactional
 	public void saveOrUpdate(Requisition requisition) throws RailtechException {
 		Session session = sessionFactory.getCurrentSession();
 		session.saveOrUpdate(requisition);
+		session.clear();
 
 	}
 
@@ -112,7 +114,7 @@ public class RequisitionServiceImpl implements RequisitionService {
 		if(null!=requisition){
 			Hibernate.initialize(requisition.getRequisitionItems());
 		}
-		logger.debug("returnVal:" + requisition.toString());
+		logger.debug("returnVal:" + requisition);
 		logger.info("exiting getRequisitionByRefNo");
 		return requisition;
 	}
