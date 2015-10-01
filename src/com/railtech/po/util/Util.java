@@ -2,7 +2,6 @@ package com.railtech.po.util;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -21,16 +20,16 @@ import com.railtech.po.entity.FlexiBean;
 public class Util {
 
 	public static Date getDate(String strDate, String format) {
-		DateFormat formatter;
-		Date date = null;
+		SimpleDateFormat formatter;
+		
 		try {
 			formatter = new SimpleDateFormat(format);
-			date = (Date) formatter.parse(strDate);
-			System.out.println("Today is " + date);
+			return formatter.parse(strDate);
+			
 		} catch (ParseException e) {
 			System.out.println("Exception :" + e);
 		}
-		return date;
+		return null;
 	}
 
 	public static String getDateString(Date date, String format){

@@ -4,9 +4,9 @@
 <script type="text/javascript">
 $(document).ready(function(){
 
-    $('#datetimepicker').datetimepicker({
-      format: 'dd/MM/yyyy hh:mm:ss'
-    });
+   /*  $('#datetimepicker').datetimepicker({
+      format: 'dd/MM/yyyy'
+    }); */
  
 	$("#flex1").dblclick(function(event){
 		$('.trSelected',this).each( function(){
@@ -34,8 +34,9 @@ dataType : 'json',
 			
 				],
 	  buttons : [
-				{name: 'Add', bclass: 'add', onpress : add},
-			 	{name: 'Edit', bclass: 'edit', onpress : open},
+				{name: 'Add', bclass: 'glyphicon glyphicon-plus', onpress : add},
+			 	{name: 'Edit', bclass: 'glyphicon glyphicon-pencil', onpress : open},
+			 	{name: 'Delete', bclass: 'glyphicon glyphicon-remove', onpress : deleteRequisition},
       
               {separator: true}
       ],
@@ -56,9 +57,9 @@ dataType : 'json',
 		height: screen.height*.50,
 
 	});
-getItems("item");
+//getItems("item");
 getFirms("firm");
-getWarehouses("warehouse");
+//getWarehouses("warehouse");
 
    
 });
@@ -70,10 +71,50 @@ getWarehouses("warehouse");
 
 	}
 
+	function deleteRequisition() {
+		var recordId = $("input[name='requisitionId']:checked").val();
+		BootstrapDialog.confirm('Are you sure you want to delete?', function(result){
+            if(result) {
+            	var modelRequest = {};
+        		modelRequest.id = recordId
+        		
+        		$.ajax({
+        			url : 'deleteRequisition',
+        			type : 'POST',
+        			dataType : 'JSON',
+        			data : JSON.stringify(modelRequest),
+        			contentType : 'application/json',
+
+        			success : function(data) {
+        				BootstrapDialog
+						.alert('Requisition successfully deleted');
+        				$('#flex1').flexOptions({
+        					url : "getRequisitions",
+        					newp : 1
+        				}).flexReload();
+        			},
+        			error : function(data) {
+        				BootstrapDialog
+        						.alert('Error unable to delete the requisition');
+        			}
+        		});
+            }else {
+                return
+            }
+        });
+
+	}
+	
 	function add() {
 		$('#modal-add-req').modal({
 			keyboard : true
 		});
+		$("#requisitionId").val('');
+		$("#requisitionRefNo").val('');
+		$("#dueDate").val("");
+		$("#firm").val("");
+		$("#warehouse").val("");
+		$("#rowhid").val(0);
 		$('#modal-add-req').modal("show");
 		$("#reqItemTable").find("tr:gt(0)").remove();
 		addRow();
@@ -101,6 +142,22 @@ getWarehouses("warehouse");
 
 	}
 
+	function myDateFormatter (dateObject) {
+        var d = new Date(dateObject);
+        var day = d.getDate();
+        var month = d.getMonth() + 1;
+        var year = d.getFullYear();
+        if (day < 10) {
+            day = "0" + day;
+        }
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var date = day + "/" + month + "/" + year;
+
+        return date;
+    }; 
+    
 	function populateRequisitionPopup(recordId, url) {
 
 		var jsonRecord = {};
@@ -117,13 +174,13 @@ getWarehouses("warehouse");
 			success : function(data) {
 				$("#requisitionId").val(data.requisitionId);
 				//$("#qty").val(data.qty);
-
+				
 				$("#requisitionRefNo").val(data.requisitionRefNo);
-				$("#dueDate").val(data.dueDate);
+				$("#dueDate").val(myDateFormatter(data.dueDate));
+				//$('#dateRangePicker').datepicker("setDate", data.dueDate);
 				$("#firm").val(data.requestedForFirm.firmId);
-				//$("#item").val(data.item.itemId);
-				$("#warehouse").val(data.requestedAtWareHouse.wareId);
-
+				getFirmWarehouses('warehouse', data.requestedForFirm.firmId,data.requestedAtWareHouse.wareId) 
+				
 				var count = $("#rowhid").val();
 				var existingRows = count;
 				//removeRow(1);
@@ -162,7 +219,7 @@ getWarehouses("warehouse");
 					+" 	name=\"item_desc"+count+"\" id=\"item_desc"+count+"\""
 					+" 	class=\"form-control\" value=\""+data.requisitionItems[r].itemCode.codeDesc+" \"/></td>"
 							+ " <td><input type=\"text\" class=\"form-control\""
-					+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\" value=\""+data.requisitionItems[r].qty+" \"></td>"
+					+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\" value=\""+data.requisitionItems[r].qty+"\"></td>"
 							+ " <td><select class=\"form-control\" id=\"unit"+count+"\""
 					+" 	name=\"unit"+count+"\">"
 							+ " </select> "
@@ -174,7 +231,7 @@ getWarehouses("warehouse");
 					getUnits('unit' + count);
 					$("#rowhid").val(++count);
 
-					
+					$("#warehouse").val(data.requestedAtWareHouse.wareId);
 
 
 				}
@@ -282,7 +339,7 @@ getWarehouses("warehouse");
 		});
 	}
 
-	function getFirmWarehouses(field, firmId) {
+	function getFirmWarehouses(field, firmId, defaultVal) {
 		var modelRequest = {};
 		modelRequest.id = firmId
 		var sel = $("#" + field);
@@ -295,9 +352,17 @@ getWarehouses("warehouse");
 
 			success : function(data) {
 				if (data != null) {
+					sel.html('<option value="" selected>Store</option>');
+					
 					for (var i = 0; i < data.length; i++) {
-						sel.append('<option value="' + data[i].wareId + '">'
-								+ data[i].warehouseName + '</option>');
+						if(defaultVal==data[i].wareId){
+							sel.append('<option value="' + data[i].wareId + '"selected >'
+									+ data[i].warehouseName + '</option>');
+						}else{
+							sel.append('<option value="' + data[i].wareId + '" >'
+									+ data[i].warehouseName + '</option>');
+						}
+						
 					}
 				}
 			},
@@ -437,10 +502,13 @@ getWarehouses("warehouse");
 <%@ include file="include/addReq.jsp" %>
 <script>
 $(document).ready(function() {
-  /*   $('#dueDate')
+     $('#dateRangePicker')
         .datepicker({
-            format: "mm/dd/yyyy"
-        }) */
+            format: "dd/mm/yyyy",
+            startDate : new Date(),
+            defaultDate: new Date(),
+            "autoclose": true
+        }) 
 
 });
       </script>

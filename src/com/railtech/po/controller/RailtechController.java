@@ -29,6 +29,7 @@ import com.railtech.po.entity.Code;
 import com.railtech.po.entity.Firm;
 import com.railtech.po.entity.FlexiBean;
 import com.railtech.po.entity.Item;
+import com.railtech.po.entity.ItemStock;
 import com.railtech.po.entity.ModelForm;
 import com.railtech.po.entity.PL;
 import com.railtech.po.entity.Requisition;
@@ -151,6 +152,14 @@ public class RailtechController {
 		return users;
 	}
 	
+	@RequestMapping(value = { "/getItemStock" }, method = { RequestMethod.POST })
+	public @ResponseBody ItemStock getItemStock(@RequestBody ModelForm requestForm)
+	{
+		ItemStock itemStock = requisitionService.getItemStock(requestForm.getId(), requestForm.getId2());
+		return itemStock;
+	}
+	
+	
 	@RequestMapping(value = { "/getRequisitions" }, method = { RequestMethod.POST })
 	public void getRequisitionList(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
@@ -176,9 +185,9 @@ public class RailtechController {
 				}
 				requisitionRow.add(itemDetails.toString());
 				
-				requisitionRow.add(Util.getDateString(requisition.getRequestedDate() ,"dd/mm/yyyy"));
+				requisitionRow.add(Util.getDateString(requisition.getRequestedDate() ,"dd/MM/yyyy"));
 				requisitionRow.add(requisition.getRequestedByUser().getUserName());
-				requisitionRow.add(Util.getDateString(requisition.getDueDate() ,"dd/mm/yyyy"));
+				requisitionRow.add(Util.getDateString(requisition.getDueDate() ,"dd/MM/yyyy"));
 				requisitionRow.add(String.valueOf(requisition.getFullFillmentStatus()));
 				
 				
@@ -199,7 +208,7 @@ public class RailtechController {
 			int count = 0;
 			for(Requisition requisition: requisitions){
 				for (RequisitionItem item : requisition.getRequisitionItems()) {
-					if (item.getFullFillmentStatus().equalsIgnoreCase("N")) {
+					if (item.getFullFillmentStatus()==null || item.getFullFillmentStatus().equalsIgnoreCase("N")) {
 						requisitionItemRow = new LinkedList<String>();
 						requisitionItemRow
 								.add("<input type='radio' name='requisitionItemId' value='"+item.getItemKey()+ "'>");
@@ -254,7 +263,7 @@ public class RailtechController {
 		requisition.setRequestedByUser(requestedByUser);
 		
 		//requisition.setQty(Float.valueOf(request.getParameter("qty")));
-		requisition.setDueDate(Util.getDate(request.getParameter("dueDate"),"mm/dd/yyyy"));
+		requisition.setDueDate(Util.getDate(request.getParameter("dueDate"),"dd/MM/yyyy"));
 		requisition.setRequestedDate(new Date());
 		requisition.setFullFillmentStatus("N");
 		
@@ -289,6 +298,15 @@ public class RailtechController {
 		}
 		requisitionService.saveOrUpdate(requisition);
 
+	}
+	
+	@RequestMapping(value = { "/deleteRequisition" }, method = { RequestMethod.POST })
+	public  @ResponseBody String deleteRequisition(@RequestBody ModelForm modelRequest)
+	{
+		Requisition requisition  = requisitionService.getRequisitionById(Long.parseLong(modelRequest.getId()));
+		requisitionService.delete(requisition);
+		logger.debug("successfully deleted the requisition");
+		return "Success";
 	}
 	
 	@RequestMapping(value = { "/getRequisitionById" }, method = { RequestMethod.POST })

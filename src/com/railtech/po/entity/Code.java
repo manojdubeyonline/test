@@ -1,10 +1,21 @@
 package com.railtech.po.entity;
 
 import java.io.Serializable;
-
-import javax.persistence.*;
-
 import java.sql.Timestamp;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 
 /**
@@ -73,6 +84,10 @@ public class Code implements Serializable {
 
 	@Column(name="shelf_no")
 	private String shelfNo;
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "itemStockPK.itemCode", cascade=CascadeType.ALL)
+	@JsonIgnore
+	private Set<ItemStock> itemstocks;
 
 	public Code() {
 	}
@@ -343,6 +358,23 @@ public class Code implements Serializable {
 	 */
 	public void setCodeDesc(String codeDesc) {
 		this.codeDesc = codeDesc;
+	}
+
+	
+
+	/**
+	 * @return the itemstocks
+	 */
+	public Set<ItemStock> getItemstocks() {
+		return itemstocks;
+	}
+
+
+	/**
+	 * @param itemstocks the itemstocks to set
+	 */
+	public void setItemstocks(Set<ItemStock> itemstocks) {
+		this.itemstocks = itemstocks;
 	}
 
 

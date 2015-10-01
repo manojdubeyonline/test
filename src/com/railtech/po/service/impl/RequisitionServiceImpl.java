@@ -20,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.railtech.po.entity.FlexiBean;
+import com.railtech.po.entity.ItemStock;
 import com.railtech.po.entity.Requisition;
+import com.railtech.po.entity.RequisitionItem;
 import com.railtech.po.entity.Warehouse;
 import com.railtech.po.exeception.RailtechException;
 import com.railtech.po.service.MasterInfoService;
@@ -48,6 +50,10 @@ public class RequisitionServiceImpl implements RequisitionService {
 	public void saveOrUpdate(Requisition requisition) throws RailtechException {
 		Session session = sessionFactory.getCurrentSession();
 		session.saveOrUpdate(requisition);
+		for(RequisitionItem i : requisition.getRequisitionItems()){
+			session.saveOrUpdate(i);
+		}
+		
 		session.clear();
 
 	}
@@ -78,6 +84,7 @@ public class RequisitionServiceImpl implements RequisitionService {
 	public void delete(Requisition requisition) {
 		Session session = sessionFactory.getCurrentSession();
 		session.delete(requisition);
+		session.flush();
 		session.clear();
 
 	}
@@ -158,17 +165,12 @@ public class RequisitionServiceImpl implements RequisitionService {
 		String refNo = null;
 		if (requisition != null) {
 			logger.debug("requisition:" + requisition);
-			String refCounter = requisition.getRequisitionRefNo()
-					.substring(
-							requisition.getRequisitionRefNo().indexOf(
-									"/",
-									requisition.getRequisitionRefNo()
-											.lastIndexOf("/")));
+			String refCounter = requisition.getRequisitionRefNo().substring(requisition.getRequisitionRefNo().indexOf("/")+1,requisition.getRequisitionRefNo().lastIndexOf("/"));
 
 			if (refCounter != null) {
 				refNo = "REQ-"
 						+ requisition.getRequestedAtWareHouse()
-								.getWarehouseCode() + "/" + refCounter + "/"
+								.getWarehouseCode() + "/" + (Integer.parseInt(refCounter)+1) + "/"
 						+ yyyy;
 			}
 		}else{
@@ -184,6 +186,22 @@ public class RequisitionServiceImpl implements RequisitionService {
 		logger.debug("returnVal:" + refNo.toString());
 		logger.info("exiting generateRequisitionRefNo");
 		return refNo;
+	}
+
+	@Override
+	public ItemStock getItemStock(String itemCode, String warehouseId) {
+		logger.info("entering getItemStock");
+		logger.debug("param:: itemCode" + itemCode+ "warehouseId:"+itemCode);
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session
+				.createQuery(
+						"from ItemStock itemStock where itemStock.itemStockPK.warehouse.wareId =:warehouseId and itemStock.itemStockPK.itemCode.codeId =:itemCode")
+				.setLong("warehouseId", Long.parseLong(warehouseId)).setLong("itemCode",Long.parseLong(itemCode));
+		ItemStock itemStock = (ItemStock) query.uniqueResult();
+		
+		logger.debug("returnVal:" + itemStock);
+		logger.info("exiting getItemStock");
+		return itemStock;
 	}
 
 

@@ -20,7 +20,7 @@
 	src="<c:url value="/resources/js/lib/bootstrap-dialog.min.js"/>"></script>
 
 <script type="text/javascript"
-	src="<c:url value="/resources/js/lib/bootstrap-datetimepicker.min.js"/>"></script>
+	src="<c:url value="/resources/js/lib/bootstrap-datepicker.js"/>"></script>
 	<script type="text/javascript"
 	src="<c:url value="/resources/js/lib/jquery.dataTables.min.js"/>"></script>
 	
@@ -43,7 +43,7 @@
 <link rel="stylesheet" type="text/css"
 	href="<c:url value="/resources/css/lib/bootstrap-theme.min.css"/>" />
 <link rel="stylesheet" type="text/css"
-	href="<c:url value="/resources/css/lib/bootstrap-datetimepicker.min.css"/>" />
+	href="<c:url value="/resources/css/lib/bootstrap-datepicker.css"/>" />
 <%-- <link rel="stylesheet" type="text/css"
 	href="<c:url value="/resources/css/lib/bootstrap-combined.min.css"/>" /> --%>
 <link rel="stylesheet" type="text/css"

@@ -31,8 +31,8 @@ dataType : 'json',
 			
 				],
 	  buttons : [
-				{name: 'Add', bclass: 'add', onpress : add},
-			 	{name: 'Edit', bclass: 'edit', onpress : open},
+				{name: 'Item Issue', bclass: 'glyphicon glyphicon-plus', onpress : add},
+			 	{name: 'Edit', bclass: 'glyphicon glyphicon-pencil', onpress : open},
       
               {separator: true}
       ],
@@ -53,17 +53,18 @@ dataType : 'json',
 		height: screen.height*.50,
 
 	});
+getUsers('user');
 getItems("item");
 getFirms("firm");
 getWarehouses("warehouse");
-
+addRow();
    
 });
 
 
 	function open() {
-		var recordId = $("input[name='requisitionId']:checked").val();
-		populateRequisitionPopup(recordId, 'getRequisitionById');
+		var recordId =  $('td[abbr="requisitionRefNo"] >div', this).html();
+		populateRequisitionPopup(recordId, 'getRequisitionByRefNo');
 
 	}
 
@@ -165,6 +166,28 @@ getWarehouses("warehouse");
 
 			}
 
+		});
+	}
+
+	function getUsers(field) {
+		var sel = $("#" + field);
+		$.ajax({
+			url : 'getUsers',
+			type : 'POST',
+			dataType : 'json',
+			contentType : 'application/json',
+
+			success : function(data) {
+				if (data != null) {
+					for (var i = 0; i < data.length; i++) {
+						sel.append('<option value="' + data[i].userId + '">'
+								+ data[i].userName + '</option>');
+					}
+				}
+			},
+			error : function(data) {
+				BootstrapDialog.alert('Error Unable to pull the item list');
+			}
 		});
 	}
 
@@ -305,22 +328,51 @@ getWarehouses("warehouse");
 
 	}
 
+	function getItemStock(field,itemCode, warehouseId) {
+		var modelRequest = {};
+		modelRequest.id = itemCode;
+		modelRequest.id2 = warehouseId;
+alert(warehouseId);
+		$.ajax({
+			url : 'getItemStock',
+			type : 'POST',
+			data : JSON.stringify(modelRequest),
+			contentType : 'application/json',
+			success : function(data) {
+				if (data != null) {
+					$(field).val(data.availableQty);
+				}
+			},
+			error : function(data) {
+				BootstrapDialog.alert('Error Unable to pull the Item Stock');
+			}
+		});
+
+	}
+
 	function push(id, plNo, desc) {
 		dlg.close();
 		$('#item_desc' + selectedCounter).val(desc);
 		$('#pl_no' + selectedCounter).val(plNo);
 		$('#codeId' + selectedCounter).val(id);
+		getItemStock('#availableQtyId' + selectedCounter,id, $("#warehouse").val())
+		//$('#availableQtyId' + selectedCounter).val(qty);
 	}
 
 	function addRow() {
 		var count = $("#rowhid").val();
 		var tbl = document.getElementById("reqItemTable");
 		var lastRow = tbl.rows.length;
+		//alert(lastRow)
 		var newRow = tbl.insertRow(lastRow);
 
-		var content = "<td><a href='#' onclick='removeRow("
+		var content = "<td>";
+		if(lastRow >1){
+			content+="<a href='#' onclick='removeRow("
 				+ count
-				+ ")'><span class=\"glyphicon glyphicon-trash\"></span></a></td>"
+				+ ")'><span class=\"glyphicon glyphicon-trash\"></span></a>";
+			}
+		content+="</td>"
 				+ " <td><select class=\"form-control\" name=\"priority"+count+"\""
 		+" 	id=\"priority"+count+"\">"
 				+ " 		<option value=\"0\">Normal</option>"
@@ -340,6 +392,9 @@ getWarehouses("warehouse");
 				+ " <td><input type=\"text\" placeholder=\"Item Description\""
 		+" 	name=\"item_desc"+count+"\" id=\"item_desc"+count+"\""
 		+" 	class=\"form-control\" /></td>"
+		+ " <td><input type=\"hidden\" placeholder=\"availableQty\""
+		+" 	name=\"availableQty"+count+"\" id=\"availableQty"+count+"\""
+		+" 	class=\"form-control\" /><span id=\"availableQtyId"+count+"\"></span></td>"
 				+ " <td><input type=\"text\" class=\"form-control\""
 		+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\"></td>"
 				+ " <td><select class=\"form-control\" id=\"unit"+count+"\""
@@ -359,7 +414,7 @@ getWarehouses("warehouse");
 </script>
 
 <table style="width:100%" id="flex1"></table>
-<%@ include file="include/addReq.jsp" %>
+<%@ include file="include/directItemIssue.jsp" %>
 <script>
 $(document).ready(function() {
   /*   $('#dueDate')

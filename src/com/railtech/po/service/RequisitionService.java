@@ -6,6 +6,7 @@ package com.railtech.po.service;
 import java.util.Set;
 
 import com.railtech.po.entity.FlexiBean;
+import com.railtech.po.entity.ItemStock;
 import com.railtech.po.entity.Requisition;
 import com.railtech.po.exeception.RailtechException;
 
@@ -26,6 +27,8 @@ public interface RequisitionService {
 	public String generateRequisitionRefNo(String firmId, String storeId);
 
 	public Requisition getRequisitionByRefNo(String refNo);
+
+	public ItemStock getItemStock(String itemCode, String warehouseId);
 
 
 }

@@ -1,7 +1,19 @@
 package com.railtech.po.entity;
 
 import java.io.Serializable;
-import javax.persistence.*;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 
 /**
@@ -29,6 +41,10 @@ public class Warehouse implements Serializable {
 
 	@Column(name="warehouse_name")
 	private String warehouseName;
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "itemStockPK.warehouse", cascade=CascadeType.ALL)
+	@JsonIgnore
+	Set<ItemStock> warehouseStock;
 
 	public Warehouse() {
 	}
@@ -73,4 +89,15 @@ public class Warehouse implements Serializable {
 		this.warehouseName = warehouseName;
 	}
 
+	public Set<ItemStock> getWarehouseStock() {
+		return warehouseStock;
+	}
+
+	public void setWarehouseStock(Set<ItemStock> warehouseStock) {
+		this.warehouseStock = warehouseStock;
+	}
+
+	
+
+	
 }

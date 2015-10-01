@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,9 +14,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 
 
 /**
@@ -63,8 +61,7 @@ public class Requisition implements Serializable {
 	private Warehouse requestedAtWareHouse;
 	
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "requisition")
-	@Cascade({CascadeType.ALL})
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "requisition", cascade=CascadeType.ALL)
 	private Set<RequisitionItem> requisitionItems;
 	
 

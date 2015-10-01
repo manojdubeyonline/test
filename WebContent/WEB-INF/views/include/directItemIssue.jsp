@@ -1,6 +1,6 @@
 <div class="modal fade" id="modal-add-req" role="dialog"
 	aria-hidden="true">
-	<form role="form" id="reqForm" name="reqForm" action="saveRequisition"
+	<form role="form" id="reqForm" name="reqForm" action="directItemIssue"
 		method="post">
 		<div class="modal-dialog">
 			<div class="modal-content">
@@ -13,29 +13,31 @@
 				</div>
 				<div class="modal-body">
 					<div class="form-group">
+						<select class="form-control" id="user" name="user" required>
+							<option value="" selected disabled>Issued To the User</option>
+						</select>
+					</div>
+					
+					<div class="form-group">
 						<select class="form-control" id="firm" name="firm"
-							onChange="getFirmWarehouses('warehouse', this.value,'') " required>
-							<option value="" selected>For the Firm</option>
+							onChange="getFirmWarehouses('firm', this.value) " required>
+							<option value="" selected disabled>For the Firm</option>
 						</select>
 					</div>
 					<div class="form-group">
 						<select class="form-control" id="warehouse" name="warehouse" onchange="generateRefNo();" required>
-							<option value="" selected>Store</option>
+							<option value="" selected disabled>Store</option>
 						</select>
 					</div>
-					
-					 <div class="form-group">
-				        
-				        <div class="date">
-				            <div class="input-group input-append date" id="dateRangePicker">
-				               <input type="text" class="form-control" name="dueDate"
-							id="dueDate" placeholder="Required By Date(dd/mm/yyyy)" />
-				                <span class="input-group-addon add-on"><span class="glyphicon glyphicon-calendar"></span></span>
-				            </div>
-				        </div>
-				    </div>
-    
-				
+
+					<div class="input-append" id="datetimepicker">
+						<input type="text" class="form-control" name="dueDate"
+							id="dueDate" placeholder="Date of Issue(dd/mm/yyyy)" />
+						
+						<span class="add-on"> <i data-time-icon="icon-time"
+							data-date-icon="icon-calendar"></i>
+						</span>
+					</div>
 
 					<div class="form-group">
 						<input type="text" class="form-control" name="requisitionRefNo"
@@ -67,6 +69,7 @@
 									<th>Pick Item</th>
 									<th>PL No</th>
 									<th>Description</th>
+									<th>Avail. Qty</th>
 									<th>Qty</th>
 									<th>Unit</th>
 								</tr>
