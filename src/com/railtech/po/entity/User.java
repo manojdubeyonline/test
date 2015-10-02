@@ -1,8 +1,21 @@
 package com.railtech.po.entity;
 
 import java.io.Serializable;
-import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
 
 
 /**
@@ -47,7 +60,13 @@ public class User implements Serializable {
 
 	@Column(name="user_password")
 	private String userPassword;
-
+	
+	@ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(name="USER_FIRMS", 
+                joinColumns={@JoinColumn(name="user_id")}, 
+                inverseJoinColumns={@JoinColumn(name="firm_id")})
+    private Set<Firm> userFirms = new HashSet<Firm>();
+	
 	public User() {
 	}
 
@@ -147,4 +166,13 @@ public class User implements Serializable {
 		this.userPassword = userPassword;
 	}
 
+	public Set<Firm> getUserFirms() {
+		return userFirms;
+	}
+
+	public void setUserFirms(Set<Firm> userFirms) {
+		this.userFirms = userFirms;
+	}
+
+	
 }

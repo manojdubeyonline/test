@@ -1,11 +1,10 @@
 <div class="modal fade" id="modal-add-req" role="dialog"
 	aria-hidden="true">
-	<form role="form" id="reqForm" name="reqForm" action="directItemIssue"
-		method="post">
+	<form role="form" id="issueForm" name="issueForm"  method="post">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
-				<h5 class='modal-title'>Add Requisition</h5>
+				<h5 class='modal-title'>Item Issue</h5>
 					<button type="button" class="close" data-dismiss="modal"
 						aria-label="Close" >
 						<span aria-hidden="true">&times;</span>
@@ -13,14 +12,14 @@
 				</div>
 				<div class="modal-body">
 					<div class="form-group">
-						<select class="form-control" id="user" name="user" required>
+						<select class="form-control" id="user" name="user" required onchange="getUserFirms('firm',this.value)">
 							<option value="" selected disabled>Issued To the User</option>
 						</select>
 					</div>
 					
 					<div class="form-group">
 						<select class="form-control" id="firm" name="firm"
-							onChange="getFirmWarehouses('firm', this.value) " required>
+							onChange="getFirmWarehouses('warehouse', this.value) " required>
 							<option value="" selected disabled>For the Firm</option>
 						</select>
 					</div>
@@ -30,14 +29,16 @@
 						</select>
 					</div>
 
-					<div class="input-append" id="datetimepicker">
-						<input type="text" class="form-control" name="dueDate"
-							id="dueDate" placeholder="Date of Issue(dd/mm/yyyy)" />
-						
-						<span class="add-on"> <i data-time-icon="icon-time"
-							data-date-icon="icon-calendar"></i>
-						</span>
-					</div>
+					 <div class="form-group">
+				        
+				        <div class="date">
+				            <div class="input-group input-append date" id="dateRangePicker">
+				               <input type="text" class="form-control" name="dueDate"
+							id="dueDate" placeholder="Issue Date (dd/mm/yyyy)" />
+				                <span class="input-group-addon add-on"><span class="glyphicon glyphicon-calendar"></span></span>
+				            </div>
+				        </div>
+				    </div>
 
 					<div class="form-group">
 						<input type="text" class="form-control" name="requisitionRefNo"
@@ -55,7 +56,7 @@
 											</button>
 											
 											<button type="button" class="btn btn-default" id="addReqSave"
-												onClick="saveUpdateRequisition()"><span class="glyphicon glyphicon-floppy-save"></span></button>
+												onClick="saveItemIssue()"><span class="glyphicon glyphicon-floppy-save"></span></button>
 											
 										</div>
 					</div>

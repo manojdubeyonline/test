@@ -34,11 +34,15 @@ dataType : 'json',
 			
 				],
 	  buttons : [
+				{separator: true},
 				{name: 'Add', bclass: 'glyphicon glyphicon-plus', onpress : add},
+				{separator: true},
 			 	{name: 'Edit', bclass: 'glyphicon glyphicon-pencil', onpress : open},
+			 	{separator: true},
 			 	{name: 'Delete', bclass: 'glyphicon glyphicon-remove', onpress : deleteRequisition},
+			 	{separator: true},
       
-              {separator: true}
+         
       ],
       searchitems : [
                 {display: 'Requisition Ref No', name : 'requisitionRefNo'},
@@ -94,8 +98,14 @@ getFirms("firm");
         				}).flexReload();
         			},
         			error : function(data) {
+        				//BootstrapDialog
+        						//.alert('Error unable to delete the requisition');
         				BootstrapDialog
-        						.alert('Error unable to delete the requisition');
+						.alert('Requisition successfully deleted');
+        				$('#flex1').flexOptions({
+        					url : "getRequisitions",
+        					newp : 1
+        				}).flexReload();
         			}
         		});
             }else {
@@ -205,7 +215,9 @@ getFirms("firm");
 							+ " 		<option value=\"1\">High</option>"
 							+ " 		<option value=\"2\">Urgent</option>"
 							+ " </select></td>"
-							+ " <td><input type=\"text\" required readonly name=\"codeId"
+							+ " <td><input type=\"hidden\" name=\"itemKey"
+							+ count+ "\" value=\""+data.requisitionItems[r].itemKey+" \" >"
+							+"<input type=\"text\" required readonly name=\"codeId"
 							+ count
 							+ "\""
 							+ " 	class=\"form-control\" id=\"codeId"

@@ -31,8 +31,10 @@ dataType : 'json',
 			
 				],
 	  buttons : [
-				{name: 'Item Issue', bclass: 'glyphicon glyphicon-plus', onpress : add},
-			 	{name: 'Edit', bclass: 'glyphicon glyphicon-pencil', onpress : open},
+				{separator: true},
+				{name: ' Direct Issue ', bclass: 'glyphicon glyphicon-export', onpress : add},
+				{separator: true},
+			 	{name: ' Issue ', bclass: 'glyphicon glyphicon-send', onpress : open},
       
               {separator: true}
       ],
@@ -54,9 +56,9 @@ dataType : 'json',
 
 	});
 getUsers('user');
-getItems("item");
-getFirms("firm");
-getWarehouses("warehouse");
+//getItems("item");
+//getFirms("firm");
+//getWarehouses("warehouse");
 addRow();
    
 });
@@ -74,23 +76,23 @@ addRow();
 		});
 		$('#modal-add-req').modal("show");
 	}
-	function saveUpdateRequisition() {
+	function saveItemIssue() {
 		$('.close').click();
 		$.ajax({
-			url : 'saveRequisition',
+			url : 'saveItemIssue',
 			type : "POST",
-			data : $("#reqForm").serialize(),
+			data : $("#issueForm").serialize(),
 			asynch : true,
 			success : function(data) {
-				BootstrapDialog.alert('Requistion saved successfully.');
+				BootstrapDialog.alert('Item issue saved successfully.');
 				$('#flex1').flexOptions({
-					url : "getRequisitions",
+					url : "getPendingStockIssue",
 					newp : 1
 				}).flexReload();
 				return;
 			},
 			error : function(data) {
-				BootstrapDialog.alert('Error Saving Requistion');
+				BootstrapDialog.alert('Error Saving Item Issue Details');
 				return;
 			}
 		});
@@ -239,6 +241,7 @@ addRow();
 		var modelRequest = {};
 		modelRequest.id = firmId
 		var sel = $("#" + field);
+		sel.html('<option value="" selected disabled>Store</option>')
 		$.ajax({
 			url : 'getFirmWarehouses',
 			type : 'POST',
@@ -328,11 +331,38 @@ addRow();
 
 	}
 
+	function getUserFirms(field, userId) {
+		var jsonRecord = {};
+		jsonRecord.id = userId;
+		var sel = $("#" + field);
+		sel.html('<option value="" selected disabled>For the Firm</option>');
+		$.ajax({
+			url : 'getUserById',
+			type : 'POST',
+			data : JSON.stringify(jsonRecord),
+			contentType : 'application/json',
+
+			success : function(data) {
+				if (data != null) {
+					var firms = data.userFirms;
+					for (var i = 0; i < firms.length; i++) {
+						sel.append('<option value="' + firms[i].firmId + '">'
+								+ firms[i].firmName + '</option>');
+					}
+				}
+			},
+			error : function(data) {
+				BootstrapDialog.alert('Error Unable to pull the User Firms list');
+			}
+		});
+
+	}
+
 	function getItemStock(field,itemCode, warehouseId) {
 		var modelRequest = {};
 		modelRequest.id = itemCode;
 		modelRequest.id2 = warehouseId;
-alert(warehouseId);
+
 		$.ajax({
 			url : 'getItemStock',
 			type : 'POST',
@@ -340,7 +370,7 @@ alert(warehouseId);
 			contentType : 'application/json',
 			success : function(data) {
 				if (data != null) {
-					$(field).val(data.availableQty);
+					$(field).html(data);
 				}
 			},
 			error : function(data) {
@@ -417,10 +447,13 @@ alert(warehouseId);
 <%@ include file="include/directItemIssue.jsp" %>
 <script>
 $(document).ready(function() {
-  /*   $('#dueDate')
+     $('#dateRangePicker')
         .datepicker({
-            format: "mm/dd/yyyy"
-        }) */
+            format: "dd/mm/yyyy",
+            endDate : new Date(),
+            defaultDate: new Date(),
+            "autoclose": true
+        }) 
 
 });
       </script>

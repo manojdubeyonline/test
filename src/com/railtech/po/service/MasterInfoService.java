@@ -49,6 +49,8 @@ public interface MasterInfoService {
 	public Set<Code> getCodeList() throws RailtechException;
 
 	public Code getCodeById(Integer codeId);
+
+	public User getUserById(Integer userId) throws RailtechException;
 	
 	
 

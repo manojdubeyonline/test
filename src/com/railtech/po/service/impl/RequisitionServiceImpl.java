@@ -20,9 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.railtech.po.entity.FlexiBean;
+import com.railtech.po.entity.ItemIssue;
 import com.railtech.po.entity.ItemStock;
 import com.railtech.po.entity.Requisition;
 import com.railtech.po.entity.RequisitionItem;
+import com.railtech.po.entity.User;
 import com.railtech.po.entity.Warehouse;
 import com.railtech.po.exeception.RailtechException;
 import com.railtech.po.service.MasterInfoService;
@@ -191,7 +193,7 @@ public class RequisitionServiceImpl implements RequisitionService {
 	@Override
 	public ItemStock getItemStock(String itemCode, String warehouseId) {
 		logger.info("entering getItemStock");
-		logger.debug("param:: itemCode" + itemCode+ "warehouseId:"+itemCode);
+		logger.debug("param:: itemCode" + itemCode+ "warehouseId:"+warehouseId);
 		Session session = sessionFactory.getCurrentSession();
 		Query query = session
 				.createQuery(
@@ -202,6 +204,54 @@ public class RequisitionServiceImpl implements RequisitionService {
 		logger.debug("returnVal:" + itemStock);
 		logger.info("exiting getItemStock");
 		return itemStock;
+	}
+	
+	@Override
+	public ItemStock updateItemStock(ItemStock itemStock) {
+		logger.info("entering updateItemStock");
+		Session session = sessionFactory.getCurrentSession();
+		session.saveOrUpdate(itemStock);
+		logger.debug("returnVal:" + itemStock);
+		logger.info("exiting updateItemStock");
+		return itemStock;
+	}
+	
+	@Override
+	public void saveItemIssue(ItemIssue itemIssue) {
+		logger.info("entering saveItemIssue");
+		Session session = sessionFactory.getCurrentSession();
+		session.saveOrUpdate(itemIssue);
+		logger.info("exiting saveItemIssue");
+	}
+
+	@Override
+	public void saveItemIssue(Requisition requisition) {
+		logger.info("entering saveItemIssue");
+		Warehouse warehouse = requisition.getRequestedAtWareHouse();
+		User user = requisition.getRequestedByUser();
+		for(RequisitionItem item : requisition.getRequisitionItems()){
+			ItemStock its = getItemStock(item.getItemCode().getCodeId()+"", ""+warehouse.getWareId());
+			Double availableQty = its.getAvailableQty();
+			if(availableQty<item.getQty()){
+				throw new RailtechException("The available qty is less than the issue qty");
+			}
+			its.setAvailableQty(availableQty - item.getQty());
+			updateItemStock(its);
+			ItemIssue itemIssue = new ItemIssue();
+			itemIssue.setRequisition(requisition);
+			itemIssue.setRequisitionItem(item);
+			itemIssue.setItemCode(item.getItemCode());
+			itemIssue.setIssuedBy(requisition.getRequestedByUser());
+			itemIssue.setIssueDate(requisition.getRequestedDate());
+			itemIssue.setIssueQty(item.getQty());
+			saveItemIssue(itemIssue);
+			item.setFullFilledByUser(user);
+			item.setFullFillmentStatus("Y");
+			saveOrUpdate(requisition);
+			
+		}
+		logger.info("exiting saveItemIssue");
+		
 	}
 
 

@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.annotation.Resource;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Hibernate;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -48,6 +49,22 @@ public class MasterInfoServiceImpl implements MasterInfoService {
 		logger.debug("returnVal No of users:"+userList.size());
 		logger.info("exiting getUsers");
 		return userList;
+
+	}
+	
+	@Override
+	public User getUserById(Integer userId) throws RailtechException {
+		logger.info("entering getRequisitions");
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from User user  where user.userId =:userId").setInteger("userId", userId);
+		@SuppressWarnings("unchecked")
+		User user = (User)(query.uniqueResult());
+		logger.debug("returnVal No of users:"+user);
+		if(user!=null){
+			Hibernate.initialize(user.getUserFirms());
+		}
+		logger.info("exiting getUsers");
+		return user;
 
 	}
 	

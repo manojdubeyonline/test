@@ -5,6 +5,7 @@ package com.railtech.po.controller;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -131,6 +132,14 @@ public class RailtechController {
 		Set<Firm>firms =masterservice.getFirms(); 
 		return firms;
 	}
+	
+	@RequestMapping(value = { "/getUserFirms" }, method = { RequestMethod.POST })
+	public  @ResponseBody Set<Firm> getUserFirms()
+	{
+		Set<Firm>firms =masterservice.getFirms(); 
+		return firms;
+	}
+	
 	@RequestMapping(value = { "/getWarehouses" }, method = { RequestMethod.POST })
 	public  @ResponseBody Set<Warehouse> getWarehouses()
 	{
@@ -152,11 +161,18 @@ public class RailtechController {
 		return users;
 	}
 	
+	@RequestMapping(value = { "/getUserById" }, method = { RequestMethod.POST })
+	public @ResponseBody User getUserById(@RequestBody ModelForm modelRequest)
+	{
+		User user = masterservice.getUserById(modelRequest.getId());
+		return user;
+	}
+	
 	@RequestMapping(value = { "/getItemStock" }, method = { RequestMethod.POST })
-	public @ResponseBody ItemStock getItemStock(@RequestBody ModelForm requestForm)
+	public @ResponseBody Double getItemStock(@RequestBody ModelForm requestForm)
 	{
 		ItemStock itemStock = requisitionService.getItemStock(requestForm.getId(), requestForm.getId2());
-		return itemStock;
+		return itemStock.getAvailableQty();
 	}
 	
 	
@@ -218,11 +234,11 @@ public class RailtechController {
 						requisitionItemRow.add(item.getItemCode().getCodeDesc());
 						requisitionItemRow.add(String.valueOf(item.getQty()));
 						requisitionItemRow.add(Util.getDateString(
-								requisition.getRequestedDate(), "dd/mm/yyyy"));
+								requisition.getRequestedDate(), "dd/MM/yyyy"));
 						requisitionItemRow.add(requisition.getRequestedByUser()
 								.getUserName());
 						requisitionItemRow.add(Util.getDateString(
-								requisition.getDueDate(), "dd/mm/yyyy"));
+								requisition.getDueDate(), "dd/MM/yyyy"));
 						requisitionItemRow.add(String.valueOf(requisition
 								.getFullFillmentStatus()));
 
@@ -242,11 +258,12 @@ public class RailtechController {
 		Requisition requisition =null;
 		String requisitionId = request.getParameter("requisitionId");
 		String requisitionRefNo = request.getParameter("requisitionRefNo");
+		Boolean isNew = Boolean.FALSE;
 		if(!StringUtils.isEmpty(requisitionId)){
 			requisition = requisitionService.getRequisitionById(Long.parseLong(requisitionId));
 		}else{
 			requisition  = new Requisition();
-			
+			isNew = Boolean.TRUE;
 		}
 		
 		String firmId = request.getParameter("firm");
@@ -273,33 +290,72 @@ public class RailtechController {
 		if(null!=rowCount){
 			maxRows = Integer.parseInt(rowCount);
 		}
-		requisition.setRequisitionItems(new HashSet<RequisitionItem>());
-
+		
+		if(isNew || requisition.getRequisitionItems() ==null){
+			requisition.setRequisitionItems(new HashSet<RequisitionItem>());
+		}
 		for (int i = 0; i < maxRows; i++) {
 			String itemCodeId = request.getParameter("codeId" + i);
+			String itemKeyStr = request.getParameter("itemKey" + i);
 
 			if (itemCodeId != null) {
 				Integer codeId = Integer.parseInt(itemCodeId.trim());
-
-				Integer unitId = Integer.parseInt(request.getParameter("unit"+ i));
+				Integer itemKey = null!=itemKeyStr?Integer.parseInt(itemKeyStr.trim()):null;
+				Integer unitId = Integer.parseInt(request.getParameter("unit"+ i).trim());
 				Code itemCode = masterservice.getCodeById(codeId);
 				Unit itemUnit = masterservice.getUnitById(unitId);
-				RequisitionItem reqItem = new RequisitionItem();
+				
+				
+				Boolean isFound = Boolean.FALSE;
+				RequisitionItem reqItem = null;
+				if(!isNew){
+					Iterator <RequisitionItem>itr = requisition.getRequisitionItems().iterator();
+					while(itr.hasNext()){
+						RequisitionItem itm = itr.next();
+						if(itm.getItemKey() ==itemKey){
+							isFound = Boolean.TRUE;
+							reqItem =itm;
+							break;
+						}
+					}
+				}
+				if(!isFound){
+					reqItem = new RequisitionItem();
+				}
 				reqItem.setItemCode(itemCode);
 				reqItem.setRequisition(requisition);
 				reqItem.setPriority(Integer.parseInt(request
 						.getParameter("priority" + i)));
 				reqItem.setQty(Double.parseDouble(request.getParameter("qty"
-						+ i)));
+						+ i).trim()));
 				reqItem.setUnit(itemUnit);
 				reqItem.setModifiedByUser(requestedByUser);
-				requisition.getRequisitionItems().add(reqItem);
+				if(!isFound){
+					requisition.getRequisitionItems().add(reqItem);
+				}
 			}
 		}
 		requisitionService.saveOrUpdate(requisition);
 
 	}
 	
+	
+	@RequestMapping(value = { "/saveItemIssue" }, method = { RequestMethod.POST })
+	public void saveItemIssue(HttpServletRequest request, HttpServletResponse response) throws Exception
+	{
+		Requisition requisition =null;
+		String requisitionId = request.getParameter("requisitionId");
+		String requisitionRefNo = request.getParameter("requisitionRefNo");
+		if(!StringUtils.isEmpty(requisitionId)){
+			requisition = requisitionService.getRequisitionById(Long.parseLong(requisitionId));
+		}else{
+			saveRequisition(request, response);
+			requisition = requisitionService.getRequisitionByRefNo(requisitionRefNo);
+		}
+		
+		requisitionService.saveItemIssue(requisition);
+
+	}
 	@RequestMapping(value = { "/deleteRequisition" }, method = { RequestMethod.POST })
 	public  @ResponseBody String deleteRequisition(@RequestBody ModelForm modelRequest)
 	{
