@@ -33,7 +33,12 @@ public class ItemStock implements Serializable {
 
 	@Column(name="on_hold_qty")
 	private double onHoldQty;
+	
+	@Column(name="requisitioned_qty")
+	private double requisitionedQty;
 
+	@Column(name="ordered_qty")
+	private double orderedQty;
 	
 	public ItemStock() {
 	}
@@ -81,6 +86,27 @@ public class ItemStock implements Serializable {
 		this.onHoldQty = onHoldQty;
 	}
 
+
+	public double getRequisitionedQty() {
+		return requisitionedQty;
+	}
+
+
+	public void setRequisitionedQty(double requisitionedQty) {
+		this.requisitionedQty = requisitionedQty;
+	}
+
+
+	public double getOrderedQty() {
+		return orderedQty;
+	}
+
+
+	public void setOrderedQty(double orderedQty) {
+		this.orderedQty = orderedQty;
+	}
+
+	
 		
 
 }

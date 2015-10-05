@@ -21,6 +21,24 @@ public class ItemStockPK implements Serializable {
 	@ManyToOne
 	@JoinColumn(name="warehouse_id")
 	private Warehouse warehouse;
+
+	public Code getItemCode() {
+		return itemCode;
+	}
+
+	public void setItemCode(Code itemCode) {
+		this.itemCode = itemCode;
+	}
+
+	public Warehouse getWarehouse() {
+		return warehouse;
+	}
+
+	public void setWarehouse(Warehouse warehouse) {
+		this.warehouse = warehouse;
+	}
+	
+	
 	
 	
 }

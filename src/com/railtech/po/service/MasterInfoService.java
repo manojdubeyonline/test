@@ -11,6 +11,7 @@ import com.railtech.po.entity.Item;
 import com.railtech.po.entity.PL;
 import com.railtech.po.entity.Unit;
 import com.railtech.po.entity.User;
+import com.railtech.po.entity.Vendor;
 import com.railtech.po.entity.Warehouse;
 import com.railtech.po.exeception.RailtechException;
 
@@ -51,6 +52,10 @@ public interface MasterInfoService {
 	public Code getCodeById(Integer codeId);
 
 	public User getUserById(Integer userId) throws RailtechException;
+
+	public Set<Vendor> getVendors() throws RailtechException;
+
+	public Vendor getVendorById(String id);
 	
 	
 

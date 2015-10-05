@@ -2,6 +2,7 @@ package com.railtech.po.entity;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -11,7 +12,10 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -88,6 +92,10 @@ public class Code implements Serializable {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "itemStockPK.itemCode", cascade=CascadeType.ALL)
 	@JsonIgnore
 	private Set<ItemStock> itemstocks;
+	
+	@ManyToMany(cascade = { CascadeType.ALL })
+	@JoinTable(name = "item_preferred_vendor", joinColumns = { @JoinColumn(name = "item_code_id") }, inverseJoinColumns = { @JoinColumn(name = "vendor_id") })
+	private Set<Vendor> preferredVendors = new HashSet<Vendor>();
 
 	public Code() {
 	}
@@ -375,6 +383,15 @@ public class Code implements Serializable {
 	 */
 	public void setItemstocks(Set<ItemStock> itemstocks) {
 		this.itemstocks = itemstocks;
+	}
+	
+	public Set<Vendor> getPreferredVendors() {
+		return preferredVendors;
+	}
+
+
+	public void setPreferredVendors(Set<Vendor> preferredVendors) {
+		this.preferredVendors = preferredVendors;
 	}
 
 

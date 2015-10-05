@@ -33,7 +33,7 @@ public interface RequisitionService {
 
 	public void saveItemIssue(Requisition requisition);
 
-	public ItemStock updateItemStock(ItemStock itemStock);
+	public void updateItemStock(ItemStock itemStock);
 
 	public void saveItemIssue(ItemIssue itemIssue);
 

@@ -3,12 +3,9 @@
 	<form role="form" id="issueForm" name="issueForm"  method="post">
 		<div class="modal-dialog">
 			<div class="modal-content">
-				<div class="modal-header">
-				<h5 class='modal-title'>Item Issue</h5>
-					<button type="button" class="close" data-dismiss="modal"
-						aria-label="Close" >
-						<span aria-hidden="true">&times;</span>
-					</button>
+				<div class="modal-header panel-success'">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+					<h5 class='modal-title '>Item Issue</h5>
 				</div>
 				<div class="modal-body">
 					<div class="form-group">

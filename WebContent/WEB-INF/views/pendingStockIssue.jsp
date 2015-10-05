@@ -4,18 +4,13 @@
 <script type="text/javascript">
 $(document).ready(function(){
 
-	$("#flex1").dblclick(function(event){
-		$('.trSelected',this).each( function(){
-			var recordId = $('td[abbr="requisitionRefNo"] >div', this).html();
-			populateRequisitionPopup(recordId, null);
-			});
-		});
+
 	$("#pendingStockIssue").attr("class","active");
-var w=1000;
-$('#flex1').flexigrid({
-url:'getPendingStockIssue',
-method: 'POST',
-dataType : 'json',
+		var w=1000;
+		$('#flex1').flexigrid({
+		url:'getPendingStockIssue',
+		method: 'POST',
+		dataType : 'json',
 	  
 	  colModel : [
 	       	{display: '', name : 'ite', width:w*0.035, sortable : false, align: 'center'},
@@ -65,16 +60,41 @@ addRow();
 
 
 	function open() {
-		var recordId =  $('td[abbr="requisitionRefNo"] >div', this).html();
-		populateRequisitionPopup(recordId, 'getRequisitionByRefNo');
+		var requisitionId =  "";
+		var requisitionItemId ="";
+		var row = $('#flex1 tbody tr').has("input[name='requisitionItemId']:checked")
+		requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
+		requisitionItemId = $(row).find("input[name='requisitionItemId']:checked").val();
+		if(requisitionId!='' && requisitionItemId !=''){
+			populateRequisitionItemPopup(requisitionId,requisitionItemId);
+		}
+		
 
 	}
 
 	function add() {
 		$('#modal-add-req').modal({
 			keyboard : true
+			
 		});
-		$('#modal-add-req').modal("show");
+		$("#requisitionRefNo").removeAttr('disabled');
+		$("#warehouse").removeAttr('disabled');
+		$("#user").removeAttr('disabled');
+		$("#dueDate").removeAttr('disabled');
+		$("#firm").removeAttr('disabled');
+
+		$("#requisitionRefNo").val('');
+		$("#warehouse").val('');
+		$("#user").val('');
+		$("#dueDate").val('');
+		$("#firm").val('');
+		$("#warehouse").val("");
+		$("#rowhid").val(0);
+		
+		$("#reqItemTable").find("tr:gt(0)").remove();
+		addRow();
+		
+		$('#modal-add-req').modal.show()
 	}
 	function saveItemIssue() {
 		$('.close').click();
@@ -99,13 +119,13 @@ addRow();
 
 	}
 
-	function populateRequisitionPopup(recordId, url) {
+	function populateRequisitionItemPopup(refNo, reqItemId) {
 
 		var jsonRecord = {};
-		if(url==null){
-			url = 'getRequisitionByRefNo';
-		}
-		jsonRecord.id = recordId;
+		
+		url = 'getRequisitionByRefNo';
+		
+		jsonRecord.id = refNo;
 		$.ajax({
 			url : url,
 			type : 'POST',
@@ -113,17 +133,98 @@ addRow();
 			contentType : 'application/json',
 			dataType : 'json',
 			success : function(data) {
-				$("#requisitionId").val(data.requisitionId);
-				//$("#qty").val(data.qty);
+				if(data!=null){
+						$("#requisitionId").val(data.requisitionId);
+						$("#requisitionRefNo").val(data.requisitionRefNo);
+						$("#dueDate").val(myDateFormatter(data.dueDate));
+						$("#user").val(data.requestedByUser.userId);
+						getUserFirms('firm',data.requestedByUser.userId);
+						$("#firm").val(data.requestedForFirm.firmId);
+						getFirmWarehouses('warehouse', data.requestedForFirm.firmId,data.requestedAtWareHouse.wareId) 
+						$("#warehouse").val(data.requestedAtWareHouse.wareId);
 
-				//$("#dueDate").val(data.dueDate);
-				$("#firm").val(data.requestedForFirm.firmId);
-				//$("#item").val(data.item.itemId);
-				$("#warehouse").val(data.requestedAtWareHouse.wareId);
-				$('#modal-add-req').modal({
-					keyboard : true
-				});
-				$('#modal-add-req').modal("show");
+						$("#requisitionRefNo").attr('disabled', 'disabled');
+						$("#warehouse").attr('disabled', 'disabled');
+						$("#user").attr('disabled', 'disabled');
+						$("#dueDate").attr('disabled', 'disabled');
+						$("#firm").attr('disabled', 'disabled');
+						
+						var count = $("#rowhid").val();
+						var existingRows = count;
+						var tbl = document.getElementById("reqItemTable");
+						$("#reqItemTable").find("tr:gt(0)").remove();
+						
+						for(var r=0;r<data.requisitionItems.length;r++){
+							if(reqItemId!=data.requisitionItems[r].itemKey){
+								continue;
+							}
+							var lastRow = tbl.rows.length;
+							var newRow = tbl.insertRow(lastRow);
+							
+							var content = "<td>";
+							if(r >0){
+								content+="<a href='#' onclick='removeRow("
+									+ count
+									+ ")'><span class=\"glyphicon glyphicon-trash\"></span></a>";
+								}
+							content+="</td>"
+									+ " <td><select class=\"form-control\" name=\"priority"+count+"\""
+							+" 	id=\"priority"+count+"\">"
+									+ " 		<option value=\"0\">Normal</option>"
+									+ " 		<option value=\"1\">High</option>"
+									+ " 		<option value=\"2\">Urgent</option>"
+									+ " </select></td>"
+									+ " <td><input type=\"hidden\" name=\"itemKey"
+									+ count+ "\" value=\""+data.requisitionItems[r].itemKey+" \" >"
+									+"<input type=\"text\" required readonly name=\"codeId"
+									+ count
+									+ "\""
+									+ " 	class=\"form-control\" id=\"codeId"
+									+ count
+									+ "\" onclick=\"popPicker('"
+									+ count
+									+ "')\" / placeHolder=\"Click to pick item\" value=\""+data.requisitionItems[r].itemCode.codeId+" \" ></td>"
+									+ " 	<td><input type=\"text\" name=\"pl_no"+count+"\""
+							+" 	id=\"pl_no"+count+"\" class=\"form-control\" placeholder=\"PL No\" value=\""+data.requisitionItems[r].itemCode.code+" \" /></td>"
+									+ " <td><input type=\"text\" placeholder=\"Item Description\""
+							+" 	name=\"item_desc"+count+"\" id=\"item_desc"+count+"\""
+							+" 	class=\"form-control\" value=\""+data.requisitionItems[r].itemCode.codeDesc+" \"/></td>"
+							+ " <td><input type=\"hidden\" placeholder=\"availableQty\""
+							+" 	name=\"availableQty"+count+"\" id=\"availableQty"+count+"\""
+							+" 	class=\"form-control\" /><span id=\"availableQtyId"+count+"\"></span></td>"
+									+ " <td><input type=\"text\" class=\"form-control\""
+							+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\" value=\""+data.requisitionItems[r].qty+"\"></td>"
+									+ " <td><select class=\"form-control\" id=\"unit"+count+"\""
+							+" 	name=\"unit"+count+"\">"
+									+ " </select> "
+		
+									+ " </td>"
+		
+							$(newRow).html(content);
+							$(newRow).attr("id", "reqItemTableRow" + count);
+							getUnits('unit' + count);
+							getItemStock('#availableQtyId' + count,data.requisitionItems[r].itemCode.codeId, data.requestedAtWareHouse.wareId)
+							
+							$("#rowhid").val(++count);
+		
+							
+		
+						}
+					
+						for(var r=0;r<data.requisitionItems.length;r++){
+							if(reqItemId!=data.requisitionItems[r].itemKey){
+								continue;
+							}
+							$("#priority"+existingRows).val(data.requisitionItems[r].priority);
+							$("#unit"+existingRows).val(data.requisitionItems[r].unit.unitId);
+							existingRows++;
+						}
+		
+						$('#modal-add-req').modal({
+							keyboard : true
+						});
+						$('#modal-add-req').modal("show");
+				}
 			},
 			error : function(data) {
 				BootstrapDialog.alert('Error Pulling Requistion' + data);
@@ -169,193 +270,6 @@ addRow();
 			}
 
 		});
-	}
-
-	function getUsers(field) {
-		var sel = $("#" + field);
-		$.ajax({
-			url : 'getUsers',
-			type : 'POST',
-			dataType : 'json',
-			contentType : 'application/json',
-
-			success : function(data) {
-				if (data != null) {
-					for (var i = 0; i < data.length; i++) {
-						sel.append('<option value="' + data[i].userId + '">'
-								+ data[i].userName + '</option>');
-					}
-				}
-			},
-			error : function(data) {
-				BootstrapDialog.alert('Error Unable to pull the item list');
-			}
-		});
-	}
-
-	function getItems(field) {
-		var sel = $("#" + field);
-		$.ajax({
-			url : 'getItems',
-			type : 'POST',
-			dataType : 'json',
-			contentType : 'application/json',
-
-			success : function(data) {
-				if (data != null) {
-					for (var i = 0; i < data.length; i++) {
-						sel.append('<option value="' + data[i].itemId + '">'
-								+ data[i].itemDesc + '</option>');
-					}
-				}
-			},
-			error : function(data) {
-				BootstrapDialog.alert('Error Unable to pull the item list');
-			}
-		});
-	}
-
-	function getUnits(field) {
-		var sel = $("#" + field);
-		$.ajax({
-			url : 'getUnits',
-			type : 'POST',
-			dataType : 'json',
-			contentType : 'application/json',
-
-			success : function(data) {
-				if (data != null) {
-					for (var i = 0; i < data.length; i++) {
-						sel.append('<option value="' + data[i].unitId + '">'
-								+ data[i].unitName + '</option>');
-					}
-				}
-			},
-			error : function(data) {
-				BootstrapDialog.alert('Error Unable to pull the unit list');
-			}
-		});
-	}
-
-	function getFirmWarehouses(field, firmId) {
-		var modelRequest = {};
-		modelRequest.id = firmId
-		var sel = $("#" + field);
-		sel.html('<option value="" selected disabled>Store</option>')
-		$.ajax({
-			url : 'getFirmWarehouses',
-			type : 'POST',
-			dataType : 'JSON',
-			data : JSON.stringify(modelRequest),
-			contentType : 'application/json',
-
-			success : function(data) {
-				if (data != null) {
-					for (var i = 0; i < data.length; i++) {
-						sel.append('<option value="' + data[i].wareId + '">'
-								+ data[i].warehouseName + '</option>');
-					}
-				}
-			},
-			error : function(data) {
-				BootstrapDialog
-						.alert('Error Unable to pull the warehouse list');
-			}
-		});
-	}
-
-	function generateRefNo() {
-		var modelRequest = {};
-		modelRequest.id = $("#firm").val();
-		modelRequest.id2 = $("#warehouse").val();
-
-		$.ajax({
-			url : 'generateRequisitionRefNo',
-			type : 'POST',
-			data : JSON.stringify(modelRequest),
-			contentType : 'application/json',
-			success : function(data) {
-				if (data != null) {
-					$("#requisitionRefNo").val(data);
-				}
-			},
-			error : function(data) {
-				BootstrapDialog.alert('Error Unable to generate the ref no.');
-			}
-		});
-	}
-	function getWarehouses(field) {
-		var sel = $("#" + field);
-		$.ajax({
-			url : 'getWarehouses',
-			type : 'POST',
-			dataType : 'json',
-			contentType : 'application/json',
-
-			success : function(data) {
-				if (data != null) {
-					for (var i = 0; i < data.length; i++) {
-						sel.append('<option value="' + data[i].wareId + '">'
-								+ data[i].warehouseName + '</option>');
-					}
-				}
-			},
-			error : function(data) {
-				BootstrapDialog
-						.alert('Error Unable to pull the warehouse list');
-			}
-		});
-
-	}
-
-	function getFirms(field) {
-		var sel = $("#" + field);
-		$.ajax({
-			url : 'getFirms',
-			type : 'POST',
-			dataType : 'json',
-			contentType : 'application/json',
-
-			success : function(data) {
-				if (data != null) {
-					for (var i = 0; i < data.length; i++) {
-						sel.append('<option value="' + data[i].firmId + '">'
-								+ data[i].firmName + '</option>');
-					}
-				}
-			},
-			error : function(data) {
-				BootstrapDialog.alert('Error Unable to pull the Firm list');
-			}
-		});
-
-	}
-
-	function getUserFirms(field, userId) {
-		var jsonRecord = {};
-		jsonRecord.id = userId;
-		var sel = $("#" + field);
-		sel.html('<option value="" selected disabled>For the Firm</option>');
-		$.ajax({
-			url : 'getUserById',
-			type : 'POST',
-			data : JSON.stringify(jsonRecord),
-			contentType : 'application/json',
-
-			success : function(data) {
-				if (data != null) {
-					var firms = data.userFirms;
-					for (var i = 0; i < firms.length; i++) {
-						sel.append('<option value="' + firms[i].firmId + '">'
-								+ firms[i].firmName + '</option>');
-					}
-				}
-			},
-			error : function(data) {
-				BootstrapDialog.alert('Error Unable to pull the User Firms list');
-			}
-		});
-
 	}
 
 	function getItemStock(field,itemCode, warehouseId) {

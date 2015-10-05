@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.railtech.po.entity.FlexiBean;
 import com.railtech.po.entity.ItemIssue;
 import com.railtech.po.entity.ItemStock;
+import com.railtech.po.entity.ItemStockPK;
 import com.railtech.po.entity.Requisition;
 import com.railtech.po.entity.RequisitionItem;
 import com.railtech.po.entity.User;
@@ -53,6 +54,19 @@ public class RequisitionServiceImpl implements RequisitionService {
 		Session session = sessionFactory.getCurrentSession();
 		session.saveOrUpdate(requisition);
 		for(RequisitionItem i : requisition.getRequisitionItems()){
+			ItemStock its = getItemStock(i.getItemCode().getCodeId()+"", ""+requisition.getRequestedAtWareHouse().getWareId());
+			if(its==null){
+				its = new ItemStock();
+				ItemStockPK pk = new ItemStockPK();
+				pk.setItemCode(i.getItemCode());
+				pk.setWarehouse(requisition.getRequestedAtWareHouse());
+				its.setItemStockPK(pk);
+			}
+			if(i.getItemKey()!=null){
+				its.setRequisitionedQty(its.getRequisitionedQty()-i.getHistQty()+i.getQty());
+			}
+			updateItemStock(its);
+			i.setHistQty(i.getQty());
 			session.saveOrUpdate(i);
 		}
 		
@@ -207,13 +221,12 @@ public class RequisitionServiceImpl implements RequisitionService {
 	}
 	
 	@Override
-	public ItemStock updateItemStock(ItemStock itemStock) {
+	public void updateItemStock(ItemStock itemStock) {
 		logger.info("entering updateItemStock");
 		Session session = sessionFactory.getCurrentSession();
 		session.saveOrUpdate(itemStock);
-		logger.debug("returnVal:" + itemStock);
 		logger.info("exiting updateItemStock");
-		return itemStock;
+
 	}
 	
 	@Override
@@ -236,6 +249,7 @@ public class RequisitionServiceImpl implements RequisitionService {
 				throw new RailtechException("The available qty is less than the issue qty");
 			}
 			its.setAvailableQty(availableQty - item.getQty());
+			its.setRequisitionedQty(its.getRequisitionedQty()-item.getQty());
 			updateItemStock(its);
 			ItemIssue itemIssue = new ItemIssue();
 			itemIssue.setRequisition(requisition);

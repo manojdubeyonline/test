@@ -23,6 +23,7 @@ import com.railtech.po.entity.Item;
 import com.railtech.po.entity.PL;
 import com.railtech.po.entity.Unit;
 import com.railtech.po.entity.User;
+import com.railtech.po.entity.Vendor;
 import com.railtech.po.entity.Warehouse;
 import com.railtech.po.exeception.RailtechException;
 import com.railtech.po.service.MasterInfoService;
@@ -57,7 +58,7 @@ public class MasterInfoServiceImpl implements MasterInfoService {
 		logger.info("entering getRequisitions");
 		Session session = sessionFactory.getCurrentSession();
 		Query query = session.createQuery("from User user  where user.userId =:userId").setInteger("userId", userId);
-		@SuppressWarnings("unchecked")
+		
 		User user = (User)(query.uniqueResult());
 		logger.debug("returnVal No of users:"+user);
 		if(user!=null){
@@ -80,7 +81,7 @@ public class MasterInfoServiceImpl implements MasterInfoService {
 		return itemList;
 
 	}
-	
+		
 	@Override
 	public Set<Firm> getFirms() throws RailtechException {
 		logger.info("entering getFirms");
@@ -235,6 +236,30 @@ public class MasterInfoServiceImpl implements MasterInfoService {
 		Code code = (Code)query.uniqueResult();
 		logger.debug("returnVal  of code:"+code);
 		logger.info("exiting getCodeById");
+		return code;
+	}
+	@Override
+	public Set<Vendor> getVendors() throws RailtechException {
+		logger.info("entering getVendors");
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from Vendor vendor");
+		@SuppressWarnings("unchecked")
+		Set <Vendor> vendorList = new HashSet<Vendor>(query.list());
+		logger.debug("returnVal No of users:"+vendorList);
+		logger.info("exiting getVendors");
+		return vendorList;
+
+	}
+	
+	
+	@Override
+	public Vendor getVendorById(String vendorId) {
+		logger.info("entering getVendorById. Param:"+vendorId);
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from Vendor vendor where vendor.vendorId =:vendorId").setInteger("vendorId", Integer.parseInt(vendorId));
+		Vendor code = (Vendor)query.uniqueResult();
+		logger.debug("returnVal  of code:"+code);
+		logger.info("exiting getVendorById");
 		return code;
 	}
 

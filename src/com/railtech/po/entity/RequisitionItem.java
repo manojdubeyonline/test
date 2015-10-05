@@ -51,6 +51,9 @@ public class RequisitionItem implements Serializable {
 
 	private double qty;
 
+	@Column(name="hist_qty")
+	private double histQty;
+	
 	@ManyToOne
 	@JoinColumn(name="unit_id")
 	private Unit unit;
@@ -167,6 +170,15 @@ public class RequisitionItem implements Serializable {
 	 */
 	public void setQty(double qty) {
 		this.qty = qty;
+	}
+
+	
+	public double getHistQty() {
+		return histQty;
+	}
+
+	public void setHistQty(double histQty) {
+		this.histQty = histQty;
 	}
 
 	/**

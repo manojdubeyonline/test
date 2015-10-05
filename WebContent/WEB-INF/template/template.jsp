@@ -28,6 +28,7 @@
 	src="<c:url value="/resources/js/lib/jquery-migrate.js"/>"></script>
 
 <script src="<c:url value="/resources/js/lib/flexigrid.js"/>"></script>
+<script src="<c:url value="/resources/js/railtech.js"/>"></script>
 
 <!-- Optional theme -->
 
