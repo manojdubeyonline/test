@@ -3,48 +3,12 @@
 
 <script type="text/javascript">
 $(document).ready(function(){
-	$("#purchaseOrders").attr("class","active");
+	$("#orderApproval").attr("class","active");
 		var w=1000;
 		
-		$('#flex1').flexigrid({
-			url:'getProcurementMarkingList',
-			method: 'POST', 
-			dataType : 'json',
-		  
-		  colModel : [
-		       	{display: '', name : '', width:w*0.035, sortable : false, align: 'center'},
-				{display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
-				{display: 'Item', name : '', width:550, sortable : true, align: 'left'},
-				{display: 'Ware house', name : '', width:200, sortable : true, align: 'left'},
-				{display: 'Marked Qty', name : '', width:100, sortable : true, align: 'left'},
-				{display: 'Due Date', name : '', width:100, sortable : true, align: 'left'},
-				{display: 'Procurement Method', name : '', width:100, sortable : true, align: 'left'},
-				
-					],
-		  buttons : [
-					{separator: true},
-				 	{name: ' Create', bclass: 'glyphicon glyphicon-plus', onpress : add},
-		            {separator: true}
-	      ],
-	      searchitems : [
-	                {display: 'Requisition Ref No', name : 'requisitionRefNo'},
-	             
-					
-	      ],
-			sortname: "code",
-			sortorder: "asc",
-			usepager: true,
-			//title: 'Pending Purchase Orders',
-			useRp: true,
-			rp: 20,
-			showTableToggleBtn: true,//toggle button for the whole table
-			resizable: false,
-			//width: w,
-			singleSelect: true
-		});
-
+		
 			
-		$('#flex2').flexigrid({
+		$('#flex1').flexigrid({
 			url:'getPurchaseOrderList',
 			method: 'POST',
 			dataType : 'json',
@@ -63,10 +27,9 @@ $(document).ready(function(){
 					],
 		  buttons : [
 					{separator: true},
-				 	{name: ' Edit', bclass: 'glyphicon glyphicon-pencil', onpress : open},
+				 	{name: ' Approval', bclass: 'glyphicon glyphicon-pencil', onpress : add},
 		            {separator: true},
-				 	{name: ' Delete', bclass: 'glyphicon glyphicon-remove', onpress : remove},
-		            {separator: true}
+
 	      ],
 	      searchitems : [
 	                {display: 'Requisition Ref No', name : 'requisitionRefNo'},
@@ -86,7 +49,46 @@ $(document).ready(function(){
 
 		});
 
+		$('#flex2').flexigrid({
+			url:'getPurchaseOrderListApprovalCompleted',
+			method: 'POST',
+			dataType : 'json',
+		  
+		  colModel : [
+		       	{display: '', name : '', width:w*0.035, sortable : false, align: 'center'},
+				{display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
+				{display: 'Purchase Order No', name : '', width:150, sortable : false, align: 'center'},
+				{display: 'Firm', name : '', width:150, sortable : true, align: 'left'},
+				{display: 'Item', name : '', width:400, sortable : true, align: 'left'},
+				{display: 'Qty', name : '', width:70, sortable : true, align: 'left'},
+				{display: 'Due Date', name : '', width:70, sortable : true, align: 'left'},
+				{display: 'Order Type', name : '', width:70, sortable : true, align: 'left'},
+				{display: 'Approval Status', name : '', width:70, sortable : true, align: 'left'},
+				{display: 'Approval Date', name : '', width:70, sortable : true, align: 'left'},
+					],
+		  buttons : [
+					{separator: true},
+				 	{name: ' Edit', bclass: 'glyphicon glyphicon-pencil', onpress : open},
+		            {separator: true},
 
+	      ],
+	      searchitems : [
+	                {display: 'Requisition Ref No', name : 'requisitionRefNo'},
+	             
+					
+	      ],
+			sortname: "code",
+			sortorder: "asc",
+			usepager: true,
+			//title: 'Purchase Orders',
+			useRp: true,
+			rp: 1000,
+			showTableToggleBtn: true,//toggle button for the whole table
+			resizable: false,
+			//width: w,
+			singleSelect: true
+
+		});
 //getUsers('user');
 
 //getFirms("firm");
@@ -97,10 +99,10 @@ getUnits("unit");
 });
 
 
-	function open() {
+	function add() {
 		//var requisitionId =  "";
 		var orderId ="";
-		var row = $('#flex2 tbody tr').has("input[name='order_id']:checked")
+		var row = $('#flex1 tbody tr').has("input[name='order_id']:checked")
 		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
 		orderId = $(row).find("input[name='order_id']:checked").val();
 		if(orderId !=undefined && orderId !=null && orderId !=''){
@@ -143,6 +145,8 @@ getUnits("unit");
 						$("#vendor").val(data.vendor.vendorId); 
 						$("#rate").val(data.rate); 
 						$("#orderRemarks").val(data.remarks); 
+						$("#approval_comments").val(data.approvalComments); 
+						$("#approvalStatus").val(data.approvalStatus); 
 						$('#modal-add-req').modal({
 							keyboard : true
 						});
@@ -196,38 +200,38 @@ getUnits("unit");
         });
 
 	}
-	function add() {
+	function open() {
 		//var requisitionId =  "";
-		var procurementId ="";
-		var row = $('#flex1 tbody tr').has("input[name='marking_id']:checked")
+		var orderId ="";
+		var row = $('#flex2 tbody tr').has("input[name='order_id']:checked")
 		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
-		procurementId = $(row).find("input[name='marking_id']:checked").val();
-		if(procurementId !=''){
-			populatePurchaseOrderCreatePopup(procurementId);
+		orderId = $(row).find("input[name='order_id']:checked").val();
+		if(orderId !=undefined && orderId !=null && orderId !=''){
+			populatePurchaseOrderViewPopup(orderId);
 		}
 	}
 
-	function savePurchaseOrder() {
+	function savePurchaseOrderApproval() {
 		$('.close').click();
 		$.ajax({
-			url : 'savePurchaseOrder',
+			url : 'savePurchaseOrderApproval',
 			type : "POST",
 			data : $("#orderForm").serialize(),
 			asynch : true,
 			success : function(data) {
-				BootstrapDialog.alert('Purchase order saved successfully.');
+				BootstrapDialog.alert('Purchase order approval saved successfully.');
 				$('#flex1').flexOptions({
-					url : "getProcurementMarkingList",
+					url : "getPurchaseOrderList",
 					newp : 1
 				}).flexReload();
 				$('#flex2').flexOptions({
-					url : "getPurchaseOrderList",
+					url : "getPurchaseOrderListApprovalCompleted",
 					newp : 1
 				}).flexReload();
 				return;
 			},
 			error : function(data) {
-				BootstrapDialog.alert('Error Saving purchase order.');
+				BootstrapDialog.alert('Error Saving purchase order approval.');
 				return;
 			}
 		});
@@ -340,67 +344,6 @@ getUnits("unit");
 
 	}
 
-	function push(id, plNo, desc) {
-		dlg.close();
-		$('#item_desc' + selectedCounter).val(desc);
-		$('#pl_no' + selectedCounter).val(plNo);
-		$('#codeId' + selectedCounter).val(id);
-		getItemStock('#availableQtyId' + selectedCounter,id, $("#warehouse").val())
-		//$('#availableQtyId' + selectedCounter).val(qty);
-	}
-
-	function addRow() {
-		var count = $("#rowhid").val();
-		var tbl = document.getElementById("reqItemTable");
-		var lastRow = tbl.rows.length;
-		//alert(lastRow)
-		var newRow = tbl.insertRow(lastRow);
-
-		var content = "<td>";
-		if(lastRow >1){
-			content+="<a href='#' onclick='removeRow("
-				+ count
-				+ ")'><span class=\"glyphicon glyphicon-trash\"></span></a>";
-			}
-		content+="</td>"
-				+ " <td><select class=\"form-control\" name=\"priority"+count+"\""
-		+" 	id=\"priority"+count+"\">"
-				+ " 		<option value=\"0\">Normal</option>"
-				+ " 		<option value=\"1\">High</option>"
-				+ " 		<option value=\"2\">Urgent</option>"
-				+ " </select></td>"
-				+ " <td><input type=\"text\" required readonly name=\"codeId"
-				+ count
-				+ "\""
-				+ " 	class=\"form-control\" id=\"codeId"
-				+ count
-				+ "\" onclick=\"popPicker('"
-				+ count
-				+ "')\" / placeHolder=\"Click to pick item\"></td>"
-				+ " 	<td><input type=\"text\" name=\"pl_no"+count+"\""
-		+" 	id=\"pl_no"+count+"\" class=\"form-control\" placeholder=\"PL No\" /></td>"
-				+ " <td><input type=\"text\" placeholder=\"Item Description\""
-		+" 	name=\"item_desc"+count+"\" id=\"item_desc"+count+"\""
-		+" 	class=\"form-control\" /></td>"
-		+ " <td><input type=\"hidden\" placeholder=\"availableQty\""
-		+" 	name=\"availableQty"+count+"\" id=\"availableQty"+count+"\""
-		+" 	class=\"form-control\" /><span id=\"availableQtyId"+count+"\"></span></td>"
-				+ " <td><input type=\"text\" class=\"form-control\""
-		+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\"></td>"
-				+ " <td><select class=\"form-control\" id=\"unit"+count+"\""
-		+" 	name=\"unit"+count+"\">"
-				+ " </select> "
-
-				+ " </td>"
-
-		newRow.innerHTML = content;
-		$(newRow).attr("id", "reqItemTableRow" + count);
-		getUnits('unit' + count);
-		$("#rowhid").val(++count);
-	}
-	function removeRow(count) {
-		$("#reqItemTableRow" + count).remove();
-	}
 </script>
 
 
@@ -409,7 +352,7 @@ getUnits("unit");
         <div class="panel panel-default" id="pendingPanel">
             <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#pendingContent">
                 <h6 class="panel-title">
-                   Pending Purchase Order<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
+                    <small>Purchase Order Pending Approval</small><span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
                 </h6>
             </div>
            
@@ -421,7 +364,7 @@ getUnits("unit");
         <div class="panel panel-default" id="donePanel">
             <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#doneContent">
                <h5 class="panel-title">
-                    Purchase Orders<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
+                    <small>Purchase Orders Approval Completed</small><span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
                 </h5>
             </div>
         
@@ -447,7 +390,7 @@ getUnits("unit");
 
 
 
-<%@ include file="include/purchase_order_form.jsp" %>
+<%@ include file="include/purchase_order_form_approval.jsp" %>
 <script>
 $(document).ready(function() {
      $('#dateRangePicker')

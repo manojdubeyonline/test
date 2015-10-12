@@ -16,7 +16,7 @@
 <script type="text/javascript"
 	src="<c:url value="/resources/js/lib/bootstrap-filestyle.min.js"/>"></script>
 
-<script type="text/javascript"
+<script type="text/javascript" 
 	src="<c:url value="/resources/js/lib/bootstrap-dialog.min.js"/>"></script>
 
 <script type="text/javascript"
@@ -52,7 +52,19 @@
 
 <link href="<c:url value="/resources/css/lib/flexigrid.css"/>"
 	rel="stylesheet" />
-
+<script type="text/javascript">
+$(document).ready(function(){
+	jQuery(function($){
+$(".panel-heading.clickable").on("click", function(e){
+	if($(this).hasClass('collapsed')){
+			$(this).find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+			}else{
+				$(this).find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+				}
+})
+		})
+});
+</script>
 </head>
 
 <body>

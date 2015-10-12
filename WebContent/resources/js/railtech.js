@@ -17,7 +17,27 @@ function generateRefNo() {
 				BootstrapDialog.alert('Error Unable to generate the ref no.');
 			}
 		});
-	}
+}
+
+function generateOrderNo(field, firmId) {
+	var modelRequest = {};
+	modelRequest.id = firmId
+	var sel = $("#" + field);
+	$.ajax({
+		url : 'generatePurchaseOrderNo',
+		type : 'POST',
+		data : JSON.stringify(modelRequest),
+		contentType : 'application/json',
+		success : function(data) {
+			if (data != null) {
+				$(sel).val(data);
+			}
+		},
+		error : function(data) {
+			BootstrapDialog.alert('Error Unable to generate the order no.');
+		}
+	});
+}
 	function getWarehouses(field) {
 		var sel = $("#" + field);
 		$.ajax({

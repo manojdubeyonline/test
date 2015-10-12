@@ -35,15 +35,13 @@ $(document).ready(function(){
 		sortname: "code",
 		sortorder: "asc",
 		usepager: true,
-		title: 'Pending Procurement Marking',
+	//	title: 'Pending Procurement Marking',
 		useRp: true,
-		rp: 1000,
-		showTableToggleBtn: true,//toggle button for the whole table
+		rp: 20,
+	//	showTableToggleBtn: true,//toggle button for the whole table
 		resizable: false,
-		width: w,
-		singleSelect: true,
-		height: screen.height*.20,
-
+		//width: w,
+		singleSelect: true
 	});
 
 
@@ -76,14 +74,14 @@ $(document).ready(function(){
 			sortname: "code",
 			sortorder: "asc",
 			usepager: true,
-			title: 'Procurement Markings',
+			//title: 'Procurement Markings',
 			useRp: true,
-			rp: 1000,
-			showTableToggleBtn: true,//toggle button for the whole table
+			rp: 20,
+		//	showTableToggleBtn: true,//toggle button for the whole table
 			resizable: false,
-			width: w,
-			singleSelect: true,
-			height: screen.height*.20,
+		//	width: w,
+			singleSelect: true
+			//height: screen.height*.20,
 
 		});
 
@@ -325,9 +323,35 @@ getWarehouses("warehouse");
 	}
 </script>
 
-<table style="width:100%" id="flex1"></table>
-<div>&nbsp;</div>
-<table style="width:100%" id="flex2"></table>
+<div class="mainPanel">
+    <div class="panel-group" id="accordion">
+        <div class="panel panel-default" id="pendingPanel">
+            <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#pendingContent">
+                <h4 class="panel-title">
+                   Pending Marking<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
+                </h4>
+            </div>
+           
+                <div class="panel-body collapse in" id="pendingContent" style="margin:0px; padding:0px;">
+                   <table style="width:100%" id="flex1"></table>
+                </div>
+           
+        </div>
+        <div class="panel panel-default" id="donePanel">
+            <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#doneContent">
+               <h4 class="panel-title">
+                   Procurement Markings<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
+                </h4>
+            </div>
+        
+                <div class="panel-body" id="doneContent" style="margin:0px; padding:0px;">
+                   <table style="width:100%" id="flex2"></table>
+                </div>
+
+        </div>
+    </div>
+</div>
+
 
 <%@ include file="include/procurement_marking.jsp" %>
 <script>

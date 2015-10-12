@@ -28,7 +28,7 @@ public class PurchaseOrder implements Serializable {
 	@Id
 	@Column(name="purchase_order_id")
 	@GeneratedValue(strategy=GenerationType.AUTO)
-	private Integer markingId;
+	private Integer orderId;
 	
 	@Column(name="purchase_order_number")
 	private String purchaseOrderNo;
@@ -57,7 +57,7 @@ public class PurchaseOrder implements Serializable {
 	private double orderQty;
 	
 	@ManyToOne
-	@JoinColumn(name="unit")
+	@JoinColumn(name="unit_id")
 	private Unit unit;
 	
 	@Column(name="basic_rate")
@@ -71,8 +71,8 @@ public class PurchaseOrder implements Serializable {
 	@JoinColumn(name="approved_by")
 	private User approvedBy;
 	
-	@Column(name="procurement_type")
-	private String procurementType;
+	@Column(name="order_type")
+	private String orderType;
 
 	@Column(name="remarks")
 	private String remarks;
@@ -80,17 +80,21 @@ public class PurchaseOrder implements Serializable {
 	@Column(name="approval_status")
 	private String approvalStatus;
 	
-	@Column(name="procurement_status")
-	private String procurementStatus;
+	@Column(name="approval_comments")
+	private String approvalComments;
+	
+	
+	@Column(name="fullfillment_status")
+	private String fullFillementStatus;
 		
 	@Column(name="due_date")
 	private Date dueDate;
 	
-	@Column(name="approval_date")
+	@Column(name="approved_date")
 	private Date approvalDate;
 	
-	@Column(name="marking_date")
-	private Date markingDate;
+	@Column(name="added_date")
+	private Date dateAdded;
 	
 	@Column(name="last_modified")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -105,15 +109,26 @@ public class PurchaseOrder implements Serializable {
 	 * @return the markingId
 	 */
 	public Integer getMarkingId() {
-		return markingId;
+		return orderId;
+	}
+
+
+
+
+
+	/**
+	 * @return the orderId
+	 */
+	public Integer getOrderId() {
+		return orderId;
 	}
 
 
 	/**
-	 * @param markingId the markingId to set
+	 * @param orderId the orderId to set
 	 */
-	public void setMarkingId(Integer markingId) {
-		this.markingId = markingId;
+	public void setOrderId(Integer orderId) {
+		this.orderId = orderId;
 	}
 
 
@@ -293,33 +308,12 @@ public class PurchaseOrder implements Serializable {
 	}
 
 
-	/**
-	 * @return the procurementType
-	 */
-	public String getProcurementType() {
-		return procurementType;
-	}
-
-
-	/**
-	 * @param procurementType the procurementType to set
-	 */
-	public void setProcurementType(String procurementType) {
-		this.procurementType = procurementType;
-	}
-
-
-	/**
-	 * @return the remarks
-	 */
 	public String getRemarks() {
 		return remarks;
 	}
 
 
-	/**
-	 * @param remarks the remarks to set
-	 */
+	
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
 	}
@@ -341,19 +335,20 @@ public class PurchaseOrder implements Serializable {
 	}
 
 
+
 	/**
-	 * @return the procurementStatus
+	 * @return the fullFillementStatus
 	 */
-	public String getProcurementStatus() {
-		return procurementStatus;
+	public String getFullFillementStatus() {
+		return fullFillementStatus;
 	}
 
 
 	/**
-	 * @param procurementStatus the procurementStatus to set
+	 * @param fullFillementStatus the fullFillementStatus to set
 	 */
-	public void setProcurementStatus(String procurementStatus) {
-		this.procurementStatus = procurementStatus;
+	public void setFullFillementStatus(String fullFillementStatus) {
+		this.fullFillementStatus = fullFillementStatus;
 	}
 
 
@@ -390,18 +385,18 @@ public class PurchaseOrder implements Serializable {
 
 
 	/**
-	 * @return the markingDate
+	 * @return the dateAdded
 	 */
-	public Date getMarkingDate() {
-		return markingDate;
+	public Date getDateAdded() {
+		return dateAdded;
 	}
 
 
 	/**
-	 * @param markingDate the markingDate to set
+	 * @param dateAdded the dateAdded to set
 	 */
-	public void setMarkingDate(Date markingDate) {
-		this.markingDate = markingDate;
+	public void setDateAdded(Date dateAdded) {
+		this.dateAdded = dateAdded;
 	}
 
 
@@ -418,6 +413,38 @@ public class PurchaseOrder implements Serializable {
 	 */
 	public void setLastModified(Date lastModified) {
 		this.lastModified = lastModified;
+	}
+
+
+	/**
+	 * @return the orderType
+	 */
+	public String getOrderType() {
+		return orderType;
+	}
+
+
+	/**
+	 * @param orderType the orderType to set
+	 */
+	public void setOrderType(String orderType) {
+		this.orderType = orderType;
+	}
+
+
+	/**
+	 * @return the approvalComments
+	 */
+	public String getApprovalComments() {
+		return approvalComments;
+	}
+
+
+	/**
+	 * @param approvalComments the approvalComments to set
+	 */
+	public void setApprovalComments(String approvalComments) {
+		this.approvalComments = approvalComments;
 	}
 
 
