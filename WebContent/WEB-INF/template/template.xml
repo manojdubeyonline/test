@@ -55,6 +55,20 @@
     <put-attribute name="footer" value="/WEB-INF/template/layouts/footer.jsp" />
   </definition>
   
+  <definition name="grpo" template="/WEB-INF/template/template.jsp">
+  	<put-attribute name="title" value="Railtech......Requisition" type="string" />
+ 	<put-attribute name="header" value="/WEB-INF/template/layouts/header.jsp" />
+    <put-attribute name="body" value="/WEB-INF/views/grpo.jsp" />
+    <put-attribute name="footer" value="/WEB-INF/template/layouts/footer.jsp" />
+  </definition>
+  
+  <definition name="grpoApproval" template="/WEB-INF/template/template.jsp">
+  	<put-attribute name="title" value="Railtech......Requisition" type="string" />
+ 	<put-attribute name="header" value="/WEB-INF/template/layouts/header.jsp" />
+    <put-attribute name="body" value="/WEB-INF/views/grpoApproval.jsp" />
+    <put-attribute name="footer" value="/WEB-INF/template/layouts/footer.jsp" />
+  </definition>
+  
   <definition name="flexigrid" template="/WEB-INF/layouts/flexigrid.jsp">
   	<put-attribute name="title" value="ev" type="string" />
     <put-attribute name="header" value="/WEB-INF/template/layouts/header.jsp" />

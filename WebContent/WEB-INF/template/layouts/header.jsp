@@ -10,8 +10,8 @@
 		<li role="presentation" id="purchaseOrders"><a href="purchaseOrder">Purchase
 				Orders</a></li>
 		<li role="presentation"  id="orderApproval"><a href="purchaseOrderApproval">Order Approval</a></li>
-		<li role="presentation" id="pendingGRPO"><a href="#">GRPO</a></li>
-		<li role="presentation" id="grpoApproval"><a href="#">GRPO Approval</a></li>
+		<li role="presentation" id="grpo"><a href="grpo">GRPO</a></li>
+		<li role="presentation" id="grpoApproval"><a href="grpoApproval">GRPO Approval</a></li>
 		<li role="presentation" id="warehouseDisbursement"><a href="#">Stock Allocation</a></li>
 	</ul>
 	</div>
