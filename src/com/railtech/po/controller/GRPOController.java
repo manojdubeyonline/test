@@ -82,6 +82,14 @@ public class GRPOController {
 		return grpo;
 	}
 	
+	@RequestMapping(value = { "/deleteGRPO" }, method = { RequestMethod.POST })
+	public  @ResponseBody String deleteRequisition(@RequestBody ModelForm modelRequest)
+	{
+		GRPO grpo = grpoService.getGRPOById(Integer.parseInt(modelRequest.getId()));
+		grpoService.delete(grpo);
+		logger.debug("successfully deleted the GRPO");
+		return "Success";
+	}
 			
 	@RequestMapping(value = { "/getPendingGRPOList" }, method = { RequestMethod.POST })
 	public void getPendingGRPOList(HttpServletRequest request, HttpServletResponse response) throws IOException
@@ -124,6 +132,9 @@ public class GRPOController {
 	public void saveGRPO(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		GRPO grpo = null;
+		
+		
+		
 		String grpoId = request.getParameter("grpoId");
 
 		if (!StringUtils.isEmpty(grpoId)) {
@@ -141,6 +152,12 @@ public class GRPOController {
 		
 		String warehouseId = request.getParameter("warehouse");
 		
+		String orderId = request.getParameter("orderId");
+		
+		if((!StringUtils.isEmpty(orderId))){
+			PurchaseOrder purchaseOrder = purchaseService.getOrderById(Integer.parseInt(orderId));
+			grpo.setOrderId(purchaseOrder);
+		}
 				
 		String markingId = request.getParameter("marking_id");
 		
@@ -185,11 +202,11 @@ public class GRPOController {
 	public void saveGRPOApproval(HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 		logger.info("entering saveGRPOApproval");
-		GRPO purchase = null;
+		GRPO grpo = null;
 		String grpoId = request.getParameter("grpoId");
 
 		if (!StringUtils.isEmpty(grpoId)) {
-			purchase = grpoService.getGRPOById(Integer
+			grpo = grpoService.getGRPOById(Integer
 					.parseInt(grpoId));
 		} else {
 			throw new Exception("Invalid Request");
@@ -197,16 +214,16 @@ public class GRPOController {
 		
 	
 		
-		purchase.setApprovalComments(request.getParameter("approval_comments"));
-		purchase.setApprovalStatus(request.getParameter("approvalStatus"));
-		purchase.setApprovalDate(new Date());
+		grpo.setApprovalComments(request.getParameter("approval_comments"));
+		grpo.setApprovalStatus(request.getParameter("approvalStatus"));
+		grpo.setApprovalDate(new Date());
 		
 		// User requestedByUser =((User)
 				// request.getSession().getAttribute("_SessionUser"));
 		User approvedByUser = masterservice.getUserById("27");
-		purchase.setApprovedBy(approvedByUser);
+		grpo.setApprovedBy(approvedByUser);
 		
-		grpoService.saveGRPO(purchase);
+		grpoService.saveGRPO(grpo);
 		logger.info("exiting saveGRPOApproval");
 	}
 	
@@ -223,22 +240,29 @@ public class GRPOController {
 		if (!CollectionUtils.isEmpty(grpos)) {
 			int count = 0;
 			for (GRPO grpo : grpos) {
+				if(grpo.getApprovalStatus()!=null){
+					continue;
+				}
 							
 				stockRow = new LinkedList<String>();
 				
 				Code itemCode = grpo.getItemCode();
+				
+				
 			
+				Warehouse itemWareHouse = grpo.getOrderId().getWarehouse();
+
 				stockRow.add("<input type='radio' name='grpo_id' value='"
 						+ grpo.getGrpoId()+ "'>");
 				stockRow.add(String.valueOf(++count));
 				stockRow.add(grpo.getOrderId().getPurchaseOrderNo());
-				stockRow.add(grpo.getMarkingId().getMarkingId()+"");
+				
 				stockRow.add(masterservice.getFirmById((grpo.getMarkingId().getWarehouse().getFirmId())+"").getFirmName());
 				stockRow.add(itemCode.getCodeDesc());
 				stockRow.add(grpo.getInwardQty() + " "+grpo.getUnit().getUnitName());
 				stockRow.add(Util.getDateString(grpo.getInwardDate(), "dd/MM/yyyy"));
 				stockRow.add(grpo.getAddedBy().getUserName());
-				strMap.put(String.valueOf(count++), stockRow);
+				strMap.put(String.valueOf(count), stockRow);
 			}
 		}
 		Util.doWriteFlexi(request, response, strMap, requestParams);
@@ -259,7 +283,7 @@ public class GRPOController {
 		if (!CollectionUtils.isEmpty(grpos)) {
 			int count = 0;
 			for (GRPO grpo : grpos) {
-				if(grpo.getApprovalStatus()!=null){
+				if(grpo.getApprovalStatus()==null){
 					continue;
 				}
 				
@@ -271,16 +295,16 @@ public class GRPOController {
 						+ grpo.getGrpoId()+ "'>");
 				stockRow.add(String.valueOf(++count));
 				stockRow.add(grpo.getOrderId().getPurchaseOrderNo());
-				stockRow.add(grpo.getMarkingId().getMarkingId()+"");
+				
 				stockRow.add(masterservice.getFirmById((grpo.getMarkingId().getWarehouse().getFirmId())+"").getFirmName());
 				stockRow.add(itemCode.getCodeDesc());
 				stockRow.add(grpo.getInwardQty() + " "+grpo.getUnit().getUnitName());
 				stockRow.add( Util.getDateString(grpo.getInwardDate(), "dd/MM/yyyy"));
 				stockRow.add( grpo.getAddedBy().getUserName());
-				stockRow.add( grpo.getApprovalStatus());
-				stockRow.add( grpo.getApprovedBy().getUserName());
+				stockRow.add(grpo.getApprovalStatus().equalsIgnoreCase("Y")?"Approved":"Rejected");
+				
 				stockRow.add( Util.getDateString(grpo.getApprovalDate(), "dd/MM/yyyy"));
-				strMap.put(String.valueOf(count++), stockRow);
+				strMap.put(String.valueOf(count), stockRow);
 			}
 		}
 		Util.doWriteFlexi(request, response, strMap, requestParams);

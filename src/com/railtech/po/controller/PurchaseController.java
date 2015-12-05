@@ -30,6 +30,7 @@ import com.railtech.po.entity.FlexiBean;
 import com.railtech.po.entity.ModelForm;
 import com.railtech.po.entity.Procurement;
 import com.railtech.po.entity.PurchaseOrder;
+import com.railtech.po.entity.Requisition;
 import com.railtech.po.entity.Unit;
 import com.railtech.po.entity.User;
 import com.railtech.po.entity.Vendor;
@@ -86,6 +87,14 @@ public class PurchaseController {
 		return purchaseOrderNo;
 	}
 	
+	@RequestMapping(value = { "/deletePurchaseOrder" }, method = { RequestMethod.POST })
+	public  @ResponseBody String deleteRequisition(@RequestBody ModelForm modelRequest)
+	{
+		PurchaseOrder order = purchaseService.getOrderById(Integer.parseInt(modelRequest.getId()));
+		purchaseService.delete(order);
+		logger.debug("successfully deleted the purchase order");
+		return "Success";
+	}
 		
 	@RequestMapping(value = { "/getPendingPurchaseOrderList" }, method = { RequestMethod.POST })
 	public @ResponseBody User getPendingPurchaseOrderList(@RequestBody ModelForm modelRequest)
@@ -159,6 +168,7 @@ public class PurchaseController {
 				"dd/MM/yyyy"));
 		purchase.setPurchaseOrderNo(request.getParameter("orderNo"));
 		purchase.setRemarks(request.getParameter("orderRemarks"));
+		
 		purchaseService.savePurchaseOrder(purchase);
 
 	}
@@ -186,6 +196,7 @@ public class PurchaseController {
 				// request.getSession().getAttribute("_SessionUser"));
 		User approvedByUser = masterservice.getUserById("27");
 		purchase.setApprovedBy(approvedByUser);
+		
 		
 		purchaseService.savePurchaseOrder(purchase);
 		logger.info("exiting savePurchaseOrderApproval");
@@ -222,7 +233,7 @@ public class PurchaseController {
 				stockRow.add("" + order.getOrderQty() + " "+order.getUnit().getUnitName());
 				stockRow.add("" + Util.getDateString(order.getDueDate(), "dd/MM/yyyy"));
 				stockRow.add("" + order.getOrderType());
-				strMap.put(String.valueOf(count++), stockRow);
+				strMap.put(String.valueOf(count), stockRow);
 			}
 		}
 		Util.doWriteFlexi(request, response, strMap, requestParams);
@@ -259,10 +270,11 @@ public class PurchaseController {
 				stockRow.add(order.getOrderQty() + " "+order.getUnit().getUnitName());
 				stockRow.add(Util.getDateString(order.getDueDate(), "dd/MM/yyyy"));
 				stockRow.add(order.getOrderType());
-				stockRow.add(order.getApprovalStatus().equalsIgnoreCase("A")?"Approved":"Rejected");
+				stockRow.add(order.getApprovalStatus().equalsIgnoreCase("Y")?"Approved":"Rejected");
 				stockRow.add(Util.getDateString(order.getApprovalDate(), "dd/MM/yyyy"));
 				
-				strMap.put(String.valueOf(count++), stockRow);
+				
+				strMap.put(String.valueOf(count), stockRow);
 			}
 		}
 		Util.doWriteFlexi(request, response, strMap, requestParams);

@@ -9,7 +9,7 @@ $(document).ready(function(){
 		
 			
 		$('#flex1').flexigrid({
-			url:'getPurchaseOrderList',
+			url:'getGRPOList',
 			method: 'POST',
 			dataType : 'json',
 		  
@@ -50,7 +50,7 @@ $(document).ready(function(){
 		});
 
 		$('#flex2').flexigrid({
-			url:'getPurchaseOrderListApprovalCompleted',
+			url:'getGRPOListApprovalCompleted',
 			method: 'POST',
 			dataType : 'json',
 		  
@@ -62,7 +62,7 @@ $(document).ready(function(){
 				{display: 'Item', name : '', width:400, sortable : true, align: 'left'},
 				{display: 'Qty', name : '', width:70, sortable : true, align: 'left'},
 				{display: 'Due Date', name : '', width:70, sortable : true, align: 'left'},
-				{display: 'Order Type', name : '', width:70, sortable : true, align: 'left'},
+				{display: 'Approved By', name : '', width:70, sortable : true, align: 'left'},
 				{display: 'Approval Status', name : '', width:70, sortable : true, align: 'left'},
 				{display: 'Approval Date', name : '', width:70, sortable : true, align: 'left'},
 					],
@@ -77,6 +77,7 @@ $(document).ready(function(){
 	             
 					
 	      ],
+	      
 			sortname: "code",
 			sortorder: "asc",
 			usepager: true,
@@ -87,6 +88,7 @@ $(document).ready(function(){
 			resizable: false,
 			//width: w,
 			singleSelect: true
+			
 
 		});
 //getUsers('user');
@@ -96,29 +98,30 @@ $(document).ready(function(){
 getVendors("vendor");
 getUnits("unit");
 
+
 });
 
 
 	function add() {
 		//var requisitionId =  "";
-		var orderId ="";
-		var row = $('#flex1 tbody tr').has("input[name='order_id']:checked")
+		var grpoId ="";
+		var row = $('#flex1 tbody tr').has("input[name='grpo_id']:checked")
 		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
-		orderId = $(row).find("input[name='order_id']:checked").val();
-		if(orderId !=undefined && orderId !=null && orderId !=''){
-			populatePurchaseOrderViewPopup(orderId);
+		grpoId = $(row).find("input[name='grpo_id']:checked").val();
+		if(grpoId !=undefined && grpoId !=null && grpoId !=''){
+			populateGRPOApprovalPopup(grpoId);
 		}
 		
 
 	}
 
-	function populatePurchaseOrderViewPopup(orderId) {
+	function populateGRPOApprovalPopup(grpoId) {
 
 		var jsonRecord = {};
 		
-		url = 'getPurchaseOrderById';
+		url = 'getGRPOById';
 		
-		jsonRecord.id = orderId;
+		jsonRecord.id = grpoId;
 		
 		$.ajax({
 			url : url,
@@ -132,29 +135,34 @@ getUnits("unit");
 					var itemCode = data.itemCode;
 					var warehouse = data.warehouse;
 					
-						$("#item").val(itemCode.codeId);
-						$("#item1").val(itemCode.codeDesc);
-						$("#qty").val(data.orderQty);
-						$("#dueDate").val(myDateFormatter(data.dueDate));
-						$("#firm1").val(data.firm.firmName);
-						$("#firm").val(data.firm.firmId);
-						$("#unit").val(data.unit.unitId)
-						$("#marking_id").val(data.markingId)
-						$("#orderNo").val(data.purchaseOrderNo); 
-						$("#orderId").val(data.orderId); 
-						$("#vendor").val(data.vendor.vendorId); 
-						$("#rate").val(data.rate); 
-						$("#orderRemarks").val(data.remarks); 
-						$("#approval_comments").val(data.approvalComments); 
-						$("#approvalStatus").val(data.approvalStatus); 
-						$('#modal-add-req').modal({
-							keyboard : true
-						});
-						$('#modal-add-req').modal("show");
+					$("#item").val(itemCode.codeId);
+					$("#item1").val(itemCode.codeDesc);
+					$("#qty").val(data.orderId.orderQty);
+					$("#inward_qty").val(data.inwardQty);
+					$("#billAmount").val(data.billAmount);
+					$("#dueDate").val(myDateFormatter(data.orderId.dueDate));
+					$("#inward_date").val(myDateFormatter(data.inwardDate));
+					$("#firm1").val(data.orderId.firm.firmName);
+					$("#firm").val(data.orderId.firm.firmId);
+					$("#unit").val(data.unit.unitId)
+					$("#unit1").val(data.unit.unitName)
+					$("#unitx").val(data.unit.unitName)
+					$("#marking_id").val(data.markingId)
+					$("#orderNo").val(data.orderId.purchaseOrderNo); 
+					$("#orderId").val(data.orderId);
+					$("#grpoId").val(data.grpoId);
+					$("#vendor").val(data.orderId.vendor.vendorId); 
+					$("#rate").val(data.orderId.rate); 
+					$("#orderRemarks").val(data.orderId.remarks); 
+					$("#inwardRemarks").val(data.inwardComments);
+					$('#modal-add-req').modal({
+						keyboard : true
+					});
+					$('#modal-add-req').modal("show");
 				}
 			},
 			error : function(data) {
-				BootstrapDialog.alert('Error Pulling Procurement Marking Details' + data);
+				BootstrapDialog.alert('Error Pulling GRPO Pending Approval Details' + data);
 				return;
 			}
 
@@ -202,49 +210,49 @@ getUnits("unit");
 	}
 	function open() {
 		//var requisitionId =  "";
-		var orderId ="";
-		var row = $('#flex2 tbody tr').has("input[name='order_id']:checked")
+		var grpoId ="";
+		var row = $('#flex2 tbody tr').has("input[name='grpo_id']:checked")
 		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
-		orderId = $(row).find("input[name='order_id']:checked").val();
-		if(orderId !=undefined && orderId !=null && orderId !=''){
-			populatePurchaseOrderViewPopup(orderId);
+		grpoId = $(row).find("input[name='grpo_id']:checked").val();
+		if(grpoId !=undefined && grpoId !=null && grpoId !=''){
+			populateGRPOApprovalViewPopup(grpoId);
 		}
 	}
 
-	function savePurchaseOrderApproval() {
+	function saveGRPOApproval() {
 		$('.close').click();
 		$.ajax({
-			url : 'savePurchaseOrderApproval',
+			url : 'saveGRPOApproval',
 			type : "POST",
-			data : $("#orderForm").serialize(),
+			data : $("#GrpoApprovalForm").serialize(),
 			asynch : true,
 			success : function(data) {
-				BootstrapDialog.alert('Purchase order approval saved successfully.');
+				BootstrapDialog.alert('GRPO approval saved successfully.');
 				$('#flex1').flexOptions({
-					url : "getPurchaseOrderList",
+					url : "getGRPOList",
 					newp : 1
 				}).flexReload();
 				$('#flex2').flexOptions({
-					url : "getPurchaseOrderListApprovalCompleted",
+					url : "getGRPOListApprovalCompleted",
 					newp : 1
 				}).flexReload();
 				return;
 			},
 			error : function(data) {
-				BootstrapDialog.alert('Error Saving purchase order approval.');
+				BootstrapDialog.alert('Error Saving GRPO approval.');
 				return;
 			}
 		});
 
 	}
 
-	function populatePurchaseOrderCreatePopup(procId) {
+	function populateGRPOApprovalViewPopup(grpoId) {
 
 		var jsonRecord = {};
 		
-		url = 'getProcurementMarkingById';
+		url = 'getGRPOById';
 		
-		jsonRecord.id = procId;
+		jsonRecord.id = grpoId;
 		
 		$.ajax({
 			url : url,
@@ -258,18 +266,28 @@ getUnits("unit");
 					var itemCode = data.itemCode;
 					var warehouse = data.warehouse;
 					
-						$("#item").val(itemCode.codeId);
-						$("#item1").val(itemCode.codeDesc);
-						$("#qty").val(data.procurementQty);
-						$("#dueDate").val('');
-						$("#firm").val(warehouse.firmId);
-						getFirmById('firm1',warehouse.firmId);
-						getFirmWarehouses('warehouse',warehouse.firmId,warehouse.wareId) 
-						$("#warehouse").val(warehouse.wareId);
-						//getUnits('unit');
-						$("#unit").val(data.unit.unitId)
-						$("#marking_id").val(data.markingId)
-						generateOrderNo("orderNo",$("#firm").val()); 
+					$("#item").val(itemCode.codeId);
+					$("#item1").val(itemCode.codeDesc);
+					$("#qty").val(data.orderId.orderQty);
+					$("#inward_qty").val(data.inwardQty);
+					$("#billAmount").val(data.billAmount);
+					$("#dueDate").val(myDateFormatter(data.orderId.dueDate));
+					$("#inward_date").val(myDateFormatter(data.inwardDate));
+					$("#firm1").val(data.orderId.firm.firmName);
+					$("#firm").val(data.orderId.firm.firmId);
+					$("#unit").val(data.unit.unitId)
+					$("#unit1").val(data.unit.unitName)
+					$("#unitx").val(data.unit.unitName)
+					$("#marking_id").val(data.markingId)
+					$("#orderNo").val(data.orderId.purchaseOrderNo); 
+					$("#orderId").val(data.orderId);
+					$("#grpoId").val(data.grpoId);
+					$("#vendor").val(data.orderId.vendor.vendorId); 
+					$("#rate").val(data.orderId.rate); 
+					$("#orderRemarks").val(data.orderId.remarks); 
+					$("#inwardRemarks").val(data.inwardComments);
+					$("#approvalStatus").val(data.approvalStatus);
+					$("#approval_comments").val(data.approvalComments);
 						$('#modal-add-req').modal({
 							keyboard : true
 						});
@@ -277,7 +295,7 @@ getUnits("unit");
 				}
 			},
 			error : function(data) {
-				BootstrapDialog.alert('Error Pulling Purchase Order Details' + data);
+				BootstrapDialog.alert('Error Pulling GRPO Approval Details' + data);
 				return;
 			}
 
@@ -390,7 +408,7 @@ getUnits("unit");
 
 
 
-<%@ include file="include/purchase_order_form_approval.jsp" %>
+<%@ include file="include/grpo_form_approval.jsp" %>
 <script>
 $(document).ready(function() {
      $('#dateRangePicker')

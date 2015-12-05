@@ -44,7 +44,7 @@
 							<option value="" selected disabled>Select Supplier </option> 
 						</select>
 					</div>
-					<div class=" form-group"">
+					<div class=" form-group">
 
 						<label for="qty">Order Qty</label>
 						<div class="row">
@@ -57,7 +57,7 @@
 							</div>
 						</div>
 					</div>
-					<div class=" form-group"">
+					<div class=" form-group">
 
 						<label for="qty">Inward Qty</label>
 						<div class="row">
@@ -100,7 +100,7 @@
 				    </div>
 					<div class="form-group" >
 						<label for="orderRemarks" style="vertical-align: top">Inward Remarks</label> 
-						<textarea id="orderRemarks"  name="inwardComments"class="formControl"  style="width: 100%; height:50px;" ></textarea>
+						<textarea id="inwardRemarks"  name="inwardComments"class="formControl"  style="width: 100%; height:50px;" ></textarea>
 					</div>
 				
 				</div><!-- end of form body -->

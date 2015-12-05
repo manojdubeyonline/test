@@ -62,7 +62,7 @@ public class User implements Serializable {
 	private String userPassword;
 	
 	@ManyToMany(cascade = {CascadeType.ALL})
-    @JoinTable(name="USER_FIRMS", 
+    @JoinTable(name="user_firms", 
                 joinColumns={@JoinColumn(name="user_id")}, 
                 inverseJoinColumns={@JoinColumn(name="firm_id")})
     private Set<Firm> userFirms = new HashSet<Firm>();

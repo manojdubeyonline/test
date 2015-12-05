@@ -14,7 +14,8 @@
 					<div class="form-group">
 						<label for="item">Item</label> <input type="hidden" id="item"
 							name="item"><input type="text" class="form-control"
-							id="item1" name="item1" readonly="readonly">
+							id="item1" name="item1" readonly="readonly"><input type="hidden" 
+							id="marking_id" name="marking_id" >
 					</div>
 
 					<div class="form-group">

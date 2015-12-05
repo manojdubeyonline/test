@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.railtech.po.entity.FlexiBean;
 import com.railtech.po.entity.GRPO;
+
 import com.railtech.po.service.GRPOService;
 import com.railtech.po.service.MasterInfoService;
 @Repository(value = "GRPOServiceImpl")
@@ -32,9 +33,9 @@ public class GRPOServiceImpl implements GRPOService {
 	
 	@Override
 	public GRPO getGRPOById(Integer grpoId) {
-		logger.info("entering getGRPOById. Param orderId:"+grpoId);
+		logger.info("entering getGRPOById. Param grpoId:"+grpoId);
 		Session session = sessionFactory.getCurrentSession();
-		Query query  = session.createQuery("from GRPO GRPO where GRPO.grpoId=:grpoId").setInteger("orderId", grpoId);
+		Query query  = session.createQuery("from GRPO GRPO where GRPO.grpoId=:grpoId").setInteger("grpoId", grpoId);
 		GRPO grpo = (GRPO) query.uniqueResult();
 		logger.info("exiting getGRPOById. Return val:"+grpo);
 		return grpo;
@@ -64,6 +65,16 @@ public class GRPOServiceImpl implements GRPOService {
 		
 		logger.info("exiting getGRPOList");
 		return grpos;
+	}
+	
+	@Override
+	@Transactional
+	public void delete(GRPO grpo) {
+		Session session = sessionFactory.getCurrentSession();
+		session.delete(grpo);
+		session.flush();
+		session.clear();
+
 	}
 
 }

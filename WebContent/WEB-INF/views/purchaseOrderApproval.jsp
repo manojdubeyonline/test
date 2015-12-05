@@ -24,6 +24,7 @@ $(document).ready(function(){
 				{display: 'Due Date', name : '', width:100, sortable : true, align: 'left'},
 				{display: 'Order Type', name : '', width:100, sortable : true, align: 'left'},
 				
+				
 					],
 		  buttons : [
 					{separator: true},
@@ -65,6 +66,7 @@ $(document).ready(function(){
 				{display: 'Order Type', name : '', width:70, sortable : true, align: 'left'},
 				{display: 'Approval Status', name : '', width:70, sortable : true, align: 'left'},
 				{display: 'Approval Date', name : '', width:70, sortable : true, align: 'left'},
+				
 					],
 		  buttons : [
 					{separator: true},
@@ -106,13 +108,13 @@ getUnits("unit");
 		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
 		orderId = $(row).find("input[name='order_id']:checked").val();
 		if(orderId !=undefined && orderId !=null && orderId !=''){
-			populatePurchaseOrderViewPopup(orderId);
+			populatePurchaseOrderApprovalPopup(orderId);
 		}
 		
 
 	}
 
-	function populatePurchaseOrderViewPopup(orderId) {
+	function populatePurchaseOrderApprovalPopup(orderId) {
 
 		var jsonRecord = {};
 		
@@ -145,8 +147,7 @@ getUnits("unit");
 						$("#vendor").val(data.vendor.vendorId); 
 						$("#rate").val(data.rate); 
 						$("#orderRemarks").val(data.remarks); 
-						$("#approval_comments").val(data.approvalComments); 
-						$("#approvalStatus").val(data.approvalStatus); 
+						
 						$('#modal-add-req').modal({
 							keyboard : true
 						});
@@ -154,7 +155,7 @@ getUnits("unit");
 				}
 			},
 			error : function(data) {
-				BootstrapDialog.alert('Error Pulling Procurement Marking Details' + data);
+				BootstrapDialog.alert('Error Purchase Order Approval Details' + data);
 				return;
 			}
 
@@ -209,6 +210,55 @@ getUnits("unit");
 		if(orderId !=undefined && orderId !=null && orderId !=''){
 			populatePurchaseOrderViewPopup(orderId);
 		}
+	}
+	
+	function populatePurchaseOrderViewPopup(orderId) {
+
+		var jsonRecord = {};
+		
+		url = 'getPurchaseOrderById';
+		
+		jsonRecord.id = orderId;
+		
+		$.ajax({
+			url : url,
+			type : 'POST',
+			data : JSON.stringify(jsonRecord),
+			contentType : 'application/json',
+			dataType : 'json',
+			success : function(data) {
+				if(data!=null){
+					
+					var itemCode = data.itemCode;
+					var warehouse = data.warehouse;
+					
+						$("#item").val(itemCode.codeId);
+						$("#item1").val(itemCode.codeDesc);
+						$("#qty").val(data.orderQty);
+						$("#dueDate").val(myDateFormatter(data.dueDate));
+						$("#firm1").val(data.firm.firmName);
+						$("#firm").val(data.firm.firmId);
+						$("#unit").val(data.unit.unitId)
+						$("#marking_id").val(data.markingId)
+						$("#orderNo").val(data.purchaseOrderNo); 
+						$("#orderId").val(data.orderId); 
+						$("#vendor").val(data.vendor.vendorId); 
+						$("#rate").val(data.rate); 
+						$("#orderRemarks").val(data.remarks); 
+						$("#approval_comments").val(data.approvalComments); 
+						$("#approvalStatus").val(data.approvalStatus); 
+						$('#modal-add-req').modal({
+							keyboard : true
+						});
+						$('#modal-add-req').modal("show");
+				}
+			},
+			error : function(data) {
+				BootstrapDialog.alert('Error Purchase Order Approval Details' + data);
+				return;
+			}
+
+		});
 	}
 
 	function savePurchaseOrderApproval() {

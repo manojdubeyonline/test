@@ -142,7 +142,8 @@ addRow();
 						$("#firm").val(data.requestedForFirm.firmId);
 						getFirmWarehouses('warehouse', data.requestedForFirm.firmId,data.requestedAtWareHouse.wareId) 
 						$("#warehouse").val(data.requestedAtWareHouse.wareId);
-
+						
+                         
 						$("#requisitionRefNo").attr('disabled', 'disabled');
 						$("#warehouse").attr('disabled', 'disabled');
 						$("#user").attr('disabled', 'disabled');
@@ -191,7 +192,7 @@ addRow();
 							+" 	class=\"form-control\" value=\""+data.requisitionItems[r].itemCode.codeDesc+" \"/></td>"
 							+ " <td><input type=\"hidden\" placeholder=\"availableQty\""
 							+" 	name=\"availableQty"+count+"\" id=\"availableQty"+count+"\""
-							+" 	class=\"form-control\" /><span id=\"availableQtyId"+count+"\"></span></td>"
+							+" 	class=\"form-control\"  /><span id=\"availableQtyId"+count+"\"></span></td>"
 									+ " <td><input type=\"text\" class=\"form-control\""
 							+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\" value=\""+data.requisitionItems[r].qty+"\"></td>"
 									+ " <td><select class=\"form-control\" id=\"unit"+count+"\""
@@ -284,7 +285,7 @@ addRow();
 			contentType : 'application/json',
 			success : function(data) {
 				if (data != null) {
-					$(field).html(data);
+					$(field).html(data.availableQty);
 				}
 			},
 			error : function(data) {
@@ -346,11 +347,12 @@ addRow();
 				+ " </select> "
 
 				+ " </td>"
-
+				
 		newRow.innerHTML = content;
 		$(newRow).attr("id", "reqItemTableRow" + count);
 		getUnits('unit' + count);
 		$("#rowhid").val(++count);
+		
 	}
 	function removeRow(count) {
 		$("#reqItemTableRow" + count).remove();

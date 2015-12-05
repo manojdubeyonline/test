@@ -1,21 +1,22 @@
 <div class="modal fade" id="modal-add-req" role="dialog"
 	aria-hidden="true">
-	<form role="form" id="orderForm" name="orderForm" method="post">
+	<form role="form" id="GrpoApprovalForm" name="GrpoApprovalForm" method="post">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header modal-header-success'">
 					<button type="button" class="close" data-dismiss="modal"
 						aria-hidden="true">×</button>
-					<h5 class='modal-title'>Purchase Order Form</h5>
+					<h5 class='modal-title'>GRPO Approval Form</h5>
 				</div>
 				<div class="modal-body">
 					<div class="form-group  form-group-sm">
 						<label for="item">Purchase Order Number</label> <input type="text" class="form-control"
 							id="orderNo" name="orderNo" readonly="readonly"><input type="hidden" 
 							id="orderId" name="orderId" ><input type="hidden" 
+							id="grpoId" name="grpoId" ><input type="hidden" 
 							id="orderType" name="orderType"  value="PurchaseOrder"><input type="hidden" 
 							id="marking_id" name="marking_id" >
-					</div>
+					</div> 
 
 					<div class="form-group  form-group-sm">
 						<label for="item">Item</label> <input type="hidden" id="item"
@@ -34,7 +35,7 @@
 							
 					</div>
 
-					<div class=" form-group"">
+					<div class=" form-group">
 
 						<label for="qty">Qty</label>
 						<div class="row">
@@ -64,7 +65,7 @@
 				        <div class="date">
 				            <div class="input-group input-append date" id="dateRangePicker">
 				               <input type="text" class="form-control" name="dueDate"
-							id="dueDate" placeholder="Due Date (dd/mm/yyyy)" / disabled>
+							id="dueDate" placeholder="Due Date (dd/mm/yyyy)"  disabled>
 				                <span class="input-group-addon add-on"><span class="glyphicon glyphicon-calendar"></span></span>
 				            </div>
 				        </div>
@@ -84,8 +85,8 @@
 					</div>
 						
 					<div class="form-group  form-group-sm" >
-						<label for="orderRemarks" style="vertical-align: top">Approval Remarks</label> 
-						<textarea id="orderRemarks"  name="approval_comments"class="formControl"  style="width: 100%; height:50px;"></textarea>
+						<label for="approval_comments" style="vertical-align: top">Approval Remarks</label> 
+						<textarea id="approval_comments"  name="approval_comments"class="formControl"  style="width: 100%; height:50px;"></textarea>
 					</div>
 					
 				</div>
@@ -95,7 +96,7 @@
 					<div class="form-group  form-group-sm">
 
 						<button type="button" class="btn btn-success" id="addReqSave"
-							onClick="savePurchaseOrderApproval()">
+							onClick="saveGRPOApproval()">
 							<span class="glyphicon glyphicon-floppy-save"></span>
 						</button>
 

@@ -34,7 +34,7 @@
 							
 					</div>
 
-					<div class=" form-group"">
+					<div class=" form-group">
 
 						<label for="qty">Qty</label>
 						<div class="row">
@@ -64,7 +64,7 @@
 				        <div class="date">
 				            <div class="input-group input-append date" id="dateRangePicker">
 				               <input type="text" class="form-control" name="dueDate"
-							id="dueDate" placeholder="Due Date (dd/mm/yyyy)" / disabled>
+							id="dueDate" placeholder="Due Date (dd/mm/yyyy)"  disabled>
 				                <span class="input-group-addon add-on"><span class="glyphicon glyphicon-calendar"></span></span>
 				            </div>
 				        </div>
@@ -75,6 +75,7 @@
 						<textarea id="orderRemarks"  name="orderRemarks"class="formControl"  style="width: 100%; height:50px;" disabled></textarea>
 					</div>
 					
+					
 					<div class="form-group  form-group-sm">
 						<label for="item">Approval</label> <select
 							class="form-control" id="approvalStatus" name="approvalStatus">
@@ -83,10 +84,9 @@
 						</select>
 					</div>
 						
-					<div class="form-group  form-group-sm" >
-						<label for="orderRemarks" style="vertical-align: top">Approval Remarks</label> 
-						<textarea id="orderRemarks"  name="approval_comments"class="formControl"  style="width: 100%; height:50px;"></textarea>
-					</div>
+					
+					
+					
 					
 				</div>
 

@@ -34,7 +34,7 @@
 							
 					</div>
 
-					<div class=" form-group"">
+					<div class=" form-group">
 
 						<label for="qty">Qty</label>
 						<div class="row">
@@ -74,6 +74,8 @@
 						<label for="orderRemarks" style="vertical-align: top">Order Remarks</label> 
 						<textarea id="orderRemarks"  name="orderRemarks"class="formControl"  style="width: 100%; height:50px;"></textarea>
 					</div>
+					
+					
 					
 				</div>
 

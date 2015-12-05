@@ -24,7 +24,7 @@ $(document).ready(function(){
 				],
 	  buttons : [
 				{separator: true},
-			 	{name: ' Mark ', bclass: 'glyphicon glyphicon-tag', onpress : open},
+			 	{name: ' Mark ', bclass: 'glyphicon glyphicon-tag', onpress : add},
 	            {separator: true}
       ],
       searchitems : [
@@ -63,7 +63,7 @@ $(document).ready(function(){
 					],
 		  buttons : [
 					{separator: true},
-				 	{name: ' Mark ', bclass: 'glyphicon glyphicon-tag', onpress : open},
+				 	{name: ' Edit ', bclass: 'glyphicon glyphicon-pencil', onpress : open},
 		            {separator: true}
 	      ],
 	      searchitems : [
@@ -97,7 +97,7 @@ getWarehouses("warehouse");
 });
 
 
-	function open() {
+	function add() {
 		//var requisitionId =  "";
 		var procurementItemId ="";
 		var row = $('#flex1 tbody tr').has("input[name='procurement_item_id']:checked")
@@ -110,7 +110,70 @@ getWarehouses("warehouse");
 
 	}
 
-	function add() {
+	
+	function open() {
+		//var requisitionId =  "";
+		var procurementItemId ="";
+		var row = $('#flex2 tbody tr').has("input[name='marking_id']:checked")
+		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
+		procurementItemId = $(row).find("input[name='marking_id']:checked").val();
+		if(procurementItemId !=''){
+			populateProcurementViewPopup(procurementItemId);
+		}
+		
+
+	}
+	
+	
+	function populateProcurementViewPopup(procId) {
+
+		var jsonRecord = {};
+		
+		url = 'getProcurementMarkingById';
+		
+		jsonRecord.id = procId;
+		
+		$.ajax({
+			url : url,
+			type : 'POST',
+			data : JSON.stringify(jsonRecord),
+			contentType : 'application/json',
+			dataType : 'json',
+			success : function(data) {
+				if(data!=null){
+					
+					var itemCode = data.itemCode;
+					var warehouse = data.warehouse;
+					
+						$("#item").val(itemCode.codeId);
+						$("#item1").val(itemCode.codeDesc);
+						$("#qty").val(data.procurementQty);
+						$("#dueDate").val(myDateFormatter(data.dueDate));
+						$("#firm").val(warehouse.firmId);
+						getFirmById('firm1',warehouse.firmId);
+						getFirmWarehouses('warehouse',warehouse.firmId,warehouse.wareId) 
+						$("#warehouse").val(warehouse.wareId);
+						//getUnits('unit');
+						$("#unit").val(data.unit.unitId)
+						$("#marking_id").val(data.markingId)
+						$("#procurementType").val(data.procurementType)
+						generateOrderNo("orderNo",$("#firm").val()); 
+						$('#modal-add-req').modal({
+							keyboard : true
+						});
+						$('#modal-add-req').modal("show");
+				}
+			},
+			error : function(data) {
+				BootstrapDialog.alert('Error Pulling Purchase Order Details' + data);
+				return;
+			}
+
+		});
+	}
+	
+	
+	function add1() {
 		$('#modal-add-req').modal({
 			keyboard : true
 			
@@ -144,7 +207,7 @@ getWarehouses("warehouse");
 			success : function(data) {
 				BootstrapDialog.alert('procurement marking saved successfully.');
 				$('#flex1').flexOptions({
-					url : "getPendingStockIssue",
+					url : "getPendingProcurementMarkingList",
 					newp : 1
 				}).flexReload();
 				return;

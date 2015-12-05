@@ -60,6 +60,7 @@ $(document).ready(function(){
 				{display: 'Due Date', name : '', width:100, sortable : true, align: 'left'},
 				{display: 'Order Type', name : '', width:100, sortable : true, align: 'left'},
 				
+				
 					],
 		  buttons : [
 					{separator: true},
@@ -143,6 +144,7 @@ getUnits("unit");
 						$("#vendor").val(data.vendor.vendorId); 
 						$("#rate").val(data.rate); 
 						$("#orderRemarks").val(data.remarks); 
+						$("#newRemarks").val(data.newRemarks);
 						$('#modal-add-req').modal({
 							keyboard : true
 						});
@@ -158,14 +160,14 @@ getUnits("unit");
 	}
 
 	function remove() {
-		var recordId = $("input[name='requisitionId']:checked").val();
+		var recordId = $("input[name='order_id']:checked").val();
 		BootstrapDialog.confirm('Are you sure you want to delete?', function(result){
             if(result) {
             	var modelRequest = {};
         		modelRequest.id = recordId
         		
         		$.ajax({
-        			url : 'deleteRequisition',
+        			url : 'deletePurchaseOrder',
         			type : 'POST',
         			dataType : 'JSON',
         			data : JSON.stringify(modelRequest),
@@ -173,9 +175,9 @@ getUnits("unit");
 
         			success : function(data) {
         				BootstrapDialog
-						.alert('Requisition successfully deleted');
-        				$('#flex1').flexOptions({
-        					url : "getRequisitions",
+						.alert('Purchase order successfully deleted');
+        				$('#flex2').flexOptions({
+        					url : "getPurchaseOrderList",
         					newp : 1
         				}).flexReload();
         			},
@@ -183,9 +185,9 @@ getUnits("unit");
         				//BootstrapDialog
         						//.alert('Error unable to delete the requisition');
         				BootstrapDialog
-						.alert('Requisition successfully deleted');
-        				$('#flex1').flexOptions({
-        					url : "getRequisitions",
+						.alert('Purchase order successfully deleted');
+        				$('#flex2').flexOptions({
+        					url : "getPurchaseOrderList",
         					newp : 1
         				}).flexReload();
         			}
@@ -334,7 +336,7 @@ getUnits("unit");
 				}
 			},
 			error : function(data) {
-				BootstrapDialog.alert('Error Unable to pull the Item Stock');
+				BootstrapDialog.alert('Error Unable to pull the Purchase Order');
 			}
 		});
 

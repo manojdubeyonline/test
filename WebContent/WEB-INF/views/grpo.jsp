@@ -8,7 +8,7 @@ $(document).ready(function(){
 		
 		
 		$('#flex1').flexigrid({
-			url:'getPendingGRPOList',
+			url:'getPurchaseOrderListApprovalCompleted',
 			method: 'POST',
 			dataType : 'json',
 		  
@@ -25,7 +25,7 @@ $(document).ready(function(){
 					],
 		  buttons : [
 					{separator: true},
-				 	{name: ' Approval', bclass: 'glyphicon glyphicon-pencil', onpress : add},
+				 	{name: ' Create', bclass: 'glyphicon glyphicon-plus', onpress : add},
 		            {separator: true},
 				 	
 	      ],
@@ -56,8 +56,8 @@ $(document).ready(function(){
 		       	{display: '', name : '', width:w*0.035, sortable : false, align: 'center'},
 				{display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
 				{display: 'Purchase Order No', name : '', width:150, sortable : true, align: 'center'},
-				{display: 'Marking No', name : '', width:150, sortable : true, align: 'center'},
-				{display: 'Firm', name : '', width:150, sortable : true, align: 'left'},
+				
+				{display: 'Firm', name : '', width:150, sortable : true, align: 'center'},
 				{display: 'Item', name : '', width:300, sortable : true, align: 'left'},
 				{display: 'Qty', name : '', width:100, sortable : true, align: 'left'},
 				{display: 'Inward Date', name : '', width:100, sortable : true, align: 'left'},
@@ -107,25 +107,14 @@ getVendors("vendor");
 		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
 		orderId = $(row).find("input[name='order_id']:checked").val();
 		if(orderId !=undefined && orderId !=null && orderId !=''){
-			populatePurchaseOrderViewPopup(orderId);
+			populateGRPOCreatePopup(orderId);
 		}
 		
 
 	}
 
-	function open() {
-		//var requisitionId =  "";
-		var orderId ="";
-		var row = $('#flex2 tbody tr').has("input[name='order_id']:checked")
-		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
-		orderId = $(row).find("input[name='order_id']:checked").val();
-		if(orderId !=undefined && orderId !=null && orderId !=''){
-			populatePurchaseOrderViewPopup(orderId);
-		}
-		
-
-	}
-	function populatePurchaseOrderViewPopup(orderId) {
+	
+	function populateGRPOCreatePopup(orderId) {
 
 		var jsonRecord = {};
 		
@@ -169,22 +158,92 @@ getVendors("vendor");
 				}
 			},
 			error : function(data) {
-				BootstrapDialog.alert('Error Pulling Procurement Marking Details' + data);
+				BootstrapDialog.alert('Error Pulling GRPO Details' + data);
 				return;
 			}
 
 		});
 	}
 
+	
+	function open() {
+		//var requisitionId =  "";
+		var grpoId ="";
+		var row = $('#flex2 tbody tr').has("input[name='grpo_id']:checked")
+		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
+		grpoId = $(row).find("input[name='grpo_id']:checked").val();
+		if(grpoId !=undefined && grpoId !=null && grpoId !=''){
+			populateGRPOViewPopup(grpoId);
+		}
+		
+
+	}
+	
+	
+	function populateGRPOViewPopup(grpoId) {
+
+		var jsonRecord = {};
+		
+		url = 'getGRPOById';
+		
+		jsonRecord.id = grpoId;
+		
+		$.ajax({
+			url : url,
+			type : 'POST',
+			data : JSON.stringify(jsonRecord),
+			contentType : 'application/json',
+			dataType : 'json',
+			success : function(data) {
+				if(data!=null){
+					
+					var itemCode = data.itemCode;
+					var warehouse = data.warehouse;
+					
+						$("#item").val(itemCode.codeId);
+						$("#item1").val(itemCode.codeDesc);
+						$("#qty").val(data.orderId.orderQty);
+						$("#inward_qty").val(data.inwardQty);
+						$("#grpoId").val(data.grpoId);
+						$("#billAmount").val(data.billAmount);
+						$("#dueDate").val(myDateFormatter(data.orderId.dueDate));
+						$("#inward_date").val(myDateFormatter(data.inwardDate));
+						$("#firm1").val(data.orderId.firm.firmName);
+						$("#firm").val(data.orderId.firm.firmId);
+						$("#unit").val(data.unit.unitId)
+						$("#unit1").val(data.unit.unitName)
+						$("#unitx").val(data.unit.unitName)
+						$("#marking_id").val(data.orderId.markingId)
+						$("#orderNo").val(data.orderId.purchaseOrderNo); 
+						$("#orderId").val(data.orderId.orderId); 
+						$("#vendor").val(data.orderId.vendor.vendorId); 
+						$("#rate").val(data.orderId.rate); 
+						$("#orderRemarks").val(data.orderId.remarks); 
+						$("#inwardRemarks").val(data.inwardComments);
+						$('#modal-add-req').modal({
+							keyboard : true
+						});
+						$('#modal-add-req').modal("show");
+				}
+			},
+			error : function(data) {
+				BootstrapDialog.alert('Error Pulling Procurement Marking Details' + data);
+				return;
+			}
+
+		});
+	}
+	
+	
 	function remove() {
-		var recordId = $("input[name='requisitionId']:checked").val();
+		var grpoId = $("input[name='grpo_id']:checked").val();
 		BootstrapDialog.confirm('Are you sure you want to delete?', function(result){
             if(result) {
             	var modelRequest = {};
-        		modelRequest.id = recordId
+        		modelRequest.id = grpoId
         		
         		$.ajax({
-        			url : 'deleteRequisition',
+        			url : 'deleteGRPO',
         			type : 'POST',
         			dataType : 'JSON',
         			data : JSON.stringify(modelRequest),
@@ -192,9 +251,9 @@ getVendors("vendor");
 
         			success : function(data) {
         				BootstrapDialog
-						.alert('Requisition successfully deleted');
-        				$('#flex1').flexOptions({
-        					url : "getRequisitions",
+						.alert('GRPO successfully deleted');
+        				$('#flex2').flexOptions({
+        					url : "getGRPOList",
         					newp : 1
         				}).flexReload();
         			},
@@ -202,9 +261,9 @@ getVendors("vendor");
         				//BootstrapDialog
         						//.alert('Error unable to delete the requisition');
         				BootstrapDialog
-						.alert('Requisition successfully deleted');
-        				$('#flex1').flexOptions({
-        					url : "getRequisitions",
+						.alert('GRPO successfully deleted');
+        				$('#flex2').flexOptions({
+        					url : "getGRPOList",
         					newp : 1
         				}).flexReload();
         			}
@@ -226,7 +285,7 @@ getVendors("vendor");
 			success : function(data) {
 				BootstrapDialog.alert('GRPO saved successfully.');
 				$('#flex1').flexOptions({
-					url : "getPendingGRPOList",
+					url : "getPurchaseOrderListApprovalCompleted",
 					newp : 1
 				}).flexReload();
 				$('#flex2').flexOptions({
@@ -236,7 +295,7 @@ getVendors("vendor");
 				return;
 			},
 			error : function(data) {
-				BootstrapDialog.alert('Error Saving purchase order.');
+				BootstrapDialog.alert('Error Saving GRPO.');
 				return;
 			}
 		});

@@ -29,6 +29,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.railtech.po.entity.Code;
 import com.railtech.po.entity.Firm;
 import com.railtech.po.entity.FlexiBean;
+import com.railtech.po.entity.ItemStock;
 import com.railtech.po.entity.ModelForm;
 import com.railtech.po.entity.Requisition;
 import com.railtech.po.entity.RequisitionItem;
@@ -65,6 +66,7 @@ public class RequisitionController {
 	{
 		return new ModelAndView("pendingStockIssue");
 	}
+	
 		
 	@RequestMapping(value = { "/getRequisitions" }, method = { RequestMethod.POST })
 	public void getRequisitionList(HttpServletRequest request, HttpServletResponse response) throws Exception
@@ -140,6 +142,9 @@ public class RequisitionController {
 		}
 		Util.doWriteFlexi(request, response, strMap, params);
 	}
+	
+	
+	
 	
 	
 	@RequestMapping(value = { "/saveRequisition" }, method = { RequestMethod.POST })
@@ -278,6 +283,18 @@ public class RequisitionController {
 		String reqRefNo = requisitionService.generateRequisitionRefNo(firmId, storeId);
 		
 		return reqRefNo;
+		
+	}
+	
+	@RequestMapping(value = { "/getItemStock" }, method = { RequestMethod.POST })
+	public  @ResponseBody ItemStock getItemStock(@RequestBody ModelForm modelRequest)
+	{
+		String  itemCode = modelRequest.getId();
+		String warehouseId = modelRequest.getId2();
+		
+		ItemStock itemStock = requisitionService.getItemStock(itemCode, warehouseId);
+		
+		return itemStock;
 		
 	}
 	

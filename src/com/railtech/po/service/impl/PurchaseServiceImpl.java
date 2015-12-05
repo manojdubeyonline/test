@@ -88,6 +88,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 						+ order.getFirm().getFirmCode()
 								 + "/" + (Integer.parseInt(refCounter)+1) + "/"
 						+ yyyy;
+				
 			}
 		}else{
 			logger.debug("purchase:" + order);
@@ -117,5 +118,17 @@ public class PurchaseServiceImpl implements PurchaseService {
 		logger.info("exiting getOrderList");
 		return orders;
 	}
+	
+	
+	@Override
+	@Transactional
+	public void delete(PurchaseOrder purchase) {
+		Session session = sessionFactory.getCurrentSession();
+		session.delete(purchase);
+		session.flush();
+		session.clear();
+
+	}
+
 
 }
