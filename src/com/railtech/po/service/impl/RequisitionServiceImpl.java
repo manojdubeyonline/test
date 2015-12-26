@@ -235,6 +235,7 @@ public class RequisitionServiceImpl implements RequisitionService {
 		Session session = sessionFactory.getCurrentSession();
 		session.saveOrUpdate(itemIssue);
 		logger.info("exiting saveItemIssue");
+		
 	}
 
 	@Override

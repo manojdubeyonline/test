@@ -36,10 +36,13 @@
 				<prop key="hibernate.format_sql">${hibernate.format.sql}</prop>
 				<prop key="hibernate.default_schema">${jdbc.schema}</prop>
 				<prop key="hibernate.transaction.auto_close_session">false</prop>
+			
+				
 			</props>
 		</property>
 		<property name="dataSource" ref="dataSource"/>
 		<property name="packagesToScan"  value="com.railtech.po.entity" />
+	
 	</bean>
 		<bean id="transactionManager"
 		class="org.springframework.orm.hibernate4.HibernateTransactionManager">

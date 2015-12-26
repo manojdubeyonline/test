@@ -281,5 +281,113 @@ public class PurchaseController {
 		logger.info("exiting getPurchaseOrderListApprovalCompleted");
 
 	}
+	
+	@RequestMapping(value = { "/getPurchaseOrder" }, method = { RequestMethod.POST })
+	public void getPurchaseOrder(HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		FlexiBean requestParams = new FlexiBean(request);
+		logger.info("entering getPurchaseOrder");
+		List<Procurement> procurementMarkings = procurementService.getProcurements(requestParams);
+
+		List<String> stockRow = null;
+		Map<String, List<String>> strMap = new LinkedHashMap<String, List<String>>();
+		if (!CollectionUtils.isEmpty(procurementMarkings)) {
+			int count = 0;
+			for (Procurement marking : procurementMarkings) {
+				if(marking.getProcurementType().equalsIgnoreCase("Purchase Order"))
+				{
+				stockRow = new LinkedList<String>();
+				
+				Code itemCode = marking.getItemCode();
+				Warehouse itemWareHouse = marking.getWarehouse();
+
+				stockRow.add("<input type='radio' name='marking_id' value='"
+						+ marking.getMarkingId()+ "'>");
+				stockRow.add(String.valueOf(++count));
+				stockRow.add(itemCode.getCodeDesc());
+				stockRow.add(itemWareHouse.getWarehouseName());
+				stockRow.add("" + marking.getProcurementQty() + " "+marking.getUnit().getUnitName());
+				stockRow.add("" + Util.getDateString(marking.getDueDate(), "dd/MM/yyyy"));
+				stockRow.add("" + marking.getProcurementType());
+				strMap.put(String.valueOf(count), stockRow);
+				}
+			}
+		}
+		Util.doWriteFlexi(request, response, strMap, requestParams);
+		logger.info("exiting getPurchaseOrder");
+
+	}
+	
+	@RequestMapping(value = { "/getLocalPurchaseOrder" }, method = { RequestMethod.POST })
+	public void getLocalPurchaseOrder(HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		FlexiBean requestParams = new FlexiBean(request);
+		logger.info("entering getLocalPurchaseOrder");
+		List<Procurement> procurementMarkings = procurementService.getProcurements(requestParams);
+
+		List<String> stockRow = null;
+		Map<String, List<String>> strMap = new LinkedHashMap<String, List<String>>();
+		if (!CollectionUtils.isEmpty(procurementMarkings)) {
+			int count = 0;
+			for (Procurement marking : procurementMarkings) {
+				if(marking.getProcurementType().equalsIgnoreCase("Local Purchase"))
+				{
+				stockRow = new LinkedList<String>();
+				
+				Code itemCode = marking.getItemCode();
+				Warehouse itemWareHouse = marking.getWarehouse();
+
+				stockRow.add("<input type='radio' name='marking_id' value='"
+						+ marking.getMarkingId()+ "'>");
+				stockRow.add(String.valueOf(++count));
+				stockRow.add(itemCode.getCodeDesc());
+				stockRow.add(itemWareHouse.getWarehouseName());
+				stockRow.add("" + marking.getProcurementQty() + " "+marking.getUnit().getUnitName());
+				stockRow.add("" + Util.getDateString(marking.getDueDate(), "dd/MM/yyyy"));
+				stockRow.add("" + marking.getProcurementType());
+				strMap.put(String.valueOf(count), stockRow);
+				}
+			}
+		}
+		Util.doWriteFlexi(request, response, strMap, requestParams);
+		logger.info("exiting getLocalPurchaseOrder");
+
+	}
+	
+	@RequestMapping(value = { "/getWarehouseBorrow" }, method = { RequestMethod.POST })
+	public void getWarehouseBorrow(HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		FlexiBean requestParams = new FlexiBean(request);
+		logger.info("entering getLocalPurchaseOrder");
+		List<Procurement> procurementMarkings = procurementService.getProcurements(requestParams);
+
+		List<String> stockRow = null;
+		Map<String, List<String>> strMap = new LinkedHashMap<String, List<String>>();
+		if (!CollectionUtils.isEmpty(procurementMarkings)) {
+			int count = 0;
+			for (Procurement marking : procurementMarkings) {
+				if(marking.getProcurementType().equalsIgnoreCase("Warehouse Borrowing"))
+				{
+				stockRow = new LinkedList<String>();
+				
+				Code itemCode = marking.getItemCode();
+				Warehouse itemWareHouse = marking.getWarehouse();
+
+				stockRow.add("<input type='radio' name='marking_id' value='"
+						+ marking.getMarkingId()+ "'>");
+				stockRow.add(String.valueOf(++count));
+				stockRow.add(itemCode.getCodeDesc());
+				stockRow.add(itemWareHouse.getWarehouseName());
+				stockRow.add("" + marking.getProcurementQty() + " "+marking.getUnit().getUnitName());
+				stockRow.add("" + Util.getDateString(marking.getDueDate(), "dd/MM/yyyy"));
+				stockRow.add("" + marking.getProcurementType());
+				strMap.put(String.valueOf(count), stockRow);
+				}
+			}
+		}
+		Util.doWriteFlexi(request, response, strMap, requestParams);
+		logger.info("exiting getLocalPurchaseOrder");
+
+	}
 
 }

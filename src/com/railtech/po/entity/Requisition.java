@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -28,8 +29,8 @@ public class Requisition implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
-	private Long requisitionId;
-	
+	private Long requisitionId;	
+
 	@Column(name="requisition_ref_no")
 	private String requisitionRefNo;
 
@@ -54,6 +55,9 @@ public class Requisition implements Serializable {
 
 	private Date requestedDate;
 	
+	
+	
+	
 	@ManyToOne
 	@JoinColumn(name="RequestedForFirm")
 	private Firm requestedForFirm;
@@ -77,6 +81,8 @@ public class Requisition implements Serializable {
 	public void setRequisitionId(Long requisitionId) {
 		this.requisitionId = requisitionId;
 	}
+	
+	
 
 	public String getApprovalComments() {
 		return this.approvalComments;

@@ -1,4 +1,25 @@
-<div class="modal fade" id="modal-add-req" role="dialog"
+<script>
+function validate(){
+	
+	var vendor = document.getElementById('vendor').value;
+	if(vendor == ''){
+		BootstrapDialog.alert('Please select vendor');
+		return false;
+	}
+	var rate = document.getElementById('rate').value;
+	if(rate == '') {
+		BootstrapDialog.alert('Please enter the rate');
+		return false;
+	}
+	var dateRange = document.getElementById('dueDate').value;
+	if(dateRange == '') {
+		BootstrapDialog.alert('Please select date');
+		return false;
+	}
+}
+	</script>
+	
+	<div class="modal fade" id="modal-add-req" role="dialog"
 	aria-hidden="true">
 	<form role="form" id="orderForm" name="orderForm" method="post">
 		<div class="modal-dialog">
@@ -13,7 +34,7 @@
 						<label for="item">Purchase Order Number</label> <input type="text" class="form-control"
 							id="orderNo" name="orderNo" readonly="readonly"><input type="hidden" 
 							id="orderId" name="orderId" ><input type="hidden" 
-							id="orderType" name="orderType"  value="PurchaseOrder"><input type="hidden" 
+							id="orderType" name="orderType"  ><input type="hidden" 
 							id="marking_id" name="marking_id" >
 					</div>
 
@@ -84,7 +105,7 @@
 					<div class="form-group">
 
 						<button type="button" class="btn btn-success" id="addReqSave"
-							onClick="savePurchaseOrder()">
+							onmouseenter="validate()" onClick="savePurchaseOrder()">
 							<span class="glyphicon glyphicon-floppy-save">Save Order</span>
 						</button>
 

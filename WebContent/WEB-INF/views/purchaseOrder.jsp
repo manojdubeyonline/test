@@ -7,7 +7,7 @@ $(document).ready(function(){
 		var w=1000;
 		
 		$('#flex1').flexigrid({
-			url:'getProcurementMarkingList',
+			url:'getPurchaseOrder',
 			method: 'POST', 
 			dataType : 'json',
 		  
@@ -43,8 +43,83 @@ $(document).ready(function(){
 			singleSelect: true
 		});
 
-			
 		$('#flex2').flexigrid({
+			url:'getLocalPurchaseOrder',
+			method: 'POST', 
+			dataType : 'json',
+		  
+		  colModel : [
+		       	{display: '', name : '', width:w*0.035, sortable : false, align: 'center'},
+				{display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
+				{display: 'Item', name : '', width:550, sortable : true, align: 'left'},
+				{display: 'Ware house', name : '', width:200, sortable : true, align: 'left'},
+				{display: 'Marked Qty', name : '', width:100, sortable : true, align: 'left'},
+				{display: 'Due Date', name : '', width:100, sortable : true, align: 'left'},
+				{display: 'Procurement Method', name : '', width:100, sortable : true, align: 'left'},
+				
+					],
+		  buttons : [
+					{separator: true},
+				 	{name: ' Create', bclass: 'glyphicon glyphicon-plus', onpress : addSecond},
+		            {separator: true}
+	      ],
+	      searchitems : [
+	                {display: 'Requisition Ref No', name : 'requisitionRefNo'},
+	             
+					
+	      ],
+			sortname: "code",
+			sortorder: "asc",
+			usepager: true,
+			//title: 'Pending Purchase Orders',
+			useRp: true,
+			rp: 20,
+			showTableToggleBtn: true,//toggle button for the whole table
+			resizable: false,
+			//width: w,
+			singleSelect: true
+		});
+
+
+		$('#flex3').flexigrid({
+			url:'getWarehouseBorrow',
+			method: 'POST', 
+			dataType : 'json',
+		  
+		  colModel : [
+		       	{display: '', name : '', width:w*0.035, sortable : false, align: 'center'},
+				{display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
+				{display: 'Item', name : '', width:550, sortable : true, align: 'left'},
+				{display: 'Ware house', name : '', width:200, sortable : true, align: 'left'},
+				{display: 'Marked Qty', name : '', width:100, sortable : true, align: 'left'},
+				{display: 'Due Date', name : '', width:100, sortable : true, align: 'left'},
+				{display: 'Procurement Method', name : '', width:100, sortable : true, align: 'left'},
+				
+					],
+		  buttons : [
+					{separator: true},
+				 	{name: ' Create', bclass: 'glyphicon glyphicon-plus', onpress : addThird},
+		            {separator: true}
+	      ],
+	      searchitems : [
+	                {display: 'Requisition Ref No', name : 'requisitionRefNo'},
+	             
+					
+	      ],
+			sortname: "code",
+			sortorder: "asc",
+			usepager: true,
+			//title: 'Pending Purchase Orders',
+			useRp: true,
+			rp: 20,
+			showTableToggleBtn: true,//toggle button for the whole table
+			resizable: false,
+			//width: w,
+			singleSelect: true
+		});
+
+			
+		$('#flex4').flexigrid({
 			url:'getPurchaseOrderList',
 			method: 'POST',
 			dataType : 'json',
@@ -67,7 +142,8 @@ $(document).ready(function(){
 				 	{name: ' Edit', bclass: 'glyphicon glyphicon-pencil', onpress : open},
 		            {separator: true},
 				 	{name: ' Delete', bclass: 'glyphicon glyphicon-remove', onpress : remove},
-		            {separator: true}
+		            {separator: true},
+				 	
 	      ],
 	      searchitems : [
 	                {display: 'Requisition Ref No', name : 'requisitionRefNo'},
@@ -101,7 +177,7 @@ getUnits("unit");
 	function open() {
 		//var requisitionId =  "";
 		var orderId ="";
-		var row = $('#flex2 tbody tr').has("input[name='order_id']:checked")
+		var row = $('#flex4 tbody tr').has("input[name='order_id']:checked")
 		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
 		orderId = $(row).find("input[name='order_id']:checked").val();
 		if(orderId !=undefined && orderId !=null && orderId !=''){
@@ -110,6 +186,10 @@ getUnits("unit");
 		
 
 	}
+	
+	
+	
+	
 
 	function populatePurchaseOrderViewPopup(orderId) {
 
@@ -176,7 +256,7 @@ getUnits("unit");
         			success : function(data) {
         				BootstrapDialog
 						.alert('Purchase order successfully deleted');
-        				$('#flex2').flexOptions({
+        				$('#flex4').flexOptions({
         					url : "getPurchaseOrderList",
         					newp : 1
         				}).flexReload();
@@ -186,7 +266,7 @@ getUnits("unit");
         						//.alert('Error unable to delete the requisition');
         				BootstrapDialog
 						.alert('Purchase order successfully deleted');
-        				$('#flex2').flexOptions({
+        				$('#flex4').flexOptions({
         					url : "getPurchaseOrderList",
         					newp : 1
         				}).flexReload();
@@ -209,6 +289,28 @@ getUnits("unit");
 		}
 	}
 
+	function addSecond() {
+		//var requisitionId =  "";
+		var procurementId ="";
+		var row = $('#flex2 tbody tr').has("input[name='marking_id']:checked")
+		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
+		procurementId = $(row).find("input[name='marking_id']:checked").val();
+		if(procurementId !=''){
+			populatePurchaseOrderCreatePopup(procurementId);
+		}
+	}
+	
+	function addThird() {
+		//var requisitionId =  "";
+		var procurementId ="";
+		var row = $('#flex3 tbody tr').has("input[name='marking_id']:checked")
+		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
+		procurementId = $(row).find("input[name='marking_id']:checked").val();
+		if(procurementId !=''){
+			populatePurchaseOrderCreatePopup(procurementId);
+		}
+	}
+	
 	function savePurchaseOrder() {
 		$('.close').click();
 		$.ajax({
@@ -219,10 +321,18 @@ getUnits("unit");
 			success : function(data) {
 				BootstrapDialog.alert('Purchase order saved successfully.');
 				$('#flex1').flexOptions({
-					url : "getProcurementMarkingList",
+					url : "getPurchaseOrder",
 					newp : 1
 				}).flexReload();
 				$('#flex2').flexOptions({
+					url : "getLocalPurchaseOrder",
+					newp : 1
+				}).flexReload();
+				$('#flex3').flexOptions({
+					url : "getWarehouseBorrow",
+					newp : 1
+				}).flexReload();
+				$('#flex4').flexOptions({
 					url : "getPurchaseOrderList",
 					newp : 1
 				}).flexReload();
@@ -265,8 +375,9 @@ getUnits("unit");
 						getFirmWarehouses('warehouse',warehouse.firmId,warehouse.wareId) 
 						$("#warehouse").val(warehouse.wareId);
 						//getUnits('unit');
-						$("#unit").val(data.unit.unitId)
-						$("#marking_id").val(data.markingId)
+						$("#unit").val(data.unit.unitId);
+						$("#marking_id").val(data.markingId);
+						$("#orderType").val(data.procurementType);
 						generateOrderNo("orderNo",$("#firm").val()); 
 						$('#modal-add-req').modal({
 							keyboard : true
@@ -423,12 +534,38 @@ getUnits("unit");
         <div class="panel panel-default" id="donePanel">
             <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#doneContent">
                <h5 class="panel-title">
-                    Purchase Orders<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
+                    Pending Local Purchase Order<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
                 </h5>
             </div>
         
                 <div class="panel-body" id="doneContent" style="margin:0px; padding:0px;">
                    <table style="width:100%" id="flex2"></table>
+                </div>
+
+        </div>
+        
+         <div class="panel panel-default" id="donePanel" >
+            <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#doneContent" >
+               <h5 class="panel-title">
+                    Warehouse Borrowing<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
+                </h5>
+            </div>
+        
+                <div class="panel-body" id="doneContent" style="margin:0px; padding:0px;">
+                   <table style="width:100%" id="flex3"></table>
+                </div>
+
+        </div>
+        
+        <div class="panel panel-default" id="donePanel" >
+            <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#doneContent" >
+               <h5 class="panel-title">
+                    Purchase Orders<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
+                </h5>
+            </div>
+        
+                <div class="panel-body" id="doneContent" style="margin:0px; padding:0px;">
+                   <table style="width:100%" id="flex4"></table>
                 </div>
 
         </div>
@@ -450,6 +587,7 @@ getUnits("unit");
 
 
 <%@ include file="include/purchase_order_form.jsp" %>
+
 <script>
 $(document).ready(function() {
      $('#dateRangePicker')

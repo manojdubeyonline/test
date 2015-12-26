@@ -1,3 +1,15 @@
+<script>
+function validate(){
+	
+	var billAmount = document.getElementById('billAmount').value;
+	if(billAmount == ''){
+		BootstrapDialog.alert('Please Enter Bill Amount');
+		return false;
+	}
+	
+}
+	</script>
+
 <div class="modal fade" id="modal-add-req" role="dialog"
 	aria-hidden="true">
 	<form role="form" id="grpoForm" name="grpoForm" method="post">
@@ -110,7 +122,7 @@
 					<div class="form-group">
 
 						<button type="button" class="btn btn-success" id="addReqSave"
-							onClick="saveGRPO()">
+							onmouseenter="validate()" onClick="saveGRPO()">
 							<span class="glyphicon glyphicon-floppy-save"></span>
 						</button>
 

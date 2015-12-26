@@ -48,6 +48,8 @@
     <put-attribute name="footer" value="/WEB-INF/template/layouts/footer.jsp" />
   </definition>
   
+  
+  
   <definition name="orderApproval" template="/WEB-INF/template/template.jsp">
   	<put-attribute name="title" value="Railtech......Requisition" type="string" />
  	<put-attribute name="header" value="/WEB-INF/template/layouts/header.jsp" />

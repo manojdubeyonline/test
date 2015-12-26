@@ -20,6 +20,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.hibernate.annotations.Cache;
 
 
 /**
@@ -27,6 +28,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
  * 
  */
 @Entity
+
 @Table(name="vender_tbl_po_code")
 
 public class Code implements Serializable {

@@ -29,6 +29,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.railtech.po.entity.Code;
 import com.railtech.po.entity.Firm;
 import com.railtech.po.entity.FlexiBean;
+import com.railtech.po.entity.ItemIssue;
 import com.railtech.po.entity.ItemStock;
 import com.railtech.po.entity.ModelForm;
 import com.railtech.po.entity.Requisition;
@@ -38,6 +39,7 @@ import com.railtech.po.entity.User;
 import com.railtech.po.entity.Warehouse;
 import com.railtech.po.service.MasterInfoService;
 import com.railtech.po.service.RequisitionService;
+import com.railtech.po.service.StockService;
 import com.railtech.po.util.Util;
 
 /**
@@ -51,6 +53,9 @@ public class RequisitionController {
 	
 	@Autowired
 	RequisitionService requisitionService;
+	
+	@Autowired
+	StockService stockService;
 	
 	@Autowired
 	MasterInfoService masterservice;
@@ -67,6 +72,7 @@ public class RequisitionController {
 		return new ModelAndView("pendingStockIssue");
 	}
 	
+	 
 		
 	@RequestMapping(value = { "/getRequisitions" }, method = { RequestMethod.POST })
 	public void getRequisitionList(HttpServletRequest request, HttpServletResponse response) throws Exception
@@ -117,6 +123,7 @@ public class RequisitionController {
 			for(Requisition requisition: requisitions){
 				for (RequisitionItem item : requisition.getRequisitionItems()) {
 					if (item.getFullFillmentStatus()==null || item.getFullFillmentStatus().equalsIgnoreCase("N")) {
+						if (item.getCurrentStatus()==null || item.getCurrentStatus().equalsIgnoreCase("R")) {
 						requisitionItemRow = new LinkedList<String>();
 						requisitionItemRow
 								.add("<input type='radio' name='requisitionItemId' value='"+item.getItemKey()+ "'>");
@@ -124,7 +131,8 @@ public class RequisitionController {
 						requisitionItemRow.add(requisition.getRequisitionRefNo());
 					
 						requisitionItemRow.add(item.getItemCode().getCodeDesc());
-						requisitionItemRow.add(String.valueOf(item.getQty()));
+						requisitionItemRow.add(String.valueOf(item.getQty())+ "  "
+								+ item.getUnit().getUnitName());
 						requisitionItemRow.add(Util.getDateString(
 								requisition.getRequestedDate(), "dd/MM/yyyy"));
 						requisitionItemRow.add(requisition.getRequestedByUser()
@@ -135,6 +143,7 @@ public class RequisitionController {
 								.getFullFillmentStatus()));
 
 						strMap.put(String.valueOf(count), requisitionItemRow);
+						}
 					}
 				}
 				
@@ -178,6 +187,9 @@ public class RequisitionController {
 		requisition.setDueDate(Util.getDate(request.getParameter("dueDate"),"dd/MM/yyyy"));
 		requisition.setRequestedDate(new Date());
 		requisition.setFullFillmentStatus("N");
+		
+		
+		
 		
 		String rowCount = request.getParameter("rowhid");
 		int maxRows = 0;
@@ -225,6 +237,7 @@ public class RequisitionController {
 						+ i).trim()));
 				reqItem.setUnit(itemUnit);
 				reqItem.setModifiedByUser(requestedByUser);
+				reqItem.setCurrentStatus("R");
 				if(!isFound){
 					requisition.getRequisitionItems().add(reqItem);
 				}
@@ -299,4 +312,55 @@ public class RequisitionController {
 	}
 	
 	
+	@RequestMapping(value = { "/getStockIssuedHistory" }, method = { RequestMethod.POST })
+	public void getStockIssuedHistory(HttpServletRequest request, HttpServletResponse response) throws Exception
+	{
+FlexiBean params = new FlexiBean(request);
+		
+		
+Set<ItemIssue> itemIssues  = stockService.getItemIssue(params);
+		List<String> requisitionItemRow = null;
+		Map<String, List<String>> strMap = new LinkedHashMap<String, List<String>>();
+		
+		if(!CollectionUtils.isEmpty(itemIssues)){
+			int count = 0;
+			for(ItemIssue itemIssue: itemIssues){
+				
+				
+					
+						requisitionItemRow = new LinkedList<String>();
+						Code item = itemIssue.getItemCode();
+						Requisition requisition = itemIssue.getRequisition();
+						
+						
+						requisitionItemRow
+								.add("<input type='radio' name='requisitionItemId' value='"+itemIssue.getItemIssueId()+ "'>");
+						requisitionItemRow.add(String.valueOf(++count));
+						requisitionItemRow.add(requisition.getRequisitionRefNo());
+						
+						requisitionItemRow.add(item.getCodeDesc());
+						requisitionItemRow.add(String.valueOf(itemIssue.getIssueQty()));
+						//requisitionItemRow.add(String.valueOf(item.getQty())+ "  "
+								//+ item.getUnit().getUnitName());
+						requisitionItemRow.add(Util.getDateString(
+								requisition.getRequestedDate(), "dd/MM/yyyy"));
+						
+						requisitionItemRow.add(itemIssue.getIssuedBy()
+								.getUserName());
+						requisitionItemRow.add(Util.getDateString(
+								itemIssue.getIssueDate(), "dd/MM/yyyy"));
+						
+						
+
+						strMap.put(String.valueOf(count), requisitionItemRow);
+					}
+					}
+				
+				
+		
+		
+	Util.doWriteFlexi(request, response, strMap, params);
+	}
+
 }
+

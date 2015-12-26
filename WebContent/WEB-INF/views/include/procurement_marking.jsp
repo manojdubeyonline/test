@@ -1,3 +1,18 @@
+<script>
+function validate(){
+	
+	var duedate = document.getElementById('dueDate').value;
+	if(duedate == ''){
+		BootstrapDialog.alert('Please select due date');
+		return false;
+	}
+	var procurement_method = document.getElementById('procurementType').value;
+	if(procurement_method == '') {
+		BootstrapDialog.alert('Please select procurement method');
+		return false;
+	}
+}
+	</script>
 <div class="modal fade" id="modal-add-req" role="dialog"
 	aria-hidden="true">
 	<form role="form" id="procurementForm" name="procurementForm" method="post">
@@ -16,6 +31,15 @@
 							name="item"><input type="text" class="form-control"
 							id="item1" name="item1" readonly="readonly"><input type="hidden" 
 							id="marking_id" name="marking_id" >
+							
+							<input type="hidden" 
+							id="associatedRequisitionItemId" name="associatedRequisitionItemId" >
+							
+							<input type="hidden" 
+							id="associatedRequisitionId" name="associatedRequisitionId" >
+							
+							<input type="hidden" 
+							id="currentStatus" name="currentStatus" value="M" >
 					</div>
 
 					<div class="form-group">
@@ -44,7 +68,7 @@
 							</div>
 						</div>
 					</div>
-					<div class=" form-group"">
+					<div class=" form-group">
 
 						<label for="qty">Qty</label>
 						<div class="row">
@@ -74,7 +98,7 @@
 					<div class="form-group">
 
 						<button type="button" class="btn btn-success" id="addReqSave"
-							onClick="saveProcurement()">
+						onmouseenter="validate()"	onClick="saveProcurement()">
 							<span class="glyphicon glyphicon-floppy-save">Save </span>
 						</button>
 

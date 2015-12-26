@@ -1,3 +1,62 @@
+<script>
+function validateQty(){
+	
+	var user = document.getElementById('user').value;
+	if(user == ''){
+		BootstrapDialog.alert('Please Select User Name');
+		return false;
+	}
+	var firm = document.getElementById('firm').value;
+	if(firm == ''){
+		BootstrapDialog.alert('Please Select Firm');
+		return false;
+	}
+	
+	var warehouse = document.getElementById('warehouse').value;
+	if(warehouse == ''){
+		BootstrapDialog.alert('Please Select Store');
+		return false;
+	}
+	var dueDate = document.getElementById('dueDate').value;
+	if(dueDate == ''){
+		BootstrapDialog.alert('Please Select Issue Date');
+		return false;
+	}
+	
+	var count = document.getElementById('rowhid').value;
+	count = --count;
+	for(i = 1; i <= count; i++){
+		
+		var codeId = document.getElementById('codeId'+i).value;
+		if(codeId == '')
+			{
+			BootstrapDialog.alert('Please Pick Item');
+			return false;
+			}
+		
+		var availableQty = document.getElementById('availableQtyId'+i).innerHTML;
+		if(availableQty =='' || availableQty == null || availableQty =='undefined'){
+		BootstrapDialog.alert('Qty is not Available');
+		}
+		else {
+		var availQty = parseInt(availableQty);
+		var qty = document.getElementById('qty'+i).value;
+		var q = parseInt(qty);
+		if(q > availQty) {
+			BootstrapDialog.alert('Qty is not greater than Available Qty');
+			return false;
+		}
+		else {
+			return true;
+		}
+		}
+		return true;
+	}
+	
+}
+
+</script>
+
 <div class="modal fade" id="modal-add-req" role="dialog"
 	aria-hidden="true">
 	<form role="form" id="issueForm" name="issueForm"  method="post">
@@ -32,6 +91,8 @@
 				            <div class="input-group input-append date" id="dateRangePicker">
 				               <input type="text" class="form-control" name="dueDate"
 							id="dueDate" placeholder="Issue Date (dd/mm/yyyy)" />
+							<input type="hidden" 
+							id="issueStatus" name="issueStatus"  value="N">
 				                <span class="input-group-addon add-on"><span class="glyphicon glyphicon-calendar"></span></span>
 				            </div>
 				        </div>
@@ -53,7 +114,7 @@
 											</button>
 											
 											<button type="button" class="btn btn-default" id="addReqSave"
-												onClick="saveItemIssue()"><span class="glyphicon glyphicon-floppy-save"></span></button>
+											onmouseenter="validateQty();" onClick="saveItemIssue()"><span class="glyphicon glyphicon-floppy-save"></span></button>
 											
 										</div>
 					</div>

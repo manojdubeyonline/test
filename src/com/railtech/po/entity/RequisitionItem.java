@@ -54,6 +54,10 @@ public class RequisitionItem implements Serializable {
 	@Column(name="hist_qty")
 	private double histQty;
 	
+	@Column(name="currentStatus")
+	private String currentStatus;
+	
+	
 	@ManyToOne
 	@JoinColumn(name="unit_id")
 	private Unit unit;
@@ -250,6 +254,21 @@ public class RequisitionItem implements Serializable {
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
 	}
+	
+	/**
+	 * @return the currentStatus
+	 */
+	public String getCurrentStatus() {
+		return currentStatus;
+	}
+
+	/**
+	 * @param currentStatus the currentStatus to set
+	 */
+	public void setCurrentStatus(String currentStatus) {
+		this.currentStatus = currentStatus;
+	}
+
 
 	@Override
 	public int hashCode() {

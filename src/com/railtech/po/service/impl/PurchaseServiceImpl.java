@@ -50,6 +50,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	@Override
 	public String generatePurchaseOrderNo(String firmId) {
 		logger.info("entering generatePurchaseOrderNo");
@@ -82,14 +83,24 @@ public class PurchaseServiceImpl implements PurchaseService {
 		if (order != null) {
 			logger.debug("order:" + order);
 			String refCounter = order.getPurchaseOrderNo().substring(order.getPurchaseOrderNo().indexOf("/")+1,order.getPurchaseOrderNo().lastIndexOf("/"));
-
+			
+			
 			if (refCounter != null) {
-				refNo = "PO-"
+				if(order.getOrderType().equalsIgnoreCase("Purchase Order") ){
+				refNo = "PPO-"
 						+ order.getFirm().getFirmCode()
 								 + "/" + (Integer.parseInt(refCounter)+1) + "/"
 						+ yyyy;
+				}
+				else{
+					refNo = "PLP-"
+							+ order.getFirm().getFirmCode()
+									 + "/" + (Integer.parseInt(refCounter)+1) + "/"
+							+ yyyy;
 				
+				}
 			}
+			
 		}else{
 			logger.debug("purchase:" + order);
 			

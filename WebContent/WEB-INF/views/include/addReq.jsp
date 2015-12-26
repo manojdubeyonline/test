@@ -1,4 +1,37 @@
-<div class="modal fade" id="modal-add-req" role="dialog"
+<script>
+function validate(){
+	var firm = document.getElementById('firm').value;
+	if(firm == ''){
+		BootstrapDialog.alert('Please select Firm');
+		return false;
+	}
+	var warehouse = document.getElementById('warehouse').value;
+	if(warehouse == '') {
+		BootstrapDialog.alert('Please select Store');
+		return false;
+	}
+	var dueDate = document.getElementById('dueDate').value;
+	if(dueDate==''){
+		BootstrapDialog.alert('Please select Date');
+		return false;
+	}
+	var count = document.getElementById('rowhid').value;
+	count = count - 1;
+	for(i = 0; i <= count; i++){
+		var codeId = document.getElementById('codeId'+i).value;
+		if(codeId == ''){
+			BootstrapDialog.alert('Please Pick item');
+			return false;
+		}
+		var qty = document.getElementById('qty'+i).value;
+		if(qty =='' || qty == null || qty =='undefined'){
+			BootstrapDialog.alert('Please Enter Qty');
+			return false;
+		}
+	}
+	
+}
+</script><div class="modal fade" id="modal-add-req" role="dialog"
 	aria-hidden="true">
 	<form role="form" id="reqForm" name="reqForm" action="saveRequisition"
 		method="post">
@@ -53,7 +86,7 @@
 											</button>
 											
 											<button type="button" class="btn btn-default" id="addReqSave"
-												onClick="saveUpdateRequisition()"><span class="glyphicon glyphicon-floppy-save"></span></button>
+											onmouseenter="validate()"	onClick="saveUpdateRequisition()"><span class="glyphicon glyphicon-floppy-save"></span></button>
 											
 										</div>
 					</div>
@@ -74,6 +107,8 @@
 							
 							</table>
 							<input type="hidden" name="rowhid" id="rowhid" value="0"/>
+							<input type="hidden" name="pdf_ref_no" id="pdf_ref_no" value=""/>
+							<input type="hidden" name="reqid" id="reqid" value=""/>
 
 						</div>
 					</div>
@@ -94,3 +129,13 @@
     width:80%;
 }
 </style>
+<script>
+function viewPDF(internal_ref_no, reqId){
+	document.forms[0].pdf_ref_no.value=internal_ref_no;
+	document.forms[0].reqid.value = reqId;
+	document.forms[0].action="PdfBuilder";
+	doucment.forms[0].submit();
+	
+}
+
+</script>

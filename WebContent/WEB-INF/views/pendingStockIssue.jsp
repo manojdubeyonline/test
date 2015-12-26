@@ -17,11 +17,11 @@ $(document).ready(function(){
 			{display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
 			{display: 'Requisition Ref No', name : 'requisitionRefNo', sortable : true, align: 'left',width:120},
 			{display: 'Item', name : '', width:300, sortable : true, align: 'left'},
-			{display: 'Qty', name : '', width:30, sortable : true, align: 'left'},
+			{display: 'Qty', name : '', width:90, sortable : true, align: 'left'},
 			{display: 'Request Date', name : 'requestedDate', width:120, sortable : true, align: 'center'},
 			{display: 'Requested By', name : 'requestedByUser', width:120, sortable : true, align: 'center'},
 			{display: 'Due Date', name : 'dueDate', width:120, sortable : true, align: 'center'},
-			{display: 'Status', name : 'fullFillmentStatus', width:120, sortable : true, align: 'center'},
+			{display: 'Status', name : 'fullFillmentStatus', width:60, sortable : true, align: 'center'},
 			
 			
 				],
@@ -38,18 +38,55 @@ $(document).ready(function(){
              
 				
       ],
-		sortname: "requestedDate",
+      sortname: "code",
 		sortorder: "asc",
 		usepager: true,
-		title: 'My Requisitions',
+	//	title: 'My Requisitions',
 		useRp: true,
-		rp: 1000,
-		showTableToggleBtn: false,//toggle button for the whole table
+		rp: 20,
+	//	showTableToggleBtn: true,//toggle button for the whole table
 		resizable: false,
-		width: w,
-		height: screen.height*.50,
+		//width: w,
+		singleSelect: true
 
 	});
+		
+		$('#flex2').flexigrid({
+			url:'getStockIssuedHistory',
+			method: 'POST',
+			dataType : 'json',
+		  
+		  colModel : [
+		       	{display: '', name : 'ite', width:w*0.035, sortable : false, align: 'center'},
+				{display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
+				{display: 'Requisition Ref No', name : 'requisitionRefNo', sortable : true, align: 'left',width:120},
+				{display: 'Item', name : '', width:300, sortable : true, align: 'left'},
+				{display: 'Issued Qty', name : '', width:90, sortable : true, align: 'left'},
+				{display: 'Request Date', name : 'requestedDate', width:120, sortable : true, align: 'center'},
+				{display: 'Issued By', name : 'requestedByUser', width:120, sortable : true, align: 'center'},
+				{display: 'Issued Date', name : 'dueDate', width:120, sortable : true, align: 'center'},
+				
+				
+				
+					],
+		
+	      searchitems : [
+	                {display: 'Requisition Ref No', name : 'requisitionRefNo'},
+	             
+					
+	      ],
+	      sortname: "code",
+			sortorder: "asc",
+			usepager: true,
+		//	title: 'My Requisitions',
+			useRp: true,
+			rp: 20,
+		//	showTableToggleBtn: true,//toggle button for the whole table
+			resizable: false,
+			//width: w,
+			singleSelect: true
+
+		});
 getUsers('user');
 //getItems("item");
 //getFirms("firm");
@@ -71,7 +108,11 @@ addRow();
 		
 
 	}
+	
+	
 
+	
+	
 	function add() {
 		$('#modal-add-req').modal({
 			keyboard : true
@@ -82,14 +123,14 @@ addRow();
 		$("#user").removeAttr('disabled');
 		$("#dueDate").removeAttr('disabled');
 		$("#firm").removeAttr('disabled');
-
+       
 		$("#requisitionRefNo").val('');
 		$("#warehouse").val('');
 		$("#user").val('');
 		$("#dueDate").val('');
 		$("#firm").val('');
 		$("#warehouse").val("");
-		$("#rowhid").val(0);
+		$("#rowhid").val(1);
 		
 		$("#reqItemTable").find("tr:gt(0)").remove();
 		addRow();
@@ -359,7 +400,34 @@ addRow();
 	}
 </script>
 
-<table style="width:100%" id="flex1"></table>
+<div class="mainPanel">
+    <div class="panel-group" id="accordion">
+        <div class="panel panel-default" id="pendingPanel">
+            <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#pendingContent">
+                <h4 class="panel-title">
+                   Pending Stock Issue<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
+                </h4>
+            </div>
+           
+                <div class="panel-body collapse in" id="pendingContent" style="margin:0px; padding:0px;">
+                   <table style="width:100%" id="flex1"></table>
+                </div>
+           
+        </div>
+        <div class="panel panel-default" id="donePanel">
+            <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#doneContent">
+               <h4 class="panel-title">
+                   Stock Issued History<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
+                </h4>
+            </div>
+        
+                <div class="panel-body" id="doneContent" style="margin:0px; padding:0px;">
+                   <table style="width:100%" id="flex2"></table>
+                </div>
+
+        </div>
+    </div>
+</div>
 <%@ include file="include/directItemIssue.jsp" %>
 <script>
 $(document).ready(function() {

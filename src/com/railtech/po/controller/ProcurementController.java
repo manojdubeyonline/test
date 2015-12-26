@@ -31,6 +31,8 @@ import com.railtech.po.entity.ItemStock;
 import com.railtech.po.entity.ItemStockPK;
 import com.railtech.po.entity.ModelForm;
 import com.railtech.po.entity.Procurement;
+import com.railtech.po.entity.Requisition;
+import com.railtech.po.entity.RequisitionItem;
 import com.railtech.po.entity.Unit;
 import com.railtech.po.entity.User;
 import com.railtech.po.entity.Warehouse;
@@ -99,10 +101,17 @@ public class ProcurementController {
 		procurement.setProcurementType(request.getParameter("procurementType"));
 		procurement.setDueDate(Util.getDate(request.getParameter("dueDate"),
 				"dd/MM/yyyy"));
+		
+		RequisitionItem reqItem = new RequisitionItem();
+		reqItem.setCurrentStatus("M");
+		
+		
+	
+		
 		procurementService.saveProcurementMarking(procurement);
 
 	}
-
+/*
 	@RequestMapping(value = { "/getPendingProcurementMarkingList" }, method = { RequestMethod.POST })
 	public void getPendingProcurementMarkingList(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
@@ -135,7 +144,46 @@ public class ProcurementController {
 		logger.info("exiting getPendingProcurementMarkingList");
 
 	}
+	*/
 	
+	@RequestMapping(value = { "/getPendingProcurementMarkingList" }, method = { RequestMethod.POST })
+	public void getPendingStockIssue(HttpServletRequest request, HttpServletResponse response) throws Exception
+	{
+		FlexiBean params = new FlexiBean(request);
+		Set<Requisition> requisitions  = requisitionService.getRequisitions(params);
+		List<String> requisitionItemRow = null;
+		Map<String, List<String>> strMap = new LinkedHashMap<String, List<String>>();
+		if(!CollectionUtils.isEmpty(requisitions)){
+			int count = 0;
+			for(Requisition requisition: requisitions){
+				for (RequisitionItem item : requisition.getRequisitionItems()) {
+					if (item.getFullFillmentStatus()==null || item.getFullFillmentStatus().equalsIgnoreCase("N")) {
+						requisitionItemRow = new LinkedList<String>();
+						requisitionItemRow
+								.add("<input type='radio' name='requisitionItemId' value='"+item.getRequisition().getRequisitionRefNo()+ "'>");
+						requisitionItemRow.add(String.valueOf(++count));
+						requisitionItemRow.add(requisition.getRequisitionRefNo());
+					
+						requisitionItemRow.add(item.getItemCode().getCodeDesc());
+						requisitionItemRow.add(String.valueOf(item.getQty())+ "  "
+								+ item.getUnit().getUnitName());
+						requisitionItemRow.add(Util.getDateString(
+								requisition.getRequestedDate(), "dd/MM/yyyy"));
+						requisitionItemRow.add(requisition.getRequestedByUser()
+								.getUserName());
+						requisitionItemRow.add(Util.getDateString(
+								requisition.getDueDate(), "dd/MM/yyyy"));
+						requisitionItemRow.add(String.valueOf(requisition
+								.getFullFillmentStatus()));
+
+						strMap.put(String.valueOf(count), requisitionItemRow);
+					}
+				}
+				
+			}
+		}
+		Util.doWriteFlexi(request, response, strMap, params);
+	}
 	
 	@RequestMapping(value = { "/getProcurementMarkingList" }, method = { RequestMethod.POST })
 	public void getProcurementMarkingList(HttpServletRequest request,

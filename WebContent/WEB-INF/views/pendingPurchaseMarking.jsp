@@ -13,11 +13,14 @@ $(document).ready(function(){
 		dataType : 'json',
 	  
 	  colModel : [
-	       	{display: '', name : '', width:w*0.035, sortable : false, align: 'center'},
-			{display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
-			{display: 'Item', name : '', width:550, sortable : true, align: 'left'},
-			{display: 'Ware house', name : '', width:300, sortable : true, align: 'left'},
-			{display: 'Requisitioned Qty', name : '', width:100, sortable : true, align: 'left'},
+               {display: '', name : 'requisitionId', width:w*0.035, sortable : false, align: 'center'},
+               {display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
+               {display: 'Requisition Ref No', name : 'requisitionRefNo', sortable : true, align: 'left',width:120},
+               {display: 'Item(s)', name : '', width:300, sortable : false, align: 'left'},
+               {display: 'Request Date', name : 'requestedDate', width:120, sortable : true, align: 'center'},
+               {display: 'Requested By', name : 'requestedByUser', width:120, sortable : true, align: 'center'},
+               {display: 'Due Date', name : 'dueDate', width:120, sortable : true, align: 'center'},
+               {display: 'Status', name : 'fullFillmentStatus', width:120, sortable : true, align: 'center'},
 		
 			
 			
@@ -100,9 +103,9 @@ getWarehouses("warehouse");
 	function add() {
 		//var requisitionId =  "";
 		var procurementItemId ="";
-		var row = $('#flex1 tbody tr').has("input[name='procurement_item_id']:checked")
+		var row = $('#flex1 tbody tr').has("input[name='requisitionItemId']:checked")
 		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
-		procurementItemId = $(row).find("input[name='procurement_item_id']:checked").val();
+		procurementItemId = $(row).find("input[name='requisitionItemId']:checked").val();
 		if(procurementItemId !=''){
 			populateProcurementItemPopup(procurementItemId);
 		}
@@ -148,13 +151,14 @@ getWarehouses("warehouse");
 						$("#item").val(itemCode.codeId);
 						$("#item1").val(itemCode.codeDesc);
 						$("#qty").val(data.procurementQty);
+					
 						$("#dueDate").val(myDateFormatter(data.dueDate));
 						$("#firm").val(warehouse.firmId);
 						getFirmById('firm1',warehouse.firmId);
 						getFirmWarehouses('warehouse',warehouse.firmId,warehouse.wareId) 
 						$("#warehouse").val(warehouse.wareId);
-						//getUnits('unit');
-						$("#unit").val(data.unit.unitId)
+						getUnits('unit');
+						//$("#unit").val(data.unit.unitId)
 						$("#marking_id").val(data.markingId)
 						$("#procurementType").val(data.procurementType)
 						generateOrderNo("orderNo",$("#firm").val()); 
@@ -220,14 +224,14 @@ getWarehouses("warehouse");
 
 	}
 
+	
 	function populateProcurementItemPopup(procItemId) {
 
 		var jsonRecord = {};
 		
-		url = 'getStock';
+		url = 'getRequisitionByRefNo';
 		
-		jsonRecord.id = procItemId.substring(0,procItemId.indexOf("_"));
-		jsonRecord.id2 = procItemId.substring(procItemId.indexOf("_")+1,procItemId.length);
+		jsonRecord.id = procItemId;
 		$.ajax({
 			url : url,
 			type : 'POST',
@@ -235,24 +239,26 @@ getWarehouses("warehouse");
 			contentType : 'application/json',
 			dataType : 'json',
 			success : function(data) {
-				if(data!=null){
-					var stockPK = data.itemStockPK;
-					var itemCode = stockPK.itemCode;
-					var warehouse = stockPK.warehouse;
+				if(data !=null){
 					
-						$("#item").val(itemCode.codeId);
-						$("#item1").val(itemCode.codeDesc);
-						$("#qty").val(data.requisitionedQty);
+					for(var r=0;r<data.requisitionItems.length;r++){
+					
+						$("#associatedRequisitionId").val(data.requisitionItems[r].requisition.requisitionId);
+						$("#associatedRequisitionItemId").val(data.requisitionItems[r].itemKey);
+						$("#item1").val(data.requisitionItems[r].itemCode.codeDesc);
+						$("#item").val(data.requisitionItems[r].itemCode.codeId);
+						$("#qty").val(data.requisitionItems[r].qty);
 					//	$("#dueDate").val(myDateFormatter(data.dueDate));
-						$("#firm").val(warehouse.firmId);
-						getFirmWarehouses('warehouse',warehouse.firmId,warehouse.wareId) 
-						$("#warehouse").val(warehouse.wareId);
+						$("#firm").val(data.requestedForFirm.firmId);
+						//getFirmWarehouses('warehouse',warehouse.firmId,warehouse.wareId) 
+						$("#warehouse").val(data.requestedAtWareHouse.wareId);
 						getUnits('unit');
 						
 						$('#modal-add-req').modal({
 							keyboard : true
 						});
 						$('#modal-add-req').modal("show");
+				}
 				}
 			},
 			error : function(data) {

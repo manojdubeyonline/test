@@ -41,6 +41,8 @@ dataType : 'json',
 			 	{separator: true},
 			 	{name: 'Delete', bclass: 'glyphicon glyphicon-remove', onpress : deleteRequisition},
 			 	{separator: true},
+			 	
+			 	
       
          
       ],
@@ -74,6 +76,8 @@ getFirms("firm");
 		populateRequisitionPopup(recordId, 'getRequisitionById');
 
 	}
+	
+	
 
 	function deleteRequisition() {
 		var recordId = $("input[name='requisitionId']:checked").val();
@@ -151,6 +155,8 @@ getFirms("firm");
 		});
 
 	}
+	
+	
 
 	function populateRequisitionPopup(recordId, url) {
 
