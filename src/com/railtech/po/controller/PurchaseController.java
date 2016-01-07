@@ -30,7 +30,6 @@ import com.railtech.po.entity.FlexiBean;
 import com.railtech.po.entity.ModelForm;
 import com.railtech.po.entity.Procurement;
 import com.railtech.po.entity.PurchaseOrder;
-import com.railtech.po.entity.Requisition;
 import com.railtech.po.entity.Unit;
 import com.railtech.po.entity.User;
 import com.railtech.po.entity.Vendor;
@@ -120,7 +119,7 @@ public class PurchaseController {
 		Integer codeId = Integer.parseInt(itemCodeId.trim());
 
 		Code itemCode = masterservice.getCodeById(codeId);
-		purchase.setItemCode(itemCode);
+	//	purchase.setItemCode(itemCode);
 		
 		String warehouseId = request.getParameter("warehouse");
 		
@@ -133,7 +132,7 @@ public class PurchaseController {
 		
 		if((!StringUtils.isEmpty(markingId))){
 			Procurement procurementMarking = procurementService.getProcurementById(Integer.parseInt(markingId));
-			purchase.setProcurementMarking(procurementMarking);
+		//	purchase.setProcurementMarking(procurementMarking);
 		}
 		
 		String firmId = request.getParameter("firm");
@@ -153,16 +152,16 @@ public class PurchaseController {
 		purchase.setAddedBy(requestedByUser);
 		purchase.setDateAdded(new Date());
 
-		purchase.setOrderQty(Double.parseDouble(request
-				.getParameter("qty")));
+		//purchase.setOrderQty(Double.parseDouble(request
+			//	.getParameter("qty")));
 		Integer unitId = Integer.parseInt(request.getParameter("unit"));
 
 		Unit itemUnit = masterservice.getUnitById(unitId);
-		purchase.setUnit(itemUnit);
+		//purchase.setUnit(itemUnit);
 		
 		purchase.setOrderType(request.getParameter("orderType"));
 		
-		purchase.setRate(Double.parseDouble(request.getParameter("rate")));
+		//purchase.setRate(Double.parseDouble(request.getParameter("rate")));
 		
 		purchase.setDueDate(Util.getDate(request.getParameter("dueDate"),
 				"dd/MM/yyyy"));
@@ -221,7 +220,7 @@ public class PurchaseController {
 				
 				stockRow = new LinkedList<String>();
 				
-				Code itemCode = order.getItemCode();
+			//	Code itemCode = order.getItemCode();
 				Warehouse itemWareHouse = order.getWarehouse();
 
 				stockRow.add("<input type='radio' name='order_id' value='"
@@ -229,8 +228,8 @@ public class PurchaseController {
 				stockRow.add(String.valueOf(++count));
 				stockRow.add(order.getPurchaseOrderNo());
 				stockRow.add(order.getFirm().getFirmName());
-				stockRow.add(itemCode.getCodeDesc());
-				stockRow.add("" + order.getOrderQty() + " "+order.getUnit().getUnitName());
+				//stockRow.add(itemCode.getCodeDesc());
+				//stockRow.add("" + order.getOrderQty() + " "+order.getUnit().getUnitName());
 				stockRow.add("" + Util.getDateString(order.getDueDate(), "dd/MM/yyyy"));
 				stockRow.add("" + order.getOrderType());
 				strMap.put(String.valueOf(count), stockRow);
@@ -258,7 +257,7 @@ public class PurchaseController {
 					continue;
 				}
 				stockRow = new LinkedList<String>();
-				Code itemCode = order.getItemCode();
+			//	Code itemCode = order.getItemCode();
 				Warehouse itemWareHouse = order.getWarehouse();
 
 				stockRow.add("<input type='radio' name='order_id' value='"
@@ -266,8 +265,8 @@ public class PurchaseController {
 				stockRow.add(String.valueOf(++count));
 				stockRow.add(order.getPurchaseOrderNo());
 				stockRow.add(order.getFirm().getFirmName());
-				stockRow.add(itemCode.getCodeDesc());
-				stockRow.add(order.getOrderQty() + " "+order.getUnit().getUnitName());
+				//stockRow.add(itemCode.getCodeDesc());
+				//stockRow.add(order.getOrderQty() + " "+order.getUnit().getUnitName());
 				stockRow.add(Util.getDateString(order.getDueDate(), "dd/MM/yyyy"));
 				stockRow.add(order.getOrderType());
 				stockRow.add(order.getApprovalStatus().equalsIgnoreCase("Y")?"Approved":"Rejected");

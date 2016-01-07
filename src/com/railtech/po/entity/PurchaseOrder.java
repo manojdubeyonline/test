@@ -3,14 +3,18 @@ package com.railtech.po.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -33,9 +37,8 @@ public class PurchaseOrder implements Serializable {
 	@Column(name="purchase_order_number")
 	private String purchaseOrderNo;
 	
-	@ManyToOne
-	@JoinColumn(name="item_code_id")
-	private Code itemCode;
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "purchaseOrder", cascade=CascadeType.ALL)
+	private Set<PurchaseOrderItem> orderItems;
 	
 	@ManyToOne
 	@JoinColumn(name="firm_id")
@@ -49,19 +52,23 @@ public class PurchaseOrder implements Serializable {
 	@JoinColumn(name="vendor_id")
 	private Vendor vendor;
 	
-	@ManyToOne
-	@JoinColumn(name="marking_id")
-	private Procurement ProcurementMarking;
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "masterKeyId", cascade=CascadeType.ALL)
+	private Set<RateApplied> orderLevelRates;
 	
-	@Column(name="order_qty")
-	private double orderQty;
-	
-	@ManyToOne
-	@JoinColumn(name="unit_id")
-	private Unit unit;
-	
-	@Column(name="basic_rate")
-	private double rate;
+	/**
+	 * @return the orderItems
+	 */
+	public Set<PurchaseOrderItem> getOrderItems() {
+		return orderItems;
+	}
+
+
+	/**
+	 * @param orderItems the orderItems to set
+	 */
+	public void setOrderItems(Set<PurchaseOrderItem> orderItems) {
+		this.orderItems = orderItems;
+	}
 	
 	@ManyToOne
 	@JoinColumn(name="added_by")
@@ -147,23 +154,6 @@ public class PurchaseOrder implements Serializable {
 		this.purchaseOrderNo = purchaseOrderNo;
 	}
 
-
-	/**
-	 * @return the itemCode
-	 */
-	public Code getItemCode() {
-		return itemCode;
-	}
-
-
-	/**
-	 * @param itemCode the itemCode to set
-	 */
-	public void setItemCode(Code itemCode) {
-		this.itemCode = itemCode;
-	}
-
-
 	/**
 	 * @return the firm
 	 */
@@ -211,71 +201,7 @@ public class PurchaseOrder implements Serializable {
 		this.vendor = vendor;
 	}
 
-
-	/**
-	 * @return the procurementMarking
-	 */
-	public Procurement getProcurementMarking() {
-		return ProcurementMarking;
-	}
-
-
-	/**
-	 * @param procurementMarking the procurementMarking to set
-	 */
-	public void setProcurementMarking(Procurement procurementMarking) {
-		ProcurementMarking = procurementMarking;
-	}
-
-
-	/**
-	 * @return the orderQty
-	 */
-	public double getOrderQty() {
-		return orderQty;
-	}
-
-
-	/**
-	 * @param orderQty the orderQty to set
-	 */
-	public void setOrderQty(double orderQty) {
-		this.orderQty = orderQty;
-	}
-
-
-	/**
-	 * @return the unit
-	 */
-	public Unit getUnit() {
-		return unit;
-	}
-
-
-	/**
-	 * @param unit the unit to set
-	 */
-	public void setUnit(Unit unit) {
-		this.unit = unit;
-	}
-
-
-	/**
-	 * @return the rate
-	 */
-	public double getRate() {
-		return rate;
-	}
-
-
-	/**
-	 * @param rate the rate to set
-	 */
-	public void setRate(double rate) {
-		this.rate = rate;
-	}
-
-
+	
 	/**
 	 * @return the addedBy
 	 */

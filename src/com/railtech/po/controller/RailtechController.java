@@ -49,7 +49,7 @@ public class RailtechController {
 	{
 		User user = masterservice.getUserById("27");
 		request.getSession().setAttribute("_SessionUser", user);
-		return new ModelAndView("home");
+		return new ModelAndView("requisitions");
 		
 	}
 	

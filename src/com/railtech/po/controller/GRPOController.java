@@ -109,7 +109,7 @@ public class GRPOController {
 				
 				stockRow = new LinkedList<String>();
 				
-				Code itemCode = order.getItemCode();
+				//Code itemCode = order.getItemCode();
 				Warehouse itemWareHouse = order.getWarehouse();
 
 				stockRow.add("<input type='radio' name='order_id' value='"
@@ -117,8 +117,8 @@ public class GRPOController {
 				stockRow.add(String.valueOf(++count));
 				stockRow.add(order.getPurchaseOrderNo());
 				stockRow.add(order.getFirm().getFirmName());
-				stockRow.add(itemCode.getCodeDesc());
-				stockRow.add("" + order.getOrderQty() + " "+order.getUnit().getUnitName());
+				//stockRow.add(itemCode.getCodeDesc());
+				//stockRow.add("" + order.getOrderQty() + " "+order.getUnit().getUnitName());
 				stockRow.add("" + Util.getDateString(order.getDueDate(), "dd/MM/yyyy"));
 				stockRow.add("" + order.getOrderType());
 				strMap.put(String.valueOf(count++), stockRow);

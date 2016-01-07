@@ -123,7 +123,7 @@ public class RequisitionController {
 			for(Requisition requisition: requisitions){
 				for (RequisitionItem item : requisition.getRequisitionItems()) {
 					if (item.getFullFillmentStatus()==null || item.getFullFillmentStatus().equalsIgnoreCase("N")) {
-						if (item.getCurrentStatus()==null || item.getCurrentStatus().equalsIgnoreCase("R")) {
+						 
 						requisitionItemRow = new LinkedList<String>();
 						requisitionItemRow
 								.add("<input type='radio' name='requisitionItemId' value='"+item.getItemKey()+ "'>");
@@ -143,7 +143,7 @@ public class RequisitionController {
 								.getFullFillmentStatus()));
 
 						strMap.put(String.valueOf(count), requisitionItemRow);
-						}
+						
 					}
 				}
 				
