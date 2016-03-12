@@ -31,7 +31,9 @@
 <script src="<c:url value="/resources/js/railtech.js"/>"></script>
 
 <!-- Optional theme -->
-
+<link rel="icon" type="image/png"
+	href="<c:url value="/resources/images/n1.jpg"/>"
+	media="screen" />
 <link rel="stylesheet" type="text/css"
 	href="<c:url value="/resources/css/lib/jquery.dataTables.min.css"/>"
 	media="screen" />

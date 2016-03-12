@@ -9,6 +9,7 @@ import com.railtech.po.entity.Code;
 import com.railtech.po.entity.Firm;
 import com.railtech.po.entity.Item;
 import com.railtech.po.entity.PL;
+import com.railtech.po.entity.PurchaseOrder;
 import com.railtech.po.entity.Unit;
 import com.railtech.po.entity.User;
 import com.railtech.po.entity.Vendor;
@@ -58,6 +59,8 @@ public interface MasterInfoService {
 	public Set<Vendor> getVendors() throws RailtechException;
 
 	public Vendor getVendorById(String id);
+
+	
 	
 	
 

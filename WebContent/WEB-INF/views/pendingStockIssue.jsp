@@ -97,13 +97,13 @@ addRow();
 
 
 	function open() {
-		var requisitionId =  "";
+		var requisitionRefNo =  "";
 		var requisitionItemId ="";
 		var row = $('#flex1 tbody tr').has("input[name='requisitionItemId']:checked")
-		requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
+		requisitionRefNo =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
 		requisitionItemId = $(row).find("input[name='requisitionItemId']:checked").val();
-		if(requisitionId!='' && requisitionItemId !=''){
-			populateRequisitionItemPopup(requisitionId,requisitionItemId);
+		if(requisitionRefNo!='' && requisitionItemId !=''){
+			populateRequisitionItemPopup(requisitionRefNo,requisitionItemId);
 		}
 		
 
@@ -164,7 +164,7 @@ addRow();
 
 		var jsonRecord = {};
 		
-		url = 'getRequisitionByRefNo';
+		url = 'getRequisitionByRefNoForStockIssue';
 		
 		jsonRecord.id = refNo;
 		$.ajax({
@@ -176,6 +176,7 @@ addRow();
 			success : function(data) {
 				if(data!=null){
 						$("#requisitionId").val(data.requisitionId);
+						$("#reqItemId").val(reqItemId);
 						$("#requisitionRefNo").val(data.requisitionRefNo);
 						$("#dueDate").val(myDateFormatter(data.dueDate));
 						$("#user").val(data.requestedByUser.userId);
@@ -225,9 +226,9 @@ addRow();
 									+ count
 									+ "\" onclick=\"popPicker('"
 									+ count
-									+ "')\" / placeHolder=\"Click to pick item\" value=\""+data.requisitionItems[r].itemCode.codeId+" \" ></td>"
+									+ "')\" / placeHolder=\"Click to pick item\" value=\""+data.requisitionItems[r].itemCode.codeId+" \" style =\"width:70px;\"></td>"
 									+ " 	<td><input type=\"text\" name=\"pl_no"+count+"\""
-							+" 	id=\"pl_no"+count+"\" class=\"form-control\" placeholder=\"PL No\" value=\""+data.requisitionItems[r].itemCode.code+" \" /></td>"
+							+" 	id=\"pl_no"+count+"\" class=\"form-control\" placeholder=\"PL No\" value=\""+data.requisitionItems[r].itemCode.code+" \" style =\"width:140px;\" /></td>"
 									+ " <td><input type=\"text\" placeholder=\"Item Description\""
 							+" 	name=\"item_desc"+count+"\" id=\"item_desc"+count+"\""
 							+" 	class=\"form-control\" value=\""+data.requisitionItems[r].itemCode.codeDesc+" \"/></td>"
@@ -235,16 +236,18 @@ addRow();
 							+" 	name=\"availableQty"+count+"\" id=\"availableQty"+count+"\""
 							+" 	class=\"form-control\"  /><span id=\"availableQtyId"+count+"\"></span></td>"
 									+ " <td><input type=\"text\" class=\"form-control\""
-							+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\" value=\""+data.requisitionItems[r].qty+"\"></td>"
-									+ " <td><select class=\"form-control\" id=\"unit"+count+"\""
-							+" 	name=\"unit"+count+"\">"
-									+ " </select> "
+							+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\" value=\""+data.requisitionItems[r].qty+"\" style =\"width:70px;\" onkeypress=\"return numbersonly(this,event, true);\" onchange=\"qtyCheck();\"></td>"
+									+ " <td><input type=\"hidden\" class=\"form-control\""
+									+" 	id=\"unit"+count+"\" name=\"unit"+count+"\"  value=\""+data.requisitionItems[r].unit.unitId+"\" ><span class=\"form-control\" id=\"unit1"+count+"\""
+									+" 	name=\"unit1"+count+"\" value=\"\">"
+										+ " </span> "
 		
 									+ " </td>"
 		
 							$(newRow).html(content);
 							$(newRow).attr("id", "reqItemTableRow" + count);
-							getUnits('unit' + count);
+							//getUnits('unit' + count);
+							$("#unit1"+count).html(data.requisitionItems[r].unit.unitName);
 							getItemStock('#availableQtyId' + count,data.requisitionItems[r].itemCode.codeId, data.requestedAtWareHouse.wareId)
 							
 							$("#rowhid").val(++count);
@@ -258,7 +261,7 @@ addRow();
 								continue;
 							}
 							$("#priority"+existingRows).val(data.requisitionItems[r].priority);
-							$("#unit"+existingRows).val(data.requisitionItems[r].unit.unitId);
+							$("#unit"+existingRows).val(data.requisitionItems[r].unit.unitName);
 							existingRows++;
 						}
 		
@@ -276,6 +279,22 @@ addRow();
 		});
 	}
 
+	function qtyCheck(){
+		var count = $("#rowhid").val();
+		for(var r=1;r<count;r++){
+			var availQty = $("#availableQtyId"+r).html();
+			var Qty = $("#qty"+r).val();
+			if(Qty>availQty){
+				BootstrapDialog.alert('Qty can not be greater then Available Qty');
+				return;
+			}
+				
+		}
+		
+		
+	}
+	
+	
 	var dlg = new BootstrapDialog({
 		draggable : true,
 		type : BootstrapDialog.TYPE_SUCCESS
@@ -372,7 +391,7 @@ addRow();
 				+ count
 				+ "\" onclick=\"popPicker('"
 				+ count
-				+ "')\" / placeHolder=\"Click to pick item\"></td>"
+				+ "')\" / placeHolder=\"Click to pick item\" ></td>"
 				+ " 	<td><input type=\"text\" name=\"pl_no"+count+"\""
 		+" 	id=\"pl_no"+count+"\" class=\"form-control\" placeholder=\"PL No\" /></td>"
 				+ " <td><input type=\"text\" placeholder=\"Item Description\""
@@ -382,7 +401,7 @@ addRow();
 		+" 	name=\"availableQty"+count+"\" id=\"availableQty"+count+"\""
 		+" 	class=\"form-control\" /><span id=\"availableQtyId"+count+"\"></span></td>"
 				+ " <td><input type=\"text\" class=\"form-control\""
-		+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\"></td>"
+		+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\" onkeypress=\"return numbersonly(this,event, true);\"></td>"
 				+ " <td><select class=\"form-control\" id=\"unit"+count+"\""
 		+" 	name=\"unit"+count+"\">"
 				+ " </select> "
@@ -398,6 +417,39 @@ addRow();
 	function removeRow(count) {
 		$("#reqItemTableRow" + count).remove();
 	}
+	
+	 function numbersonly(form_element, e, decimal) {
+		 var key;
+		     var keychar;
+		     
+		     if (window.event) {
+		        key = window.event.keyCode;
+		     }
+		     else if (e) {
+		       key = e.which;
+		    }
+		    else {
+		       return true;
+		    }
+		    keychar = String.fromCharCode(key);
+		    
+		    if ((key==null) || (key==0) || (key==8) ||  (key==9) || (key==13) || (key==27) ) {
+		       return true;
+		    }
+		    else if ((("0123456789").indexOf(keychar) > -1)) {
+		       return true;
+		    }
+		    else if (decimal && (keychar == ".")) { 
+			if(form_element.value.indexOf('.')>0){
+				return false;
+			}
+		      return true;
+		    }
+		    else
+		       return false;
+		}
+	
+	
 </script>
 
 <div class="mainPanel">

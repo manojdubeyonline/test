@@ -2,6 +2,7 @@ package com.railtech.po.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -67,7 +68,7 @@ public class Requisition implements Serializable {
 	
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "requisition", cascade=CascadeType.ALL)
-	private Set<RequisitionItem> requisitionItems;
+	private List<RequisitionItem> requisitionItems;
 	
 
 	public Requisition() {
@@ -207,16 +208,18 @@ public class Requisition implements Serializable {
 	/**
 	 * @return the requisitionItems
 	 */
-	public Set<RequisitionItem> getRequisitionItems() {
+	public List<RequisitionItem> getRequisitionItems() {
 		return requisitionItems;
 	}
 
 	/**
 	 * @param requisitionItems the requisitionItems to set
 	 */
-	public void setRequisitionItems(Set<RequisitionItem> requisitionItems) {
+	public void setRequisitionItems(List<RequisitionItem> requisitionItems) {
 		this.requisitionItems = requisitionItems;
 	}
+
+	
 
 	
 	

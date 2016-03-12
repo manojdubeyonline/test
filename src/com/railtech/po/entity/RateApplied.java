@@ -30,8 +30,15 @@ public class RateApplied implements Serializable {
 	@JsonBackReference
 	private Rate rate;
 	
-	private Integer masterKeyId;
-	private Integer itemKeyId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="masterKeyId")
+	@JsonBackReference
+	private PurchaseOrder masterKeyId;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="itemKeyId")
+	@JsonBackReference
+	private PurchaseOrderItem itemKeyId;
 	private Double appliedAmount;
 	/**
 	 * @return the rate
@@ -48,25 +55,25 @@ public class RateApplied implements Serializable {
 	/**
 	 * @return the masterKeyId
 	 */
-	public Integer getMasterKeyId() {
+	public PurchaseOrder getMasterKeyId() {
 		return masterKeyId;
 	}
 	/**
 	 * @param masterKeyId the masterKeyId to set
 	 */
-	public void setMasterKeyId(Integer masterKeyId) {
+	public void setMasterKeyId(PurchaseOrder masterKeyId) {
 		this.masterKeyId = masterKeyId;
 	}
 	/**
 	 * @return the itemKeyId
 	 */
-	public Integer getItemKeyId() {
+	public PurchaseOrderItem getItemKeyId() {
 		return itemKeyId;
 	}
 	/**
 	 * @param itemKeyId the itemKeyId to set
 	 */
-	public void setItemKeyId(Integer itemKeyId) {
+	public void setItemKeyId(PurchaseOrderItem itemKeyId) {
 		this.itemKeyId = itemKeyId;
 	}
 	/**

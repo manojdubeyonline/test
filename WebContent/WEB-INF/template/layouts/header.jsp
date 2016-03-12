@@ -8,10 +8,11 @@
 		<li role="presentation" id="requisitionApproval"><a href="pendingPurchaseMarking">Requisition
 				Marking</a></li>
 		<li role="presentation" id="purchaseOrders"><a href="purchaseOrder">Purchase
-				Orders</a></li>
-		<li role="presentation"  id="orderApproval"><a href="purchaseOrderApproval">Order Approval</a></li>
-		<li role="presentation" id="grpo"><a href="grpo">GRPO</a></li>
-		<li role="presentation" id="grpoApproval"><a href="grpoApproval">GRPO Approval</a></li>
+				</a></li>
+		<li role="presentation"  id="orderApproval"><a href="purchaseOrderApproval">Purchase Orders</a></li>
+		<li role="presentation"  id="pendingWarehouse"><a href="pendingWarehouse">Warehouse</a></li>
+		<li role="presentation" id="grpo"><a href="grpo">GR</a></li>
+		<li role="presentation" id="grpoApproval"><a href="grpoApproval">GR Approval</a></li>
 		<li role="presentation" id="warehouseDisbursement"><a href="#stockAllocation">Stock Allocation</a></li>
 	</ul>
 	</div>

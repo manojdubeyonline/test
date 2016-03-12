@@ -5,6 +5,8 @@ package com.railtech.po.controller;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,9 +29,11 @@ import org.springframework.web.servlet.ModelAndView;
 import com.railtech.po.entity.Code;
 import com.railtech.po.entity.FlexiBean;
 import com.railtech.po.entity.GRPO;
+import com.railtech.po.entity.GRPOReceiptEntry;
 import com.railtech.po.entity.ModelForm;
 import com.railtech.po.entity.Procurement;
 import com.railtech.po.entity.PurchaseOrder;
+import com.railtech.po.entity.PurchaseOrderItem;
 import com.railtech.po.entity.Unit;
 import com.railtech.po.entity.User;
 import com.railtech.po.entity.Warehouse;
@@ -132,69 +136,112 @@ public class GRPOController {
 	public void saveGRPO(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		GRPO grpo = null;
-		
-		
-		
 		String grpoId = request.getParameter("grpoId");
+		Boolean isNew = Boolean.FALSE;
 
 		if (!StringUtils.isEmpty(grpoId)) {
 			grpo = grpoService.getGRPOById(Integer
 					.parseInt(grpoId));
 		} else {
 			grpo = new GRPO();
-		}
-		String itemCodeId = request.getParameter("item");
-
-		Integer codeId = Integer.parseInt(itemCodeId.trim());
-
-		Code itemCode = masterservice.getCodeById(codeId);
-		grpo.setItemCode(itemCode);
-		
-		String warehouseId = request.getParameter("warehouse");
-		
+			isNew = Boolean.TRUE;
+		}		
 		String orderId = request.getParameter("orderId");
 		
 		if((!StringUtils.isEmpty(orderId))){
 			PurchaseOrder purchaseOrder = purchaseService.getOrderById(Integer.parseInt(orderId));
 			grpo.setOrderId(purchaseOrder);
 		}
-				
-		String markingId = request.getParameter("marking_id");
-		
-		if((!StringUtils.isEmpty(markingId))){
-			Procurement procurementMarking = procurementService.getProcurementById(Integer.parseInt(markingId));
-			grpo.setMarkingId(procurementMarking);	
-		}
-		
 
-		String vendorDetails = request.getParameter("vendorDetails");
+		String vendorDetails = request.getParameter("vendor");
 		if(vendorDetails!=null){
 			
 			grpo.setVendorDetails(vendorDetails);
 		}
-		
-		
 		// User requestedByUser =((User)
 		// request.getSession().getAttribute("_SessionUser"));
 		User requestedByUser = masterservice.getUserById("27");
 		grpo.setAddedBy(requestedByUser);
 		grpo.setLastModifiedBy(requestedByUser);
-		grpo.setInwardDate(Util.getDate(request.getParameter("inward_date"),
-				"dd/MM/yyyy"));
-
-		grpo.setInwardQty(Float.parseFloat(request.getParameter("inward_qty")));
-		Integer unitId = Integer.parseInt(request.getParameter("unit"));
-
-		Unit itemUnit = masterservice.getUnitById(unitId);
-		grpo.setUnit(itemUnit);
 		
-		
-		
-		grpo.setBillAmount(Float.parseFloat(request.getParameter("billAmount")));
-		
-		
-	
-		grpo.setInwardComments(request.getParameter("inwardComments"));
+      grpo.setBillAmount(Float.parseFloat(request.getParameter("billAmount")));
+	  grpo.setInwardComments(request.getParameter("inwardComments"));
+	  grpo.setGrDate(Util.getDate(request.getParameter("gr_date"),"dd/MM/yyyy"));
+	  grpo.setVendorInvoiceDate(Util.getDate(request.getParameter("vendorInvoicedate"),"dd/MM/yyyy"));
+	  grpo.setVendorInvoiceNo(request.getParameter("vendorInvoiceNo"));
+	  grpo.setVehicleNo(request.getParameter("vehicleNo"));
+	  
+	  String rowCount = request.getParameter("rowhid");
+	  int maxRows = 0;
+	  if(null!=rowCount ){
+			maxRows = Integer.parseInt(rowCount);
+			}
+	  if(isNew || grpo.getGrpoReceiptItems() == null){
+		  grpo.setGrpoReceiptItems(new HashSet<GRPOReceiptEntry>());
+		}
+	  for(int i=0;i<maxRows;i++){
+		  
+		  String grpoEntryIdStr = request.getParameter("grpoItemId" + i);
+			Integer grpoEntryId = null!=grpoEntryIdStr?Integer.parseInt(grpoEntryIdStr.trim()):null;
+			Boolean isFound = Boolean.FALSE;
+			GRPOReceiptEntry grpoItem = null;
+			if(!isNew){
+				Iterator <GRPOReceiptEntry>itr = grpo.getGrpoReceiptItems().iterator();
+				while(itr.hasNext()){
+					GRPOReceiptEntry gre = itr.next();
+					if(gre.getGrpoEntryId() ==grpoEntryId){
+						isFound = Boolean.TRUE;
+						
+						grpoItem =gre;
+						break;
+					}
+				}
+			}
+			if(!isFound){
+				grpoItem = new GRPOReceiptEntry();
+			}
+		  
+		  
+		  if((!StringUtils.isEmpty(orderId))){
+				PurchaseOrder purchaseOrder = purchaseService.getOrderById(Integer.parseInt(orderId));
+				grpoItem.setOrderId(purchaseOrder);
+			}
+		  String markingId = request.getParameter("marking_id");
+			
+			if((!StringUtils.isEmpty(markingId))){
+				Procurement procurementMarking = procurementService.getProcurementById(Integer.parseInt(markingId));
+			   grpoItem.setMarkingId(procurementMarking);	
+			}
+			Double basicRate = 0.0;
+			String orderItemIdStr = request.getParameter("orderItemId"+i);
+			if((!StringUtils.isEmpty(orderItemIdStr))){
+				PurchaseOrderItem orderItemId = purchaseService.getOrderItemById(Integer.parseInt(orderItemIdStr));
+				basicRate = orderItemId.getBasicRate();
+				grpoItem.setOrderItemId(orderItemId);
+	          }
+			
+			grpoItem.setBasicRate(basicRate);
+			
+			String itemCodeId = request.getParameter("item"+i);
+            Integer codeId = Integer.parseInt(itemCodeId.trim());
+            Code itemCode = masterservice.getCodeById(codeId);
+			grpoItem.setItemCode(itemCode);
+			
+			grpoItem.setInwardQty(Float.parseFloat(request.getParameter("gr_Qty"+i)));
+			
+			Integer unitId = Integer.parseInt(request.getParameter("unit"+i));
+            Unit itemUnit = masterservice.getUnitById(unitId);
+			grpoItem.setUnit(itemUnit);
+			
+			
+			
+			grpoItem.setGrpo(grpo);
+			if(!isFound){
+				grpo.getGrpoReceiptItems().add(grpoItem);
+			}
+			
+	  }
+	  
 		grpoService.saveGRPO(grpo);
 
 	}
@@ -204,24 +251,57 @@ public class GRPOController {
 		logger.info("entering saveGRPOApproval");
 		GRPO grpo = null;
 		String grpoId = request.getParameter("grpoId");
-
+		Boolean isNew = Boolean.TRUE;
 		if (!StringUtils.isEmpty(grpoId)) {
 			grpo = grpoService.getGRPOById(Integer
 					.parseInt(grpoId));
+			isNew = Boolean.FALSE;
 		} else {
 			throw new Exception("Invalid Request");
 		}
 		
-	
-		
 		grpo.setApprovalComments(request.getParameter("approval_comments"));
 		grpo.setApprovalStatus(request.getParameter("approvalStatus"));
 		grpo.setApprovalDate(new Date());
+		String rejection_remarks = (request.getParameter("rejectRemaks"));
+		if (!StringUtils.isEmpty(rejection_remarks)) {
+			grpo.setRejectionComments(rejection_remarks);
+		}
 		
+
 		// User requestedByUser =((User)
 				// request.getSession().getAttribute("_SessionUser"));
 		User approvedByUser = masterservice.getUserById("27");
 		grpo.setApprovedBy(approvedByUser);
+		
+		  String rowCount = request.getParameter("rowhid");
+		  int maxRows = 0;
+		  if(null!=rowCount ){
+				maxRows = Integer.parseInt(rowCount);
+				}
+		  for(int i=0;i<maxRows;i++){
+			  String grpoEntryIdStr = request.getParameter("grpoItemId" + i);
+				Integer grpoEntryId = null!=grpoEntryIdStr?Integer.parseInt(grpoEntryIdStr.trim()):null;
+				
+				GRPOReceiptEntry grpoItem = null;
+				if(!isNew){
+					Iterator <GRPOReceiptEntry>itr = grpo.getGrpoReceiptItems().iterator();
+					while(itr.hasNext()){
+						GRPOReceiptEntry gre = itr.next();
+						if(gre.getGrpoEntryId() ==grpoEntryId){
+							grpoItem =gre;
+							break;
+						}
+					}
+				} 
+				grpoItem.setInwardQty(Float.parseFloat(request.getParameter("gr_Qty"+i)));
+				grpoItem.setBasicRate(Double.parseDouble(request.getParameter("basicRate"+i)));
+				
+		  }
+		  
+		
+		
+		
 		
 		grpoService.saveGRPO(grpo);
 		logger.info("exiting saveGRPOApproval");
@@ -246,7 +326,7 @@ public class GRPOController {
 							
 				stockRow = new LinkedList<String>();
 				
-				Code itemCode = grpo.getItemCode();
+				//Code itemCode = grpo.getItemCode();
 				
 				
 			
@@ -257,10 +337,30 @@ public class GRPOController {
 				stockRow.add(String.valueOf(++count));
 				stockRow.add(grpo.getOrderId().getPurchaseOrderNo());
 				
-				stockRow.add(masterservice.getFirmById((grpo.getMarkingId().getWarehouse().getFirmId())+"").getFirmName());
-				stockRow.add(itemCode.getCodeDesc());
-				stockRow.add(grpo.getInwardQty() + " "+grpo.getUnit().getUnitName());
-				stockRow.add(Util.getDateString(grpo.getInwardDate(), "dd/MM/yyyy"));
+				stockRow.add(masterservice.getFirmById((itemWareHouse.getFirmId())+"").getFirmName());
+				StringBuilder itemMarge = new StringBuilder();
+				StringBuilder itemQty = new StringBuilder();
+				StringBuilder dateMerge = new StringBuilder();
+				
+				for (GRPOReceiptEntry GRPOReceipt : grpo.getGrpoReceiptItems()){
+					itemMarge.append("<p>");
+					itemMarge.append( GRPOReceipt.getItemCode().getCodeDesc());
+					itemMarge.append("</p>");
+				
+					itemQty.append("<p>");
+					itemQty.append( "" + GRPOReceipt.getInwardQty() + " "+GRPOReceipt.getUnit().getUnitName());
+					itemQty.append("</p>");
+					
+					dateMerge.append("<p>");
+					//dateMerge.append(Util.getDateString(GRPOReceipt.getInwardDate(), "dd/MM/yyyy"));
+					dateMerge.append("</p>");
+				
+				}
+				stockRow.add(itemMarge.toString());
+				stockRow.add(itemQty.toString());
+				//stockRow.add(dateMerge.toString());
+				
+				stockRow.add(Util.getDateString(grpo.getGrDate(), "dd/MM/yyyy"));
 				stockRow.add(grpo.getAddedBy().getUserName());
 				strMap.put(String.valueOf(count), stockRow);
 			}
@@ -289,17 +389,35 @@ public class GRPOController {
 				
 				stockRow = new LinkedList<String>();
 				
-				Code itemCode = grpo.getItemCode();
-			
+				//Code itemCode = grpo.getItemCode();
+				Warehouse itemWareHouse = grpo.getOrderId().getWarehouse();
 				stockRow.add("<input type='radio' name='grpo_id' value='"
 						+ grpo.getGrpoId()+ "'>");
 				stockRow.add(String.valueOf(++count));
 				stockRow.add(grpo.getOrderId().getPurchaseOrderNo());
 				
-				stockRow.add(masterservice.getFirmById((grpo.getMarkingId().getWarehouse().getFirmId())+"").getFirmName());
-				stockRow.add(itemCode.getCodeDesc());
-				stockRow.add(grpo.getInwardQty() + " "+grpo.getUnit().getUnitName());
-				stockRow.add( Util.getDateString(grpo.getInwardDate(), "dd/MM/yyyy"));
+				stockRow.add(masterservice.getFirmById((itemWareHouse.getFirmId())+"").getFirmName());
+				StringBuilder itemMarge = new StringBuilder();
+				StringBuilder itemQty = new StringBuilder();
+				StringBuilder dateMerge = new StringBuilder();
+				
+				for (GRPOReceiptEntry GRPOReceipt : grpo.getGrpoReceiptItems()){
+					itemMarge.append("<p>");
+					itemMarge.append( GRPOReceipt.getItemCode().getCodeDesc());
+					itemMarge.append("</p>");
+				
+					itemQty.append("<p>");
+					itemQty.append( "" + GRPOReceipt.getInwardQty() + " "+GRPOReceipt.getUnit().getUnitName());
+					itemQty.append("</p>");
+					
+					dateMerge.append("<p>");
+					//dateMerge.append(Util.getDateString(GRPOReceipt.getInwardDate(), "dd/MM/yyyy"));
+					dateMerge.append("</p>");
+				
+				}
+				stockRow.add(itemMarge.toString());
+				stockRow.add(itemQty.toString());
+				stockRow.add(dateMerge.toString());
 				stockRow.add( grpo.getAddedBy().getUserName());
 				stockRow.add(grpo.getApprovalStatus().equalsIgnoreCase("Y")?"Approved":"Rejected");
 				

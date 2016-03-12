@@ -5,6 +5,8 @@ package com.railtech.po.service.impl;
 
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -14,6 +16,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -52,6 +55,7 @@ public class RequisitionServiceImpl implements RequisitionService {
 	@Transactional
 	public void saveOrUpdate(Requisition requisition) throws RailtechException {
 		Session session = sessionFactory.getCurrentSession();
+	
 		session.saveOrUpdate(requisition);
 		for(RequisitionItem i : requisition.getRequisitionItems()){
 			ItemStock its = getItemStock(i.getItemCode().getCodeId()+"", ""+requisition.getRequestedAtWareHouse().getWareId());
@@ -67,6 +71,7 @@ public class RequisitionServiceImpl implements RequisitionService {
 			}
 			updateItemStock(its);
 			i.setHistQty(i.getQty());
+			
 			session.saveOrUpdate(i);
 		}
 		
@@ -75,20 +80,21 @@ public class RequisitionServiceImpl implements RequisitionService {
 	}
 
 	@Override
-	public Set<Requisition> getRequisitions(FlexiBean requestParams)
+	public List<Requisition> getRequisitions(FlexiBean requestParams)
 			throws RailtechException {
 		logger.info("entering getRequisitions");
 		Session session = sessionFactory.getCurrentSession();
 		Query query = session
 				.createQuery("from Requisition requisition where requisition.fullFillmentStatus =:fullFillmentStatus  order by requisition.requestedDate").setString("fullFillmentStatus", "N");
 		@SuppressWarnings("unchecked")
-		Set<Requisition> requisitionList = new HashSet<Requisition>(
+		List<Requisition> requisitionList = new LinkedList<Requisition>(
 				query.list());
 		logger.debug("returnVal No of requisitions:" + requisitionList.size());
 		for(Requisition requisition: requisitionList){
 			if(null!=requisition){
 				Hibernate.initialize(requisition.getRequisitionItems());
 			}
+			
 		}
 		logger.info("exiting getRequisitions");
 		return requisitionList;
@@ -123,6 +129,25 @@ public class RequisitionServiceImpl implements RequisitionService {
 		logger.info("exiting getRequisitionByRequisitionId");
 		return requisition;
 	}
+	
+	@Override
+	@Transactional
+	public RequisitionItem getRequisitionItemById(Long requisitionItemId) {
+		logger.info("entering getRequisitionByRequisitionId");
+		logger.debug("param:" + requisitionItemId);
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session
+				.createQuery(
+						"from RequisitionItem requisitionItem where requisitionItem.itemKey =:requisitionItemId")
+				.setLong("requisitionItemId", requisitionItemId);
+		RequisitionItem requisitionItem = (RequisitionItem) query.uniqueResult();
+		
+		logger.debug("returnVal:" + requisitionItem.toString());
+		logger.info("exiting getRequisitionByRequisitionId");
+		return requisitionItem;
+	}
+	
+	
 	
 	@Override
 	public Requisition getRequisitionByRefNo(String refNo) {
@@ -230,14 +255,14 @@ public class RequisitionServiceImpl implements RequisitionService {
 	}
 	
 	@Override
-	public void saveItemIssue(ItemIssue itemIssue) {
+	public void saveItemIssued(ItemIssue itemIssue) {
 		logger.info("entering saveItemIssue");
 		Session session = sessionFactory.getCurrentSession();
 		session.saveOrUpdate(itemIssue);
 		logger.info("exiting saveItemIssue");
 		
 	}
-
+/*
 	@Override
 	public void saveItemIssue(Requisition requisition) {
 		logger.info("entering saveItemIssue");
@@ -259,15 +284,19 @@ public class RequisitionServiceImpl implements RequisitionService {
 			itemIssue.setIssuedBy(requisition.getRequestedByUser());
 			itemIssue.setIssueDate(requisition.getRequestedDate());
 			itemIssue.setIssueQty(item.getQty());
-			saveItemIssue(itemIssue);
+			saveItemIssued(itemIssue);
 			item.setFullFilledByUser(user);
 			item.setFullFillmentStatus("Y");
+			//item.setCurrentStatus("S");
 			saveOrUpdate(requisition);
 			
 		}
 		logger.info("exiting saveItemIssue");
 		
 	}
+
+*/
+
 
 
 }

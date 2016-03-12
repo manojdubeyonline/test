@@ -31,10 +31,6 @@ public class Procurement implements Serializable {
 	private Integer markingId;
 	
 	@ManyToOne
-	@JoinColumn(name="item_code_id")
-	private Code itemCode;
-	
-	@ManyToOne
 	@JoinColumn(name="warehouse_id")
 	private Warehouse warehouse;
 	
@@ -67,7 +63,7 @@ public class Procurement implements Serializable {
 	
 	@Column(name="due_date")
 	private Date dueDate;
-	
+
 	@Column(name="approval_date")
 	private Date approvalDate;
 	
@@ -78,7 +74,14 @@ public class Procurement implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastModified;
 
+	@ManyToOne
+	@JoinColumn(name="requisition_item_Id")
+	private RequisitionItem requisitionItemId;
 	
+	@ManyToOne
+	@JoinColumn(name="requisition_id")
+	private Requisition reqId;
+
 	public Procurement() {
 	}
 
@@ -90,16 +93,6 @@ public class Procurement implements Serializable {
 
 	public void setMarkingId(Integer markingId) {
 		this.markingId = markingId;
-	}
-
-
-	public Code getItemCode() {
-		return itemCode;
-	}
-
-
-	public void setItemCode(Code itemCode) {
-		this.itemCode = itemCode;
 	}
 
 
@@ -223,6 +216,16 @@ public class Procurement implements Serializable {
 	}
 
 
+	public RequisitionItem getRequisitionItemId() {
+		return requisitionItemId;
+	}
+
+
+	public void setRequisitionItemId(RequisitionItem requisitionItemId) {
+		this.requisitionItemId = requisitionItemId;
+	}
+
+
 	public Unit getUnit() {
 		return unit;
 	}
@@ -231,7 +234,16 @@ public class Procurement implements Serializable {
 	public void setUnit(Unit unit) {
 		this.unit = unit;
 	}
+	 
+	
+	public Requisition getReqId() {
+		return reqId;
+	}
 
+	public void setReqId(Requisition reqId) {
+		this.reqId = reqId;
+	}
+	
 	
 
 }

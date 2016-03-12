@@ -4,7 +4,6 @@
 package com.railtech.po.controller;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -32,14 +31,18 @@ import com.railtech.po.entity.FlexiBean;
 import com.railtech.po.entity.ItemIssue;
 import com.railtech.po.entity.ItemStock;
 import com.railtech.po.entity.ModelForm;
+import com.railtech.po.entity.Procurement;
 import com.railtech.po.entity.Requisition;
 import com.railtech.po.entity.RequisitionItem;
 import com.railtech.po.entity.Unit;
 import com.railtech.po.entity.User;
 import com.railtech.po.entity.Warehouse;
+import com.railtech.po.exeception.RailtechException;
 import com.railtech.po.service.MasterInfoService;
+import com.railtech.po.service.ProcurementService;
 import com.railtech.po.service.RequisitionService;
 import com.railtech.po.service.StockService;
+import com.railtech.po.util.POConstants;
 import com.railtech.po.util.Util;
 
 /**
@@ -56,6 +59,9 @@ public class RequisitionController {
 	
 	@Autowired
 	StockService stockService;
+	
+	@Autowired
+	ProcurementService procurementService;
 	
 	@Autowired
 	MasterInfoService masterservice;
@@ -78,7 +84,7 @@ public class RequisitionController {
 	public void getRequisitionList(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
 		FlexiBean params = new FlexiBean(request);
-		Set<Requisition> requisitions  = requisitionService.getRequisitions(params);
+		List<Requisition> requisitions  = requisitionService.getRequisitions(params);
 		List<String> requisitionRow = null;
 		Map<String, List<String>> strMap = new LinkedHashMap<String, List<String>>();
 		if(!CollectionUtils.isEmpty(requisitions)){
@@ -115,15 +121,36 @@ public class RequisitionController {
 	public void getPendingStockIssue(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
 		FlexiBean params = new FlexiBean(request);
-		Set<Requisition> requisitions  = requisitionService.getRequisitions(params);
+		List<Requisition> requisitions  = requisitionService.getRequisitions(params);
+		Set<ItemIssue> itemIssues  = stockService.getItemIssue(params);
+		List<Procurement> procurementMarkings = procurementService.getProcurements(params);
 		List<String> requisitionItemRow = null;
 		Map<String, List<String>> strMap = new LinkedHashMap<String, List<String>>();
 		if(!CollectionUtils.isEmpty(requisitions)){
 			int count = 0;
+			double issueQty =  0;
+			double procQty =  0;
+			double qty =  0;
 			for(Requisition requisition: requisitions){
 				for (RequisitionItem item : requisition.getRequisitionItems()) {
-					if (item.getFullFillmentStatus()==null || item.getFullFillmentStatus().equalsIgnoreCase("N")) {
-						 
+					//if (item.getFullFillmentStatus()==null || item.getFullFillmentStatus().equalsIgnoreCase("N")) {
+					procQty = 0;
+					for(Procurement procurement: procurementMarkings){
+						
+						if(item.getItemKey() == procurement.getRequisitionItemId().getItemKey() && requisition.getRequisitionId() == procurement.getReqId().getRequisitionId())
+						procQty = procQty + procurement.getProcurementQty();
+						
+					}
+					issueQty = 0;
+					for(ItemIssue itemIssue: itemIssues){
+						
+						if(item.getItemKey() == itemIssue.getRequisitionItem().getItemKey() && requisition.getRequisitionId() == itemIssue.getRequisition().getRequisitionId())
+						//for(ItemIssue itmIssue:itemIssues){
+							issueQty = issueQty + itemIssue.getIssueQty();
+						//}
+					}
+					qty = item.getQty()-(procQty + issueQty);
+					if (qty>0) {
 						requisitionItemRow = new LinkedList<String>();
 						requisitionItemRow
 								.add("<input type='radio' name='requisitionItemId' value='"+item.getItemKey()+ "'>");
@@ -131,7 +158,7 @@ public class RequisitionController {
 						requisitionItemRow.add(requisition.getRequisitionRefNo());
 					
 						requisitionItemRow.add(item.getItemCode().getCodeDesc());
-						requisitionItemRow.add(String.valueOf(item.getQty())+ "  "
+						requisitionItemRow.add(String.valueOf(qty)+ "  "
 								+ item.getUnit().getUnitName());
 						requisitionItemRow.add(Util.getDateString(
 								requisition.getRequestedDate(), "dd/MM/yyyy"));
@@ -199,7 +226,7 @@ public class RequisitionController {
 		}
 		
 		if(isNew || requisition.getRequisitionItems() ==null){
-			requisition.setRequisitionItems(new HashSet<RequisitionItem>());
+			requisition.setRequisitionItems(new LinkedList<RequisitionItem>());
 		}
 		for (int i = 0; i < maxRows; i++) {
 			String itemCodeId = request.getParameter("codeId" + i);
@@ -247,7 +274,7 @@ public class RequisitionController {
 
 	}
 	
-	
+	/*
 	@RequestMapping(value = { "/saveItemIssue" }, method = { RequestMethod.POST })
 	public void saveItemIssue(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
@@ -264,6 +291,72 @@ public class RequisitionController {
 		requisitionService.saveItemIssue(requisition);
 
 	}
+	*/
+	
+	@RequestMapping(value = { "/saveItemIssue" }, method = { RequestMethod.POST })
+	public void saveItemIssue(HttpServletRequest request, HttpServletResponse response) throws Exception
+	{
+		Requisition requisition =null;
+		Integer requisitionItemId = null;
+		String requisitionId = request.getParameter("requisitionId");
+		String requisitionRefNo = request.getParameter("requisitionRefNo");
+		String requisitionItem = request.getParameter("reqItemId");
+		if(requisitionItem != null && requisitionItem != ""){
+			 requisitionItemId = Integer.parseInt(requisitionItem.trim());
+		}
+		
+		if(!StringUtils.isEmpty(requisitionId)){
+			requisition = requisitionService.getRequisitionById(Long.parseLong(requisitionId));
+		}else{
+			saveRequisition(request, response);
+			requisition = requisitionService.getRequisitionByRefNo(requisitionRefNo);
+		}
+		
+		//requisitionService.saveItemIssue(requisition);
+		
+		String rowCount = request.getParameter("rowhid");
+		int maxRows = 0;
+		
+		if(null!=rowCount){
+			maxRows = Integer.parseInt(rowCount);
+		}
+		String qtyStr = null;
+		for (int i = 0; i < maxRows; i++) {
+			qtyStr = request.getParameter("qty"
+					+ i);
+			}
+		Double qty = Double.parseDouble(qtyStr.trim());
+		Warehouse warehouse = requisition.getRequestedAtWareHouse();
+		User user = requisition.getRequestedByUser();
+		for(RequisitionItem item : requisition.getRequisitionItems()){
+			if(requisitionItemId != item.getItemKey() && !StringUtils.isEmpty(requisitionId)){
+				continue;
+			}
+			ItemStock its = requisitionService.getItemStock(item.getItemCode().getCodeId()+"", ""+warehouse.getWareId());
+			Double availableQty = its.getAvailableQty();
+			if(availableQty<item.getQty()){
+				throw new RailtechException("The available qty is less than the issue qty");
+			}
+			its.setAvailableQty(availableQty - qty);
+			its.setRequisitionedQty(its.getRequisitionedQty()-qty);
+			requisitionService.updateItemStock(its);
+			ItemIssue itemIssue = new ItemIssue();
+			itemIssue.setRequisition(requisition);
+			itemIssue.setRequisitionItem(item);
+			itemIssue.setItemCode(item.getItemCode());
+			itemIssue.setIssuedBy(requisition.getRequestedByUser());
+			itemIssue.setIssueDate(requisition.getRequestedDate());
+			itemIssue.setIssueQty(qty);
+			requisitionService.saveItemIssued(itemIssue);
+			item.setFullFilledByUser(user);
+			item.setFullFillmentStatus("Y");
+			//item.setCurrentStatus("S");
+			requisitionService.saveOrUpdate(requisition);
+		}
+
+	}
+	
+	
 	@RequestMapping(value = { "/deleteRequisition" }, method = { RequestMethod.POST })
 	public  @ResponseBody String deleteRequisition(@RequestBody ModelForm modelRequest)
 	{
@@ -284,6 +377,29 @@ public class RequisitionController {
 	public  @ResponseBody Requisition getRequisitionByRefNo(@RequestBody ModelForm modelRequest)
 	{
 		Requisition requisition  = requisitionService.getRequisitionByRefNo(modelRequest.getId());
+		return requisition;
+	}
+	
+	@RequestMapping(value = { "/getRequisitionByRefNoForStockIssue" }, method = { RequestMethod.POST })
+	public  @ResponseBody Requisition getRequisitionByRefNoForStockIssue(@RequestBody ModelForm modelRequest)
+	{
+		Requisition requisition  = requisitionService.getRequisitionByRefNo(modelRequest.getId());
+		if(requisition !=null){
+			for(RequisitionItem item:requisition.getRequisitionItems()){
+				Double markedQty = 0.0;
+				Double issueQty = 0.0;
+				//if(item.getCurrentStatus().equals(POConstants.STATUS_MARKED)){
+					 markedQty = procurementService.getProcureQtyByReqItemId(item.getItemKey());
+					
+					//item.setQty(item.getQty()-markedQty);
+				//}
+				//if(item.getCurrentStatus().equals(POConstants.STATUS_PART_ISSUED)){
+					 issueQty = stockService.getIssuedQtyByReqItemId(item.getItemKey());
+					 
+				//}
+				item.setQty(item.getQty()-(markedQty+issueQty));
+			}
+		}
 		return requisition;
 	}
 	

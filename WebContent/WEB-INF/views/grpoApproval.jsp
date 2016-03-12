@@ -114,61 +114,102 @@ getUnits("unit");
 		
 
 	}
+	
+	
 
-	function populateGRPOApprovalPopup(grpoId) {
+function populateGRPOApprovalPopup(grpoId) {
 
-		var jsonRecord = {};
-		
-		url = 'getGRPOById';
-		
-		jsonRecord.id = grpoId;
-		
-		$.ajax({
-			url : url,
-			type : 'POST',
-			data : JSON.stringify(jsonRecord),
-			contentType : 'application/json',
-			dataType : 'json',
-			success : function(data) {
-				if(data!=null){
+	var jsonRecord = {};
+	
+	url = 'getGRPOById';
+	
+	jsonRecord.id = grpoId;
+	
+	$.ajax({
+		url : url,
+		type : 'POST',
+		data : JSON.stringify(jsonRecord),
+		contentType : 'application/json',
+		dataType : 'json',
+		success : function(data) {
+			if(data!=null){
+				$("#firm1").val(data.orderId.firm.firmName);
+				$("#firm").val(data.orderId.firm.firmId);
+				$("#vendor").val(data.orderId.vendor.vendorId); 
+				$("#orderNo").val(data.orderId.purchaseOrderNo); 
+				$("#orderId").val(data.orderId.orderId); 
+				$("#rate").val(data.billAmount);
+				$("#dueDate").val(myDateFormatter(data.orderId.dueDate));
+				$("#invoiceDate").val(myDateFormatter(data.vendorInvoiceDate));
+				$("#invoiceNo").val(data.vendorInvoiceNo);
+				$("#grpoId").val(data.grpoId);
+				$("#inwardRemarks").val(data.inwardComments);
+				$("#marking_id").val(data.orderId.markingId);
+				$("#grDate").val(myDateFormatter(data.grDate));
+				
+				var count = $("#rowhid").val();
+				
+				var tbl = document.getElementById("reqItemTable");
+				$("#reqItemTable").find("tr:gt(0)").remove();
+				
+				for(var r=0;r<data.grpoReceiptItems.length;r++){
+				var orderId = data.orderId.orderId;
+					var lastRow = tbl.rows.length;
+					var newRow = tbl.insertRow(lastRow);
 					
-					var itemCode = data.itemCode;
-					var warehouse = data.warehouse;
 					
-					$("#item").val(itemCode.codeId);
-					$("#item1").val(itemCode.codeDesc);
-					$("#qty").val(data.orderId.orderQty);
-					$("#inward_qty").val(data.inwardQty);
-					$("#billAmount").val(data.billAmount);
-					$("#dueDate").val(myDateFormatter(data.orderId.dueDate));
-					$("#inward_date").val(myDateFormatter(data.inwardDate));
-					$("#firm1").val(data.orderId.firm.firmName);
-					$("#firm").val(data.orderId.firm.firmId);
-					$("#unit").val(data.unit.unitId)
-					$("#unit1").val(data.unit.unitName)
-					$("#unitx").val(data.unit.unitName)
-					$("#marking_id").val(data.markingId)
-					$("#orderNo").val(data.orderId.purchaseOrderNo); 
-					$("#orderId").val(data.orderId);
-					$("#grpoId").val(data.grpoId);
-					$("#vendor").val(data.orderId.vendor.vendorId); 
-					$("#rate").val(data.orderId.rate); 
-					$("#orderRemarks").val(data.orderId.remarks); 
-					$("#inwardRemarks").val(data.inwardComments);
-					$('#modal-add-req').modal({
-						keyboard : true
-					});
-					$('#modal-add-req').modal("show");
-				}
-			},
-			error : function(data) {
-				BootstrapDialog.alert('Error Pulling GRPO Pending Approval Details' + data);
-				return;
+					
+					var itemCode = data.grpoReceiptItems[r].itemCode;
+
+					
+					var content = "<td>";
+					
+					content+="<input type=\"text\" name=\"item1"+count+"\""
+						+" 	id=\"item1"+count+"\"  value=\""+itemCode.code+" / "+itemCode.codeDesc+"\" class=\"form-control\" placeholder=\"Item Code / Item Description\"  style =\"width:320px;\" readonly=\"readonly\" />"
+						+ "<input type=\"hidden\" name=\"item"
+						+ count+ "\" id=\"item"+count+"\" value=\""+itemCode.codeId+"\" > <input type=\"hidden\" name=\"orderItemId"
+						+ count+ "\" id=\"orderItemId"+count+"\" value=\""+data.grpoReceiptItems[r].orderItemId.itemKey+"\" ><input type=\"hidden\" name=\"grpoItemId"
+						+ count+ "\" id=\"grpoItemId"+count+"\" value=\""+data.grpoReceiptItems[r].grpoEntryId+"\" ></td>"
+						
+								+ " <td><input type=\"text\" "
+						+" 	name=\"order_qty"+count+"\" id=\"order_qty"+count+"\""
+						+" 	class=\"form-control\" value=\""+data.grpoReceiptItems[r].inwardQty+"\" style =\"width:70px;\" readonly=\"readonly\" /></td>"
+						+ " <td><input type=\"text\" class=\"form-control\""
+						+" 	id=\"gr_Qty"+count+"\" name=\"gr_Qty"+count+"\" placeholder=\"Approval Qty\" value=\""+data.grpoReceiptItems[r].inwardQty+"\" style =\"width:80px;\" onkeypress=\"return numbersonly(this,event, true);\" onchange=\"qtyCheck();\"  ></td>"
+								
+								+ " <td><input type=\"hidden\" class=\"form-control\""
+								+" 	id=\"unit"+count+"\" name=\"unit"+count+"\"  value=\""+data.grpoReceiptItems[r].unit.unitId+"\" ><span class=\"form-control\" id=\"unit1"+count+"\""
+								+" 	name=\"unit1"+count+"\" value=\"\" style =\"width:70px;\">"
+									+ " </span> "
+
+								+ " </td>"
+								+ " <td> <input type=\"text\" class=\"form-control\"  value=\""+data.grpoReceiptItems[r].basicRate+"\" name=\"basicRate"+count+"\""
+								+ "id=\"basicRate"+count+"\" placeholder=\"Basic Rate\" /></td>"
+
+					$(newRow).html(content);				
+					   $(newRow).attr("id", "reqItemTableRow" + count);
+					   //document.getElementById("addButton").style.display = "none";
+					   //getItemOption('item'+count,orderId);	
+					    $("#unit1"+count).html(data.grpoReceiptItems[r].unit.unitName);
+					//$("#inward_date"+r).val(myDateFormatter(new Date()));
+					$("#rowhid").val(++count);
 			}
+				//$("#reqItemTable th:first-child").remove();
+					
+				$('#modal-add-req').modal({
+					keyboard : true
+				});
+				$('#modal-add-req').modal("show");
+			}
+			
+		},
+		error : function(data) {
+			BootstrapDialog.alert('Error Pulling GRPO Details' + data);
+			return;
+		}
 
-		});
-	}
-
+	});
+}
 	function remove() {
 		var recordId = $("input[name='requisitionId']:checked").val();
 		BootstrapDialog.confirm('Are you sure you want to delete?', function(result){
@@ -245,7 +286,7 @@ getUnits("unit");
 		});
 
 	}
-
+/*
 	function populateGRPOApprovalViewPopup(grpoId) {
 
 		var jsonRecord = {};
@@ -262,13 +303,13 @@ getUnits("unit");
 			dataType : 'json',
 			success : function(data) {
 				if(data!=null){
-					
+					for(var r=0;r<data.orderId.orderItems.length;r++){
 					var itemCode = data.itemCode;
 					var warehouse = data.warehouse;
 					
 					$("#item").val(itemCode.codeId);
 					$("#item1").val(itemCode.codeDesc);
-					$("#qty").val(data.orderId.orderQty);
+					$("#qty").val(data.orderId.orderItems[r].qty);
 					$("#inward_qty").val(data.inwardQty);
 					$("#billAmount").val(data.billAmount);
 					$("#dueDate").val(myDateFormatter(data.orderId.dueDate));
@@ -283,7 +324,7 @@ getUnits("unit");
 					$("#orderId").val(data.orderId);
 					$("#grpoId").val(data.grpoId);
 					$("#vendor").val(data.orderId.vendor.vendorId); 
-					$("#rate").val(data.orderId.rate); 
+					$("#rate").val(data.orderId.orderItems[r].basicRate); 
 					$("#orderRemarks").val(data.orderId.remarks); 
 					$("#inwardRemarks").val(data.inwardComments);
 					$("#approvalStatus").val(data.approvalStatus);
@@ -293,6 +334,7 @@ getUnits("unit");
 						});
 						$('#modal-add-req').modal("show");
 				}
+			  }
 			},
 			error : function(data) {
 				BootstrapDialog.alert('Error Pulling GRPO Approval Details' + data);
@@ -301,6 +343,102 @@ getUnits("unit");
 
 		});
 	}
+*/
+
+
+function populateGRPOApprovalViewPopup(grpoId) {
+
+	var jsonRecord = {};
+	
+	url = 'getGRPOById';
+	
+	jsonRecord.id = grpoId;
+	
+	$.ajax({
+		url : url,
+		type : 'POST',
+		data : JSON.stringify(jsonRecord),
+		contentType : 'application/json',
+		dataType : 'json',
+		success : function(data) {
+			if(data!=null){
+				$("#firm1").val(data.orderId.firm.firmName);
+				$("#firm").val(data.orderId.firm.firmId);
+				$("#vendor").val(data.orderId.vendor.vendorId); 
+				$("#orderNo").val(data.orderId.purchaseOrderNo); 
+				$("#orderId").val(data.orderId.orderId); 
+				$("#rate").val(data.billAmount);
+				$("#dueDate").val(myDateFormatter(data.orderId.dueDate));
+				$("#grpoId").val(data.grpoId);
+				$("#inwardRemarks").val(data.inwardComments);
+				$("#marking_id").val(data.orderId.markingId);
+				$("#approvalStatus").val(data.approvalStatus);
+				$("#approval_comments").val(data.approvalComments);
+				
+				var count = $("#rowhid").val();
+				
+				var tbl = document.getElementById("reqItemTable");
+				$("#reqItemTable").find("tr:gt(0)").remove();
+				
+				for(var r=0;r<data.grpoReceiptItems.length;r++){
+				var orderId = data.orderId.orderId;
+					var lastRow = tbl.rows.length;
+					var newRow = tbl.insertRow(lastRow);
+					
+					
+					
+					var itemCode = data.grpoReceiptItems[r].itemCode;
+
+					
+					var content = "<td>";
+					
+					content+="<input type=\"text\" name=\"item1"+count+"\""
+						+" 	id=\"item1"+count+"\"  value=\""+itemCode.code+" / "+itemCode.codeDesc+"\" class=\"form-control\" placeholder=\"Item Code / Item Description\"  style =\"width:320px;\" readonly=\"readonly\" />"
+						+ "<input type=\"hidden\" name=\"item"
+						+ count+ "\" id=\"item"+count+"\" value=\""+itemCode.codeId+"\" > <input type=\"hidden\" name=\"orderItemId"
+						+ count+ "\" id=\"orderItemId"+count+"\" value=\""+data.grpoReceiptItems[r].orderItemId.itemKey+"\" ><input type=\"hidden\" name=\"grpoItemId"
+						+ count+ "\" id=\"grpoItemId"+count+"\" value=\""+data.grpoReceiptItems[r].grpoEntryId+"\" ></td>"
+						
+								+ " <td><input type=\"text\" "
+						+" 	name=\"order_qty"+count+"\" id=\"order_qty"+count+"\""
+						+" 	class=\"form-control\" value=\""+data.grpoReceiptItems[r].orderItemId.qty+"\" style =\"width:70px;\" readonly=\"readonly\" /></td>"
+						+ " <td><input type=\"text\" class=\"form-control\""
+						+" 	id=\"Inward_Qty"+count+"\" name=\"Inward_Qty"+count+"\" placeholder=\"Inward Qty\" value=\""+data.grpoReceiptItems[r].inwardQty+"\" style =\"width:80px;\" onkeypress=\"return numbersonly(this,event, true);\" onchange=\"qtyCheck();\"  readonly=\"readonly\"></td>"
+								
+								+ " <td><input type=\"hidden\" class=\"form-control\""
+								+" 	id=\"unit"+count+"\" name=\"unit"+count+"\"  value=\""+data.grpoReceiptItems[r].unit.unitId+"\" ><span class=\"form-control\" id=\"unit1"+count+"\""
+								+" 	name=\"unit1"+count+"\" value=\"\" style =\"width:70px;\">"
+									+ " </span> "
+
+								+ " </td>"
+								+ " <td> <input type=\"text\" class=\"form-control\"  value=\""+myDateFormatter(data.grpoReceiptItems[r].inwardDate)+"\" name=\"inward_date"+count+"\""
+								+ "id=\"inward_date"+count+"\" placeholder=\"Inward Date (dd/mm/yyyy)\" readonly=\"readonly\" /></td>"
+
+					$(newRow).html(content);				
+					   $(newRow).attr("id", "reqItemTableRow" + count);
+					   //document.getElementById("addButton").style.display = "none";
+					   //getItemOption('item'+count,orderId);	
+					    $("#unit1"+count).html(data.grpoReceiptItems[r].unit.unitName);
+					$("#inward_date"+r).val(myDateFormatter(new Date()));
+					$("#rowhid").val(++count);
+			}
+				//$("#reqItemTable th:first-child").remove();
+					
+				$('#modal-add-req').modal({
+					keyboard : true
+				});
+				$('#modal-add-req').modal("show");
+			}
+			
+		},
+		error : function(data) {
+			BootstrapDialog.alert('Error Pulling GRPO Details' + data);
+			return;
+		}
+
+	});
+}
+
 
 	var dlg = new BootstrapDialog({
 		draggable : true,
@@ -370,7 +508,7 @@ getUnits("unit");
         <div class="panel panel-default" id="pendingPanel">
             <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#pendingContent">
                 <h6 class="panel-title">
-                    <small>GRPO Pending Approval</small><span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
+                    <small>Goods Receipt Approval</small><span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
                 </h6>
             </div>
            
@@ -382,7 +520,7 @@ getUnits("unit");
         <div class="panel panel-default" id="donePanel">
             <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#doneContent">
                <h5 class="panel-title">
-                    <small>GRPOs Approval Completed</small><span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
+                    <small>View Goods Receipt Approval</small><span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
                 </h5>
             </div>
         

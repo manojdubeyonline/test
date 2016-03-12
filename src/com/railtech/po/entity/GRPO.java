@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.persistence.*;
 
 import java.util.Date;
+import java.util.Set;
 import java.sql.Timestamp;
 
 
@@ -22,29 +23,11 @@ public class GRPO implements Serializable {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Integer grpoId;
 
-	@ManyToOne
-	@JoinColumn(name="marking_id")
-	private Procurement markingId;
+	
 
 	@ManyToOne
 	@JoinColumn(name="order_id")
 	private PurchaseOrder orderId;
-	
-	@ManyToOne
-	@JoinColumn(name="item_code_id")
-	private Code itemCode;
-	
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="inward_date")
-	private Date inwardDate;
-
-	@Column(name="inward_qty")
-	private Float inwardQty;
-
-	@ManyToOne
-	@JoinColumn(name="unit_id")
-	private Unit unit;
-	
 	
 	@ManyToOne
 	@JoinColumn(name="inward_added_by")
@@ -72,7 +55,27 @@ public class GRPO implements Serializable {
 	private String inwardComments;
 
 
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="gr_date")
+	private Date grDate;
+	
+	
 	private String isdisbursed;
+	
+	@Column(name="vendor_details")
+	private String vendorDetails;
+	
+	@Column(name="vendor_invoice_no")
+	private String vendorInvoiceNo;
+	
+	@Column(name="vendor_invoice_date")
+	private Date vendorInvoiceDate;
+	
+	@Column(name="vehicle_no")
+	private String vehicleNo;
+	
+	@Column(name="rejection_comments")
+	private String rejectionComments;
 	
 	@ManyToOne
 	@JoinColumn(name="last_modified_by")
@@ -81,8 +84,10 @@ public class GRPO implements Serializable {
 	@Column(name="last_updated")
 	private Timestamp lastUpdated;
 
-	@Column(name="vendor_details")
-	private String vendorDetails;
+	
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "grpo", cascade=CascadeType.ALL)
+	private Set<GRPOReceiptEntry> grpoReceiptItems;
 
 	public GRPO() {
 	}
@@ -102,20 +107,6 @@ public class GRPO implements Serializable {
 	}
 
 	/**
-	 * @return the markingId
-	 */
-	public Procurement getMarkingId() {
-		return markingId;
-	}
-
-	/**
-	 * @param markingId the markingId to set
-	 */
-	public void setMarkingId(Procurement markingId) {
-		this.markingId = markingId;
-	}
-
-	/**
 	 * @return the orderId
 	 */
 	public PurchaseOrder getOrderId() {
@@ -129,61 +120,7 @@ public class GRPO implements Serializable {
 		this.orderId = orderId;
 	}
 
-	/**
-	 * @return the itemCode
-	 */
-	public Code getItemCode() {
-		return itemCode;
-	}
-
-	/**
-	 * @param itemCode the itemCode to set
-	 */
-	public void setItemCode(Code itemCode) {
-		this.itemCode = itemCode;
-	}
-
-	/**
-	 * @return the inwardDate
-	 */
-	public Date getInwardDate() {
-		return inwardDate;
-	}
-
-	/**
-	 * @param inwardDate the inwardDate to set
-	 */
-	public void setInwardDate(Date inwardDate) {
-		this.inwardDate = inwardDate;
-	}
-
-	/**
-	 * @return the inwardQty
-	 */
-	public Float getInwardQty() {
-		return inwardQty;
-	}
-
-	/**
-	 * @param inwardQty the inwardQty to set
-	 */
-	public void setInwardQty(Float inwardQty) {
-		this.inwardQty = inwardQty;
-	}
-
-	/**
-	 * @return the unit
-	 */
-	public Unit getUnit() {
-		return unit;
-	}
-
-	/**
-	 * @param unit the unit to set
-	 */
-	public void setUnit(Unit unit) {
-		this.unit = unit;
-	}
+	
 
 	/**
 	 * @return the addedBy
@@ -284,6 +221,76 @@ public class GRPO implements Serializable {
 	}
 
 	/**
+	 * @return the grDate
+	 */
+	public Date getGrDate() {
+		return grDate;
+	}
+
+	/**
+	 * @param grDate the grDate to set
+	 */
+	public void setGrDate(Date grDate) {
+		this.grDate = grDate;
+	}
+
+	/**
+	 * @return the vendorInvoiceNo
+	 */
+	public String getVendorInvoiceNo() {
+		return vendorInvoiceNo;
+	}
+
+	/**
+	 * @param vendorInvoiceNo the vendorInvoiceNo to set
+	 */
+	public void setVendorInvoiceNo(String vendorInvoiceNo) {
+		this.vendorInvoiceNo = vendorInvoiceNo;
+	}
+
+	/**
+	 * @return the vendorInvoiceDate
+	 */
+	public Date getVendorInvoiceDate() {
+		return vendorInvoiceDate;
+	}
+
+	/**
+	 * @param vendorInvoiceDate the vendorInvoiceDate to set
+	 */
+	public void setVendorInvoiceDate(Date vendorInvoiceDate) {
+		this.vendorInvoiceDate = vendorInvoiceDate;
+	}
+
+	/**
+	 * @return the vihicleNo
+	 */
+	public String getVehicleNo() {
+		return vehicleNo;
+	}
+
+	/**
+	 * @param vihicleNo the vihicleNo to set
+	 */
+	public void setVehicleNo(String vehicleNo) {
+		this.vehicleNo = vehicleNo;
+	}
+
+	/**
+	 * @return the rejectionReason
+	 */
+	public String getRejectionComments() {
+		return rejectionComments;
+	}
+
+	/**
+	 * @param rejectionReason the rejectionReason to set
+	 */
+	public void setRejectionComments(String rejectionComments) {
+		this.rejectionComments = rejectionComments;
+	}
+
+	/**
 	 * @return the isdisbursed
 	 */
 	public String getIsdisbursed() {
@@ -338,6 +345,22 @@ public class GRPO implements Serializable {
 	public void setVendorDetails(String vendorDetails) {
 		this.vendorDetails = vendorDetails;
 	}
+
+	/**
+	 * @return the grpoReceiptItems
+	 */
+	public Set<GRPOReceiptEntry> getGrpoReceiptItems() {
+		return grpoReceiptItems;
+	}
+
+	/**
+	 * @param grpoReceiptItems the grpoReceiptItems to set
+	 */
+	public void setGrpoReceiptItems(Set<GRPOReceiptEntry> grpoReceiptItems) {
+		this.grpoReceiptItems = grpoReceiptItems;
+	}
+
+	
 
 
 }

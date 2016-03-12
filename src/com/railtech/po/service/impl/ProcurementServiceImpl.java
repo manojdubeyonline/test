@@ -4,6 +4,8 @@
 package com.railtech.po.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,6 +27,7 @@ import com.railtech.po.entity.Procurement;
 import com.railtech.po.exeception.RailtechException;
 import com.railtech.po.service.MasterInfoService;
 import com.railtech.po.service.ProcurementService;
+import com.sun.org.apache.xalan.internal.xsltc.util.IntegerArray;
 
 /**
  * @author MANOJ
@@ -66,6 +69,21 @@ public class ProcurementServiceImpl implements ProcurementService {
 		logger.info("entering getProcurementById");
 		return procurement;
 	}
+	
+	@Override
+	public Double getProcureQtyByReqItemId(Integer requisitionItemId) {
+		logger.info("entering getProcureQtyByReqItemId");
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from Procurement procurement where procurement.requisitionItemId.itemKey=:requisitionItemId").setInteger("requisitionItemId", requisitionItemId);
+		Procurement procurement = (Procurement)query.uniqueResult();
+		Double Qty = 0.0;
+		if(procurement != null){
+			Qty = procurement.getProcurementQty();
+		}
+		logger.info("entering getProcureQtyByReqItemId");
+		return Qty;
+	}
+
 
 	@Override
 	public void saveProcurementMarking(Procurement procurement){
@@ -90,5 +108,35 @@ public class ProcurementServiceImpl implements ProcurementService {
 		return markingList;
 
 	}
+	
+	@SuppressWarnings({ "unchecked" })
+	@Override
+	public List<Procurement> getProcurementByMultipleId(String procurementId)
+			throws RailtechException {
+		logger.info("entering getPurchaseOrder");
+		Session session = sessionFactory.getCurrentSession();
+		
+		String str[] = procurementId.split(",");
+		Integer id[] = new Integer[str.length]; 
+		for(int i=0;i<str.length;i++){
+		id[i]=Integer.parseInt(str[i]);
+		} 
+		
+		//List<Integer> ids = Arrays.asList(id);
+		Query query = session
+				.createQuery("from Procurement procurement where markingId in (:markingIds)");
+		query.setParameterList("markingIds",id);
+		
+		List<Procurement> markingList = new ArrayList<Procurement>(query.list());
+				
+		logger.debug("returnVal of markingList:" + markingList);
+
+		logger.info("exiting getPurchaseOrder");
+		return markingList;
+
+	}
+
+	
+
 
 }

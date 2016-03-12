@@ -104,6 +104,7 @@ function validateQty(){
 					</div>
 					
 					<input type="hidden" name="requisitionId" id="requisitionId"  />
+					<input type="hidden" name="reqItemId" id="reqItemId"  />
 				
 					<div class="panel panel-default">
 					<div class="panel-heading"> Requisition Items
@@ -153,6 +154,6 @@ function validateQty(){
 <style>
 .modal-dialog {
      padding: 15px;
-    width:80%;
+    width:90%;
 }
 </style>

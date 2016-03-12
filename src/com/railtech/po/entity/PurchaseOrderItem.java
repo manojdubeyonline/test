@@ -20,7 +20,7 @@ import org.codehaus.jackson.annotate.JsonBackReference;
 
 
 /**
- * The persistent class for the requisition_item database table.
+ * The persistent class for the purchase_order_item database table.
  * 
  */
 @Entity
@@ -38,6 +38,8 @@ public class PurchaseOrderItem implements Serializable {
 	@JsonBackReference
 	private PurchaseOrder purchaseOrder;
 	
+	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="requisitionId")
 	@JsonBackReference
@@ -68,6 +70,11 @@ public class PurchaseOrderItem implements Serializable {
 	private User modifiedByUser;
 
 	private double qty;
+
+	@Column(name="basic_rate")
+	private double basicRate;
+	
+	
 
 	@Column(name="hist_qty")
 	private double histQty;
@@ -191,7 +198,13 @@ public class PurchaseOrderItem implements Serializable {
 		this.qty = qty;
 	}
 
-	
+	public double getBasicRate() {
+		return basicRate;
+	}
+
+	public void setBasicRate(double basicRate) {
+		this.basicRate = basicRate;
+	}
 	public double getHistQty() {
 		return histQty;
 	}
@@ -256,6 +269,29 @@ public class PurchaseOrderItem implements Serializable {
 		this.remarks = remarks;
 	}
 	
+	public PurchaseOrder getPurchaseOrder() {
+		return purchaseOrder;
+	}
+
+	public void setPurchaseOrder(PurchaseOrder purchaseOrder) {
+		this.purchaseOrder = purchaseOrder;
+	}
+
+	public RequisitionItem getRequisitionItem() {
+		return requisitionItem;
+	}
+
+	public void setRequisitionItem(RequisitionItem requisitionItem) {
+		this.requisitionItem = requisitionItem;
+	}
+
+	public Set<RateApplied> getItemLevelRates() {
+		return itemLevelRates;
+	}
+
+	public void setItemLevelRates(Set<RateApplied> itemLevelRates) {
+		this.itemLevelRates = itemLevelRates;
+	}
 
 	@Override
 	public int hashCode() {

@@ -15,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 
@@ -49,9 +50,10 @@ public class User implements Serializable {
 
 	@Lob
 	private String remarks;
-
-	@Column(name="role_id")
-	private Integer roleId;
+	
+	@ManyToOne
+	@JoinColumn(name="role_id")
+	private Role userRole;
 
 	private String status;
 
@@ -134,12 +136,13 @@ public class User implements Serializable {
 		this.remarks = remarks;
 	}
 
-	public Integer getRoleId() {
-		return this.roleId;
+	
+	public Role getUserRole() {
+		return userRole;
 	}
 
-	public void setRoleId(Integer roleId) {
-		this.roleId = roleId;
+	public void setUserRole(Role userRole) {
+		this.userRole = userRole;
 	}
 
 	public String getStatus() {

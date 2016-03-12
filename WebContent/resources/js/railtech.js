@@ -1,3 +1,7 @@
+
+
+
+
 function generateRefNo() {
 		var modelRequest = {};
 		modelRequest.id = $("#firm").val();
@@ -19,6 +23,8 @@ function generateRefNo() {
 		});
 }
 
+
+
 function generateOrderNo(field, firmId) {
 	var modelRequest = {};
 	modelRequest.id = firmId
@@ -38,6 +44,27 @@ function generateOrderNo(field, firmId) {
 		}
 	});
 }
+
+function generateJobWorkNo(field, firmId) {
+	var modelRequest = {};
+	modelRequest.id = firmId
+	var sel = $("#" + field);
+	$.ajax({
+		url : 'generateJobWorkOrderNo',
+		type : 'POST',
+		data : JSON.stringify(modelRequest),
+		contentType : 'application/json',
+		success : function(data) {
+			if (data != null) {
+				$(sel).val(data);
+			}
+		},
+		error : function(data) {
+			BootstrapDialog.alert('Error Unable to generate the job work order no.');
+		}
+	});
+}
+
 	function getWarehouses(field) {
 		var sel = $("#" + field);
 		$.ajax({
@@ -56,7 +83,7 @@ function generateOrderNo(field, firmId) {
 			},
 			error : function(data) {
 				BootstrapDialog
-						.alert('Error Unable to pull the warehouse list');
+						.alert('Error Unable to pull the warehouse list ');
 			}
 		});
 
@@ -79,11 +106,59 @@ function generateOrderNo(field, firmId) {
 				}
 			},
 			error : function(data) {
-				BootstrapDialog.alert('Error Unable to pull the Firm list');
+				BootstrapDialog.alert('Error Unable to pull the Firm list ');
 			}
 		});
 
 	}
+	
+	function getReceiverFirm(field) {
+		var sel = $("#" + field);
+		$.ajax({
+			url : 'getFirms',
+			type : 'POST',
+			dataType : 'json',
+			contentType : 'application/json',
+
+			success : function(data) {
+				if (data != null) {
+					for (var i = 0; i < data.length; i++) {
+						sel.append('<option value="' + data[i].firmId + '">'
+								+ data[i].firmName + '</option>');
+					}
+				}
+			},
+			error : function(data) {
+				BootstrapDialog.alert('Error Unable to pull the Firm list ');
+			}
+		});
+
+	}
+	
+	function getFromFirm(field) {
+		var sel = $("#" + field);
+		$.ajax({
+			url : 'getFirms',
+			type : 'POST',
+			dataType : 'json',
+			contentType : 'application/json',
+
+			success : function(data) {
+				if (data != null) {
+					for (var i = 0; i < data.length; i++) {
+						sel.append('<option value="' + data[i].firmId + '">'
+								+ data[i].firmName + '</option>');
+					}
+				}
+			},
+			error : function(data) {
+				BootstrapDialog.alert('Error Unable to pull the Firm list ');
+			}
+		});
+
+	}
+	
+	
 	
 
 	function getFirmWarehouses(field, firmId, defaultVal) {
@@ -115,10 +190,49 @@ function generateOrderNo(field, firmId) {
 			},
 			error : function(data) {
 				BootstrapDialog
-						.alert('Error Unable to pull the warehouse list');
+						.alert('Error Unable to pull the warehouse list ');
 			}
 		});
 	}
+	
+	
+	
+	function getWarehouseFirm(field, firmId, defaultVal) {
+		var modelRequest = {};
+		modelRequest.id = firmId
+		var sel = $("#" + field);
+		$.ajax({
+			url : 'getFirmWarehouses',
+			type : 'POST',
+			dataType : 'JSON',
+			data : JSON.stringify(modelRequest),
+			contentType : 'application/json',
+
+			success : function(data) {
+				if (data != null) {
+					sel.html('<option value="" selected>Warehouse</option>');
+					
+					for (var i = 0; i < data.length; i++) {
+						if(defaultVal==data[i].wareId){
+							sel.append('<option value="' + data[i].wareId + '"selected >'
+									+ data[i].warehouseName + '</option>');
+						}else{
+							sel.append('<option value="' + data[i].wareId + '" >'
+									+ data[i].warehouseName + '</option>');
+						}
+						
+					}
+				}
+			},
+			error : function(data) {
+				BootstrapDialog
+						.alert('Error Unable to pull the warehouse list ');
+			}
+		});
+	}
+
+	
+	
 
 	function getFirmById(field, firmId) {
 		var modelRequest = {};
@@ -257,6 +371,9 @@ function generateOrderNo(field, firmId) {
 
 	}
 	
+	function getItemOption(field,id){
+		alert(id);
+	}
 
 	function myDateFormatter (dateObject) {
         var d = new Date(dateObject);
@@ -273,4 +390,35 @@ function generateOrderNo(field, firmId) {
 
         return date;
     }; 
+    
+    function numbersonly(form_element, e, decimal) {
+		 var key;
+		     var keychar;
+		     
+		     if (window.event) {
+		        key = window.event.keyCode;
+		     }
+		     else if (e) {
+		       key = e.which;
+		    }
+		    else {
+		       return true;
+		    }
+		    keychar = String.fromCharCode(key);
+		    
+		    if ((key==null) || (key==0) || (key==8) ||  (key==9) || (key==13) || (key==27) ) {
+		       return true;
+		    }
+		    else if ((("0123456789").indexOf(keychar) > -1)) {
+		       return true;
+		    }
+		    else if (decimal && (keychar == ".")) { 
+			if(form_element.value.indexOf('.')>0){
+				return false;
+			}
+		      return true;
+		    }
+		    else
+		       return false;
+		}
     

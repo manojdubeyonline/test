@@ -126,7 +126,7 @@ function validate(){
 <style>
 .modal-dialog {
      padding: 15px;
-    width:80%;
+    width:90%;
 }
 </style>
 <script>

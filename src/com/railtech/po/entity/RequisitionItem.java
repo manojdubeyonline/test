@@ -50,7 +50,7 @@ public class RequisitionItem implements Serializable {
 	private Integer priority;
 
 	private double qty;
-
+	
 	@Column(name="hist_qty")
 	private double histQty;
 	

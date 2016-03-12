@@ -22,11 +22,11 @@ public class Rate implements Serializable {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Column(name="rate_id")
 	private Integer rateId;
-	
 	private String rateName;
 	private String rateApplicableType;
-	private String percentage;
-	private String applicableFinancialYear;
+	private Double percentage;
+	private Date applicableToDate;
+    private Date applicableFromDate;
 	private Integer lastModifiedBy;
 	
 	@Temporal(TemporalType.TIMESTAMP)
@@ -57,21 +57,30 @@ public class Rate implements Serializable {
 		this.rateApplicableType = rateApplicableType;
 	}
 
-	public String getPercentage() {
+	public Double getPercentage() {
 		return percentage;
 	}
 
-	public void setPercentage(String percentage) {
+	public void setPercentage(Double percentage) {
 		this.percentage = percentage;
 	}
-	
-	public String getApplicableFinancialYear() {
-		return applicableFinancialYear;
+	public Date getApplicableToDate() {
+		return applicableToDate;
 	}
-	
-	public void setApplicableFinancialYear(String applicableFinancialYear) {
-		this.applicableFinancialYear = applicableFinancialYear;
+
+	public void setApplicableToDate(Date applicableToDate) {
+		this.applicableToDate = applicableToDate;
 	}
+
+	public Date getApplicableFromDate() {
+		return applicableFromDate;
+	}
+
+	public void setApplicableFromDate(Date applicableFromDate) {
+		this.applicableFromDate = applicableFromDate;
+	}
+
+	
 
 	/**
 	 * @return the lastModifiedBy

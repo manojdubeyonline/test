@@ -113,54 +113,134 @@ getUnits("unit");
 		
 
 	}
+	
+	
 
-	function populatePurchaseOrderApprovalPopup(orderId) {
+function populatePurchaseOrderApprovalPopup(orderId) {
 
-		var jsonRecord = {};
-		
-		url = 'getPurchaseOrderById';
-		
-		jsonRecord.id = orderId;
-		
-		$.ajax({
-			url : url,
-			type : 'POST',
-			data : JSON.stringify(jsonRecord),
-			contentType : 'application/json',
-			dataType : 'json',
-			success : function(data) {
-				if(data!=null){
+	var jsonRecord = {};
+	
+	url = 'getPurchaseOrderById';
+	
+	jsonRecord.id = orderId;
+	
+	$.ajax({
+		url : url,
+		type : 'POST',
+		data : JSON.stringify(jsonRecord),
+		contentType : 'application/json',
+		dataType : 'json',
+		success : function(data) {
+			if(data!=null){
+				
+				$("#firm").val(data.firm.firmId);
+				$("#firm1").val(data.firm.firmName);
+				$("#vendor").val(data.vendor.vendorId);
+				$("#orderNo").val(data.purchaseOrderNo);
+				$("#orderId").val(data.orderId);
+				$("#dueDate").val(myDateFormatter(data.dueDate));
+				
+				//generateOrderNo("orderNo",$("#firm").val());
+				var count = $("#rowhid").val();
+				var counter = $("#rowId").val();
+				//var counter=0;
+				var tbl = document.getElementById("reqItemTable");
+				$("#reqItemTable").find("tr:gt(0)").remove();
+				
+				
+				for(var r=0;r<data.orderItems.length;r++){
+					var lastRow = tbl.rows.length;
+					var newRow = tbl.insertRow(lastRow);
 					
-					var itemCode = data.itemCode;
-					var warehouse = data.warehouse;
+					var total = data.orderItems[r];
+					var rateAppliedId = null;
+					for(var k=0;k<total.itemLevelRates.length;k++){
+						$("#total").val(total.itemLevelRates[k].appliedAmount);
+						rateAppliedId = total.itemLevelRates[k].rateAppliedId;
+					}
+					var itemCode = data.orderItems[r].itemCode;
 					
-						$("#item").val(itemCode.codeId);
-						$("#item1").val(itemCode.codeDesc);
-						$("#qty").val(data.orderQty);
-						$("#dueDate").val(myDateFormatter(data.dueDate));
-						$("#firm1").val(data.firm.firmName);
-						$("#firm").val(data.firm.firmId);
-						$("#unit").val(data.unit.unitId)
-						$("#marking_id").val(data.markingId)
-						$("#orderNo").val(data.purchaseOrderNo); 
-						$("#orderId").val(data.orderId); 
-						$("#vendor").val(data.vendor.vendorId); 
-						$("#rate").val(data.rate); 
-						$("#orderRemarks").val(data.remarks); 
+					var content = "<td>";
+					
+					content+=" <input type=\"text\" class=\"form-control\" readonly name=\"itemCode"+count+"\""
+					+" 	id=\"itemCode"+count+"\" value=\""+itemCode.code+" \"/><input type=\"hidden\" name=\"item"
+					+ count+ "\" value=\""+itemCode.codeId+" \" ><input type=\"hidden\" name=\"itemKey"
+					+ count+ "\" value=\""+data.orderItems[r].itemKey+" \" ><input type=\"hidden\" name=\"rateAppliedId"
+					+ count+ "\" value=\""+rateAppliedId+" \" >"
+							
+							+ " </td>"
+							+ "<td><input type=\"text\" required readonly name=\"itemName"
+							+ count
+							+ "\""
+							+ " 	class=\"form-control\" id=\"itemName"
+							+ count
+							+ "\"  value=\""+itemCode.codeDesc+" \" ></td>"
+							
+							+ " <td><input type=\"hidden\" class=\"form-control\""
+							+" 	id=\"qty"+count+"\" name=\"qty"+count+"\"  value=\""+data.orderItems[r].histQty+"\" ><span class=\"form-control\""
+					+" 	id=\"qty1"+count+"\" name=\"qty1"+count+"\" placeholder=\"Quantity\" ></span></td>"
+					+ " <td><input type=\"text\" class=\"form-control\""
+					+" 	id=\"Order_Qty"+count+"\" name=\"Order_Qty"+count+"\" placeholder=\"Order Qty\" value=\""+data.orderItems[r].qty+"\" style =\"width:70px;\" readonly=\"readonly\"></td>"
+							+ " <td><input type=\"hidden\" class=\"form-control\""
+							+" 	id=\"unit"+count+"\" name=\"unit"+count+"\"  value=\""+data.orderItems[r].unit.unitId+"\" ><span class=\"form-control\" id=\"unit1"+count+"\""
+					+" 	name=\"unit1"+count+"\" value=\"\">"
+						+ " </span> "
+
+					+ " </td></td>"
+					$(newRow).html(content);
+					$(newRow).attr("id", "reqItemTableRow" + count);
+					
+					var nextRowHeader = tbl.rows.length;
+					var nextHeader =tbl.insertRow(nextRowHeader);
+					var headerContent="<td colspan=\"5\" class=\"active\">"
+						headerContent+="Rate Per Unit</td>"
+					$(nextHeader).html(headerContent);
 						
-						$('#modal-add-req').modal({
-							keyboard : true
-						});
-						$('#modal-add-req').modal("show");
-				}
-			},
-			error : function(data) {
-				BootstrapDialog.alert('Error Purchase Order Approval Details' + data);
-				return;
-			}
+						
+					var nextlastRow = tbl.rows.length;
+					var nextRow =tbl.insertRow(nextlastRow);
+					var nextContent ="<td colspan=\"5\">"
+						nextContent+="<table class=\"table table-bordered table-hover\" id=\"innerItemTable"+count+"\" width=\"100%\"><td><select class=\"form-control\" name=\"rateName"+count+counter+"\""
+					+" 	id=\"rateName"+count+counter+"\" readonly=\"readonly\">"
+					+ " 		<option value=\"0\">Basic Rate</option>"
+					+ " 		<option value=\"1\">Excise</option>"
+					+ " 		<option value=\"2\">Cess</option>"
+					+ " 		<option value=\"3\">Sales</option>"
+					+ " 		<option value=\"4\">Freight</option>"
+					+ " 		<option value=\"5\">Other Charges</option>"
+					+ " </select></td><td><input type=\"text\" class=\"form-control\""
+					+" 	id=\"rateValue"+count+counter+"\" name=\"rateValue"+count+counter+"\" placeholder=\"Rate Value\"  value=\""+data.orderItems[r].basicRate+"\"  onchange=\"purchaseRateCalc();\" readonly=\"readonly\"></td>"
+					+"<td><a href='#' onclick='addRow(" +count+")'><div class =\"btn-group\" style=\"float:right\"><button type=\"button\" class=\"btn btn-default\"><span class=\"glyphicon glyphicon-plus\" ></span></button></div></a><input type=\"hidden\" class=\"form-control\""
+					+" 	id=\"subTotal"+count+"\" name=\"subTotal"+count+"\" value=\"0\" ></td></table></td>"
 
-		});
-	}
+					
+					$(nextRow).html(nextContent);				
+					   $(nextRow).attr("id", "innerItemTableRow" + count);             
+					
+					//getUnits('unit' +count);
+					$("#qty1"+count).html(data.orderItems[r].histQty);
+					$("#unit1"+count).html(data.orderItems[r].unit.unitName);
+					$("#rowhid").val(++count);
+					$("#rowId").val(++counter);
+					$("#warehouse").val(data.warehouse.wareId);
+					
+					
+			}
+				$('#modal-add-req').modal({
+					keyboard : true
+				});
+				$('#modal-add-req').modal("show");
+			}
+			
+		},
+		error : function(data) {
+			BootstrapDialog.alert('Error Pulling Purchase Order Approval Details' + data);
+			return;
+		}
+
+	});
+}
+
 
 	function remove() {
 		var recordId = $("input[name='requisitionId']:checked").val();
@@ -208,11 +288,11 @@ getUnits("unit");
 		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
 		orderId = $(row).find("input[name='order_id']:checked").val();
 		if(orderId !=undefined && orderId !=null && orderId !=''){
-			populatePurchaseOrderViewPopup(orderId);
+			populatePurchaseOrderApprovalViewPopup(orderId);
 		}
 	}
-	
-	function populatePurchaseOrderViewPopup(orderId) {
+	/*
+	function populatePurchaseOrderApprovalViewPopup(orderId) {
 
 		var jsonRecord = {};
 		
@@ -228,22 +308,22 @@ getUnits("unit");
 			dataType : 'json',
 			success : function(data) {
 				if(data!=null){
-					
-					var itemCode = data.itemCode;
+					for(var r=0;r<data.orderItems.length;r++){
+						var itemCode = data.orderItems[r].itemCode;
 					var warehouse = data.warehouse;
 					
 						$("#item").val(itemCode.codeId);
 						$("#item1").val(itemCode.codeDesc);
-						$("#qty").val(data.orderQty);
+						$("#qty").val(data.orderItems[r].qty);
 						$("#dueDate").val(myDateFormatter(data.dueDate));
 						$("#firm1").val(data.firm.firmName);
 						$("#firm").val(data.firm.firmId);
-						$("#unit").val(data.unit.unitId)
+						$("#unit").val(data.orderItems[r].unit.unitId)
 						$("#marking_id").val(data.markingId)
 						$("#orderNo").val(data.purchaseOrderNo); 
 						$("#orderId").val(data.orderId); 
 						$("#vendor").val(data.vendor.vendorId); 
-						$("#rate").val(data.rate); 
+						$("#rate").val(data.orderItems[r].basicRate); 
 						$("#orderRemarks").val(data.remarks); 
 						$("#approval_comments").val(data.approvalComments); 
 						$("#approvalStatus").val(data.approvalStatus); 
@@ -252,6 +332,7 @@ getUnits("unit");
 						});
 						$('#modal-add-req').modal("show");
 				}
+			 }
 			},
 			error : function(data) {
 				BootstrapDialog.alert('Error Purchase Order Approval Details' + data);
@@ -260,6 +341,132 @@ getUnits("unit");
 
 		});
 	}
+*/
+
+
+function populatePurchaseOrderApprovalViewPopup(orderId) {
+
+	var jsonRecord = {};
+	
+	url = 'getPurchaseOrderById';
+	
+	jsonRecord.id = orderId;
+	
+	$.ajax({
+		url : url,
+		type : 'POST',
+		data : JSON.stringify(jsonRecord),
+		contentType : 'application/json',
+		dataType : 'json',
+		success : function(data) {
+			if(data!=null){
+				$("#firm").val(data.firm.firmId);
+				$("#firm1").val(data.firm.firmName);
+				$("#vendor").val(data.vendor.vendorId);
+				$("#orderNo").val(data.purchaseOrderNo);
+				$("#orderId").val(data.orderId);
+				$("#dueDate").val(myDateFormatter(data.dueDate));
+				$("#approvalStatus").val(data.approvalStatus);
+				
+				var count = $("#rowhid").val();
+				var counter = $("#rowId").val();
+				//var counter=0;
+				var tbl = document.getElementById("reqItemTable");
+				$("#reqItemTable").find("tr:gt(0)").remove();
+				
+				
+				for(var r=0;r<data.orderItems.length;r++){
+					var lastRow = tbl.rows.length;
+					var newRow = tbl.insertRow(lastRow);
+					
+					var total = data.orderItems[r];
+					var rateAppliedId = null;
+					for(var k=0;k<total.itemLevelRates.length;k++){
+						$("#total").val(total.itemLevelRates[k].appliedAmount);
+						rateAppliedId = total.itemLevelRates[k].rateAppliedId;
+					}
+					var itemCode = data.orderItems[r].itemCode;
+					
+					var content = "<td>";
+					
+					content+=" <input type=\"text\" class=\"form-control\" readonly name=\"itemCode"+count+"\""
+					+" 	id=\"itemCode"+count+"\" value=\""+itemCode.code+" \"/><input type=\"hidden\" name=\"item"
+					+ count+ "\" value=\""+itemCode.codeId+" \" ><input type=\"hidden\" name=\"itemKey"
+					+ count+ "\" value=\""+data.orderItems[r].itemKey+" \" ><input type=\"hidden\" name=\"rateAppliedId"
+					+ count+ "\" value=\""+rateAppliedId+" \" >"
+							
+							+ " </td>"
+							+ "<td><input type=\"text\" required readonly name=\"itemName"
+							+ count
+							+ "\""
+							+ " 	class=\"form-control\" id=\"itemName"
+							+ count
+							+ "\"  value=\""+itemCode.codeDesc+" \" ></td>"
+							
+							+ " <td><input type=\"hidden\" class=\"form-control\""
+							+" 	id=\"qty"+count+"\" name=\"qty"+count+"\"  value=\""+data.orderItems[r].histQty+"\" ><span class=\"form-control\""
+					+" 	id=\"qty1"+count+"\" name=\"qty1"+count+"\" placeholder=\"Quantity\" ></span></td>"
+					+ " <td><input type=\"text\" class=\"form-control\""
+					+" 	id=\"Order_Qty"+count+"\" name=\"Order_Qty"+count+"\" placeholder=\"Order Qty\" value=\""+data.orderItems[r].qty+"\" style =\"width:70px;\" readonly=\"readonly\"></td>"
+							+ " <td><input type=\"hidden\" class=\"form-control\""
+							+" 	id=\"unit"+count+"\" name=\"unit"+count+"\"  value=\""+data.orderItems[r].unit.unitId+"\" ><span class=\"form-control\" id=\"unit1"+count+"\""
+					+" 	name=\"unit1"+count+"\" value=\"\">"
+						+ " </span> "
+
+					+ " </td></td>"
+					$(newRow).html(content);
+					$(newRow).attr("id", "reqItemTableRow" + count);
+					
+					var nextRowHeader = tbl.rows.length;
+					var nextHeader =tbl.insertRow(nextRowHeader);
+					var headerContent="<td colspan=\"5\" class=\"active\">"
+						headerContent+="Rate Per Unit</td>"
+					$(nextHeader).html(headerContent);
+						
+						
+					var nextlastRow = tbl.rows.length;
+					var nextRow =tbl.insertRow(nextlastRow);
+					var nextContent ="<td colspan=\"5\">"
+						nextContent+="<table class=\"table table-bordered table-hover\" id=\"innerItemTable"+count+"\" width=\"100%\"><td><select class=\"form-control\" name=\"rateName"+count+counter+"\""
+					+" 	id=\"rateName"+count+counter+"\" readonly=\"readonly\">"
+					+ " 		<option value=\"0\">Basic Rate</option>"
+					+ " 		<option value=\"1\">Excise</option>"
+					+ " 		<option value=\"2\">Cess</option>"
+					+ " 		<option value=\"3\">Sales</option>"
+					+ " 		<option value=\"4\">Freight</option>"
+					+ " 		<option value=\"5\">Other Charges</option>"
+					+ " </select></td><td><input type=\"text\" class=\"form-control\""
+					+" 	id=\"rateValue"+count+counter+"\" name=\"rateValue"+count+counter+"\" placeholder=\"Rate Value\"  value=\""+data.orderItems[r].basicRate+"\"  onchange=\"purchaseRateCalc();\" readonly=\"readonly\"></td>"
+					+"<td><a href='#' onclick='addRow(" +count+")'><div class =\"btn-group\" style=\"float:right\"><button type=\"button\" class=\"btn btn-default\"><span class=\"glyphicon glyphicon-plus\" ></span></button></div></a><input type=\"hidden\" class=\"form-control\""
+					+" 	id=\"subTotal"+count+"\" name=\"subTotal"+count+"\" value=\"0\" ></td></table></td>"
+
+					
+					$(nextRow).html(nextContent);				
+					   $(nextRow).attr("id", "innerItemTableRow" + count);             
+					
+					//getUnits('unit' +count);
+					$("#qty1"+count).html(data.orderItems[r].histQty);
+					$("#unit1"+count).html(data.orderItems[r].unit.unitName);
+					$("#rowhid").val(++count);
+					$("#rowId").val(++counter);
+					$("#warehouse").val(data.warehouse.wareId);
+					
+					
+			}
+				$('#modal-add-req').modal({
+					keyboard : true
+				});
+				$('#modal-add-req').modal("show");
+			}
+			
+		},
+		error : function(data) {
+			BootstrapDialog.alert('Error Purchase Order Approval Details' + data);
+			return;
+		}
+
+	});
+}
 
 	function savePurchaseOrderApproval() {
 		$('.close').click();

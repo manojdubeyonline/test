@@ -133,6 +133,7 @@ getFirms("firm");
 		$("#reqItemTable").find("tr:gt(0)").remove();
 		addRow();
 	}
+	
 	function saveUpdateRequisition() {
 		$('.close').click();
 		$.ajax({
@@ -221,16 +222,19 @@ getFirms("firm");
 					+" 	name=\"item_desc"+count+"\" id=\"item_desc"+count+"\""
 					+" 	class=\"form-control\" value=\""+data.requisitionItems[r].itemCode.codeDesc+" \"/></td>"
 							+ " <td><input type=\"text\" class=\"form-control\""
-					+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\" value=\""+data.requisitionItems[r].qty+"\"></td>"
-							+ " <td><select class=\"form-control\" id=\"unit"+count+"\""
-					+" 	name=\"unit"+count+"\">"
-							+ " </select> "
+					+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\" value=\""+data.requisitionItems[r].qty+"\"  onkeypress=\"return numbersonly(this,event, true);\"></td>"
+							+ " <td><input type=\"hidden\" class=\"form-control\""
+							+" 	id=\"unit"+count+"\" name=\"unit"+count+"\"  value=\""+data.requisitionItems[r].unit.unitId+"\" ><span class=\"form-control\" id=\"unit1"+count+"\""
+							+" 	name=\"unit1"+count+"\" value=\"\">"
+								+ " </span> "
 
 							+ " </td>"
 
 					$(newRow).html(content);
 					$(newRow).attr("id", "reqItemTableRow" + count);
-					getUnits('unit' + count);
+					//getUnits('unit' + count);
+					//$("#unit"+ count).val(data.requisitionItems[r].unit.unitName);
+					$("#unit1"+count).html(data.requisitionItems[r].unit.unitName);
 					$("#rowhid").val(++count);
 
 					$("#warehouse").val(data.requestedAtWareHouse.wareId);
@@ -240,7 +244,7 @@ getFirms("firm");
 				
 				for(var r=0;r<data.requisitionItems.length;r++){
 					$("#priority"+existingRows).val(data.requisitionItems[r].priority);
-					$("#unit"+existingRows).val(data.requisitionItems[r].unit.unitId);
+					$("#unit"+existingRows).val(data.requisitionItems[r].unit.unitName);
 					existingRows++;
 				}
 
@@ -340,7 +344,7 @@ getFirms("firm");
 		+" 	name=\"item_desc"+count+"\" id=\"item_desc"+count+"\""
 		+" 	class=\"form-control\" /></td>"
 				+ " <td><input type=\"text\" class=\"form-control\""
-		+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\"></td>"
+		+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\" onkeypress=\"return numbersonly(this,event, true);\"></td>"
 				+ " <td><select class=\"form-control\" id=\"unit"+count+"\""
 		+" 	name=\"unit"+count+"\">"
 				+ " </select> "
@@ -355,6 +359,37 @@ getFirms("firm");
 	function removeRow(count) {
 		$("#reqItemTableRow" + count).remove();
 	}
+	
+	function numbersonly(form_element, e, decimal) {
+		 var key;
+		     var keychar;
+		     
+		     if (window.event) {
+		        key = window.event.keyCode;
+		     }
+		     else if (e) {
+		       key = e.whichs;
+		    }
+		    else {
+		       return true;
+		    }
+		    keychar = String.fromCharCode(key);
+		    
+		    if ((key==null) || (key==0) || (key==8) ||  (key==9) || (key==13) || (key==27) ) {
+		       return true;
+		    }
+		    else if ((("0123456789").indexOf(keychar) > -1)) {
+		       return true;
+		    }
+		    else if (decimal && (keychar == ".")) { 
+			if(form_element.value.indexOf('.')>0){
+				return false;
+			}
+		      return true;
+		    }
+		    else
+		       return false;
+		}
 </script>
 
 <table width="100%" id="flex1"></table>

@@ -1,8 +1,18 @@
 package com.railtech.po.entity;
 
 import java.io.Serializable;
-import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 
 /**
@@ -30,6 +40,18 @@ public class Role implements Serializable {
 
 	@Column(name="role_name")
 	private String roleName;
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "role", cascade=CascadeType.ALL)
+	List<AccessLevel> access;
+	
+		
+	public List<AccessLevel> getAccess() {
+		return access;
+	}
+
+	public void setAccess(List<AccessLevel> access) {
+		this.access = access;
+	}
 
 	public Role() {
 	}
@@ -73,5 +95,6 @@ public class Role implements Serializable {
 	public void setRoleName(String roleName) {
 		this.roleName = roleName;
 	}
+	
 
 }

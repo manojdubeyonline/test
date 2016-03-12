@@ -12,6 +12,38 @@ function validate(){
 		return false;
 	}
 }
+
+function numbersonly(form_element, e, decimal) {
+	 var key;
+	     var keychar;
+	     
+	     if (window.event) {
+	        key = window.event.keyCode;
+	     }
+	     else if (e) {
+	       key = e.whichs;
+	    }
+	    else {
+	       return true;
+	    }
+	    keychar = String.fromCharCode(key);
+	    
+	    if ((key==null) || (key==0) || (key==8) ||  (key==9) || (key==13) || (key==27) ) {
+	       return true;
+	    }
+	    else if ((("0123456789").indexOf(keychar) > -1)) {
+	       return true;
+	    }
+	    else if (decimal && (keychar == ".")) { 
+		if(form_element.value.indexOf('.')>0){
+			return false;
+		}
+	      return true;
+	    }
+	    else
+	       return false;
+	}
+
 	</script>
 <div class="modal fade" id="modal-add-req" role="dialog"
 	aria-hidden="true">
@@ -34,7 +66,8 @@ function validate(){
 							
 							<input type="hidden" 
 							id="associatedRequisitionItemId" name="associatedRequisitionItemId" >
-							
+							<input type="hidden" 
+							id="requisition_no" name="requisition_no" >
 							<input type="hidden" 
 							id="associatedRequisitionId" name="associatedRequisitionId" >
 							
@@ -74,10 +107,10 @@ function validate(){
 						<div class="row">
 							<div class="col-md-7">
 								<input type="text" class="form-control input-sm" id="qty"
-									name="qty" placeholder="enter marking qty">
+									name="qty" placeholder="enter marking qty" onkeypress="return numbersonly(this,event, true);">
 							</div>
 							<div class="col-md-5">
-								<select id="unit" name="unit" class="form-control"></select>
+								<input type="hidden" id="unit" name="unit" class="form-control" /><span id="unit1" class="form-control"></span>
 							</div>
 						</div>
 					</div>

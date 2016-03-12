@@ -17,10 +17,11 @@ $(document).ready(function(){
                {display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
                {display: 'Requisition Ref No', name : 'requisitionRefNo', sortable : true, align: 'left',width:120},
                {display: 'Item(s)', name : '', width:300, sortable : false, align: 'left'},
+               {display: 'Qty', name : 'qty', width:120, sortable : true, align: 'center'},
                {display: 'Request Date', name : 'requestedDate', width:120, sortable : true, align: 'center'},
                {display: 'Requested By', name : 'requestedByUser', width:120, sortable : true, align: 'center'},
                {display: 'Due Date', name : 'dueDate', width:120, sortable : true, align: 'center'},
-               {display: 'Status', name : 'fullFillmentStatus', width:120, sortable : true, align: 'center'},
+               //{display: 'Status', name : 'fullFillmentStatus', width:120, sortable : true, align: 'center'},
 		
 			
 			
@@ -101,13 +102,13 @@ getWarehouses("warehouse");
 
 
 	function add() {
-		//var requisitionId =  "";
-		var procurementItemId ="";
+		var requisitionRefNo =  "";
+		var requisitionItemId ="";
 		var row = $('#flex1 tbody tr').has("input[name='requisitionItemId']:checked")
-		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
-		procurementItemId = $(row).find("input[name='requisitionItemId']:checked").val();
-		if(procurementItemId !=''){
-			populateProcurementItemPopup(procurementItemId);
+		requisitionRefNo =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
+		requisitionItemId = $(row).find("input[name='requisitionItemId']:checked").val();
+		if(requisitionRefNo!='' && requisitionItemId !=''){
+			populateProcurementItemPopup(requisitionRefNo,requisitionItemId);
 		}
 		
 
@@ -145,7 +146,7 @@ getWarehouses("warehouse");
 			success : function(data) {
 				if(data!=null){
 					
-					var itemCode = data.itemCode;
+					var itemCode = data.requisitionItemId.itemCode;
 					var warehouse = data.warehouse;
 					
 						$("#item").val(itemCode.codeId);
@@ -225,13 +226,13 @@ getWarehouses("warehouse");
 	}
 
 	
-	function populateProcurementItemPopup(procItemId) {
+	function populateProcurementItemPopup(requisitionRefNo,requisitionItemId) {
 
 		var jsonRecord = {};
 		
-		url = 'getRequisitionByRefNo';
+		url = 'getRequisitionByRefNoForStockIssue';
 		
-		jsonRecord.id = procItemId;
+		jsonRecord.id = requisitionRefNo;
 		$.ajax({
 			url : url,
 			type : 'POST',
@@ -242,12 +243,17 @@ getWarehouses("warehouse");
 				if(data !=null){
 					
 					for(var r=0;r<data.requisitionItems.length;r++){
-					
-						$("#associatedRequisitionId").val(data.requisitionItems[r].requisition.requisitionId);
+						if(requisitionItemId!=data.requisitionItems[r].itemKey){
+							continue;
+						}
+						$("#associatedRequisitionId").val(data.requisitionId);
+						$("#requisition_no").val(data.requisitionRefNo);
 						$("#associatedRequisitionItemId").val(data.requisitionItems[r].itemKey);
 						$("#item1").val(data.requisitionItems[r].itemCode.codeDesc);
 						$("#item").val(data.requisitionItems[r].itemCode.codeId);
 						$("#qty").val(data.requisitionItems[r].qty);
+						$("#unit").val(data.requisitionItems[r].unit.unitId);
+						$("#unit1").html(data.requisitionItems[r].unit.unitName);
 					//	$("#dueDate").val(myDateFormatter(data.dueDate));
 						$("#firm").val(data.requestedForFirm.firmId);
 						//getFirmWarehouses('warehouse',warehouse.firmId,warehouse.wareId) 

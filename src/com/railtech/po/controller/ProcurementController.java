@@ -27,6 +27,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.railtech.po.entity.Code;
 import com.railtech.po.entity.FlexiBean;
+import com.railtech.po.entity.ItemIssue;
 import com.railtech.po.entity.ItemStock;
 import com.railtech.po.entity.ItemStockPK;
 import com.railtech.po.entity.ModelForm;
@@ -38,7 +39,9 @@ import com.railtech.po.entity.User;
 import com.railtech.po.entity.Warehouse;
 import com.railtech.po.service.MasterInfoService;
 import com.railtech.po.service.ProcurementService;
+import com.railtech.po.service.PurchaseService;
 import com.railtech.po.service.RequisitionService;
+import com.railtech.po.service.StockService;
 import com.railtech.po.util.Util;
 
 /**
@@ -52,9 +55,15 @@ public class ProcurementController {
 
 	@Autowired
 	RequisitionService requisitionService;
+	
+	@Autowired
+	PurchaseService purchaseService;
 
 	@Autowired
 	ProcurementService procurementService;
+	
+	@Autowired
+	StockService stockService;
 
 	@Autowired
 	MasterInfoService masterservice;
@@ -81,11 +90,17 @@ public class ProcurementController {
 		Integer codeId = Integer.parseInt(itemCodeId.trim());
 
 		Code itemCode = masterservice.getCodeById(codeId);
-		procurement.setItemCode(itemCode);
+		//procurement.setItemCode(itemCode);
 		String warehouseId = request.getParameter("warehouse");
 		Warehouse warehouse = masterservice.getWareHouseById(warehouseId);
 		procurement.setWarehouse(warehouse);
-
+		String requisitionItemId= request.getParameter("associatedRequisitionItemId");
+		RequisitionItem requisitionItem = requisitionService.getRequisitionItemById(Long.parseLong(requisitionItemId));
+		procurement.setRequisitionItemId(requisitionItem);
+		
+		String requisition= request.getParameter("associatedRequisitionId");
+		Requisition requisitionId = requisitionService.getRequisitionById(Long.parseLong(requisition));
+		procurement.setReqId(requisitionId);
 		// User requestedByUser =((User)
 		// request.getSession().getAttribute("_SessionUser"));
 		User requestedByUser = masterservice.getUserById("27");
@@ -99,14 +114,9 @@ public class ProcurementController {
 		Unit itemUnit = masterservice.getUnitById(unitId);
 		procurement.setUnit(itemUnit);
 		procurement.setProcurementType(request.getParameter("procurementType"));
+	
 		procurement.setDueDate(Util.getDate(request.getParameter("dueDate"),
 				"dd/MM/yyyy"));
-		
-		RequisitionItem reqItem = new RequisitionItem();
-		reqItem.setCurrentStatus("M");
-		
-		
-	
 		
 		procurementService.saveProcurementMarking(procurement);
 
@@ -150,22 +160,51 @@ public class ProcurementController {
 	public void getPendingStockIssue(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
 		FlexiBean params = new FlexiBean(request);
-		Set<Requisition> requisitions  = requisitionService.getRequisitions(params);
+		List<Requisition> requisitions  = requisitionService.getRequisitions(params);
+		List<Procurement> procurementMarkings = procurementService.getProcurements(params);
+		Set<ItemIssue> itemIssues  = stockService.getItemIssue(params);
 		List<String> requisitionItemRow = null;
 		Map<String, List<String>> strMap = new LinkedHashMap<String, List<String>>();
 		if(!CollectionUtils.isEmpty(requisitions)){
 			int count = 0;
+			double issueQty =  0;
+			double procQty =  0;
+			double qty =  0;
 			for(Requisition requisition: requisitions){
 				for (RequisitionItem item : requisition.getRequisitionItems()) {
-					if (item.getFullFillmentStatus()==null || item.getFullFillmentStatus().equalsIgnoreCase("N")) {
+					//if(item.getCurrentStatus().equalsIgnoreCase("S")){
+					//	continue;
+					//}
+					//if (item.getFullFillmentStatus()==null || item.getFullFillmentStatus().equalsIgnoreCase("N")) {
+					procQty = 0;
+					for(Procurement procurement: procurementMarkings){
+						
+						
+								if(requisition.getRequisitionId() == procurement.getReqId().getRequisitionId() && item.getItemKey() == procurement.getRequisitionItemId().getItemKey())
+							procQty = procQty + procurement.getProcurementQty();
+						
+					}
+					issueQty = 0;
+					for(ItemIssue itemIssue: itemIssues){
+						
+						if(requisition.getRequisitionId() == itemIssue.getRequisition().getRequisitionId() && item.getItemKey() == itemIssue.getRequisitionItem().getItemKey()){
+							
+							//for(ItemIssue itmIssue:itemIssues){
+								if(requisition.getRequisitionId() == itemIssue.getRequisition().getRequisitionId() && item.getItemKey() == itemIssue.getRequisitionItem().getItemKey())	
+							issueQty = issueQty + itemIssue.getIssueQty();
+						//}
+						}
+					}
+					qty = item.getQty()-(procQty + issueQty);
+					if (qty>0) {
 						requisitionItemRow = new LinkedList<String>();
 						requisitionItemRow
-								.add("<input type='radio' name='requisitionItemId' value='"+item.getRequisition().getRequisitionRefNo()+ "'>");
+								.add("<input type='radio' name='requisitionItemId' value='"+item.getItemKey()+ "'>");
 						requisitionItemRow.add(String.valueOf(++count));
 						requisitionItemRow.add(requisition.getRequisitionRefNo());
 					
 						requisitionItemRow.add(item.getItemCode().getCodeDesc());
-						requisitionItemRow.add(String.valueOf(item.getQty())+ "  "
+						requisitionItemRow.add(String.valueOf(qty)+ "  "
 								+ item.getUnit().getUnitName());
 						requisitionItemRow.add(Util.getDateString(
 								requisition.getRequestedDate(), "dd/MM/yyyy"));
@@ -199,7 +238,7 @@ public class ProcurementController {
 			for (Procurement marking : procurementMarkings) {
 				stockRow = new LinkedList<String>();
 				
-				Code itemCode = marking.getItemCode();
+				Code itemCode = marking.getRequisitionItemId().getItemCode();
 				Warehouse itemWareHouse = marking.getWarehouse();
 
 				stockRow.add("<input type='radio' name='marking_id' value='"
@@ -223,6 +262,19 @@ public class ProcurementController {
 			logger.info("entering getProcurementMarkingById");
 			Procurement procurementMarking = procurementService.getProcurementById(Integer.parseInt(requestForm.getId()));
 			logger.info("exiting getProcurementMarkingById");
+			return procurementMarking;
+	}
+	
+	@RequestMapping(value = { "/getMultipleProcurementMarkingById" }, method = { RequestMethod.POST })
+	public @ResponseBody List<Procurement> getMultipleProcurementMarkingById(HttpServletRequest request,
+			HttpServletResponse response, @RequestBody ModelForm requestForm) throws IOException {
+			logger.info("entering getMultipleProcurementMarkingById");
+			List<Procurement> procurementMarking = procurementService.getProcurementByMultipleId(requestForm.getId());
+			for(Procurement procurment : procurementMarking){
+				Double Qty = purchaseService.getOrderQtyById(procurment.getMarkingId());
+				procurment.setProcurementQty(procurment.getProcurementQty()-Qty);
+			}
+			logger.info("exiting getMultipleProcurementMarkingById");
 			return procurementMarking;
 	}
 	

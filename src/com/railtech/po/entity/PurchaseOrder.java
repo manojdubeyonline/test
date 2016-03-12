@@ -21,7 +21,7 @@ import javax.persistence.TemporalType;
 
 
 /**
- * The persistent class for the requisition_procurement_marking database table.
+ * The persistent class for the purchase_order database table.
  * 
  */
 @Entity
