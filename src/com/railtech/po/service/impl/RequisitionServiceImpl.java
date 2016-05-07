@@ -3,6 +3,7 @@
  */
 package com.railtech.po.service.impl;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.railtech.po.entity.FlexiBean;
 import com.railtech.po.entity.ItemIssue;
@@ -53,10 +55,11 @@ public class RequisitionServiceImpl implements RequisitionService {
 
 	@Override
 	@Transactional
-	public void saveOrUpdate(Requisition requisition) throws RailtechException {
+	public void saveOrUpdate(Requisition requisition,Boolean shallowSave) throws RailtechException {
 		Session session = sessionFactory.getCurrentSession();
 	
 		session.saveOrUpdate(requisition);
+		if(!shallowSave){
 		for(RequisitionItem i : requisition.getRequisitionItems()){
 			ItemStock its = getItemStock(i.getItemCode().getCodeId()+"", ""+requisition.getRequestedAtWareHouse().getWareId());
 			if(its==null){
@@ -74,18 +77,19 @@ public class RequisitionServiceImpl implements RequisitionService {
 			
 			session.saveOrUpdate(i);
 		}
+		}
 		
 		session.clear();
 
 	}
 
 	@Override
-	public List<Requisition> getRequisitions(FlexiBean requestParams)
-			throws RailtechException {
+	public List<Requisition> getRequisitions(FlexiBean requestParams){
+			 
 		logger.info("entering getRequisitions");
 		Session session = sessionFactory.getCurrentSession();
 		Query query = session
-				.createQuery("from Requisition requisition where requisition.fullFillmentStatus =:fullFillmentStatus  order by requisition.requestedDate").setString("fullFillmentStatus", "N");
+				.createQuery("from Requisition requisition where requisition.fullFillmentStatus =:fullFillmentStatus  order by requisition.requestedDate DESC").setString("fullFillmentStatus", "N");
 		@SuppressWarnings("unchecked")
 		List<Requisition> requisitionList = new LinkedList<Requisition>(
 				query.list());
@@ -100,7 +104,34 @@ public class RequisitionServiceImpl implements RequisitionService {
 		return requisitionList;
 
 	}
-
+	/*
+	@Override
+	public List<Requisition> getRequisitions(FlexiBean requestParams) {
+		logger.info("entering getRequisitions");
+		Session session = sessionFactory.getCurrentSession();
+		String strQry = "from Requisition requisition";
+		
+		Query query  =null;
+		
+		 if(!StringUtils.isEmpty(requestParams.getQuery())){
+			query = session.createQuery(strQry+ " where requisition."+requestParams.getQtype()+" like:"+requestParams.getQtype()).setString(requestParams.getQtype(), "%" + requestParams.getQuery() + "%");
+		}
+		else{
+			query = session.createQuery(strQry);
+		}
+		
+		
+		Query qry = query.setMaxResults(requestParams.getRp());
+		qry.setFirstResult(requestParams.getRp()*(requestParams.getPage()-1));
+		
+		@SuppressWarnings("unchecked")
+		List <Requisition> requisitionList = new ArrayList<Requisition>(qry.list());
+		//codeList.size();
+		logger.debug("returnVal No of requisitons:"+requisitionList.size());
+		logger.info("exiting getRequisitions");
+		return requisitionList;
+	}
+*/
 	@Override
 	@Transactional
 	public void delete(Requisition requisition) {
@@ -166,6 +197,9 @@ public class RequisitionServiceImpl implements RequisitionService {
 		logger.info("exiting getRequisitionByRefNo");
 		return requisition;
 	}
+	
+	
+	
 
 	@Override
 	public String generateRequisitionRefNo(String firmId, String storeId) {
@@ -229,6 +263,67 @@ public class RequisitionServiceImpl implements RequisitionService {
 		return refNo;
 	}
 
+	
+	@Override
+	public String generateIssueRefNo(String firmId, String warehouseId) {
+		logger.info("entering generateIssueRefNo");
+		logger.debug("param:firmId:" + firmId);
+		logger.debug("param:warehouseId:" + warehouseId);
+		Session session = sessionFactory.getCurrentSession();
+		
+		int month = 0;
+
+		Calendar cal = Calendar.getInstance();
+		month = cal.get(Calendar.MONTH);
+		month = month + 1;
+		int year = cal.get(Calendar.YEAR);
+		if (month < 4) {
+			year--;
+		}
+
+		String yyyy = "" + year;
+
+		Query query = session
+				.createQuery(" from  ItemIssue issue"
+						+ "  where issue.requisition.requestedForFirm.firmId=:firmId and issue.requisition.requestedAtWareHouse.wareId =:wareId and issue.issueRefNo like:refNo"
+						+ " order by issue.itemIssueId desc");
+
+		query.setInteger("firmId", Integer.parseInt(firmId));
+		query.setInteger("wareId", Integer.parseInt(warehouseId));
+		query.setString("refNo", "%" + yyyy);
+		query.setMaxResults(1);
+
+		ItemIssue issue = (ItemIssue) query.uniqueResult();
+		
+		String refNo = null;
+		if (issue != null) {
+			logger.debug("issue:" + issue);
+			String refCounter = issue.getIssueRefNo().substring(issue.getIssueRefNo().indexOf("/")+1,issue.getIssueRefNo().lastIndexOf("/"));
+
+			if (refCounter != null) {
+				refNo = "II-"
+						+ issue.getRequisition().getRequestedAtWareHouse()
+								.getWarehouseCode() + "/" + (Integer.parseInt(refCounter)+1) + "/"
+						+ yyyy;
+			}
+		}else{
+			logger.debug("issue:" + issue);
+			
+			Warehouse warehouse = masterInfoService.getWareHouseById(warehouseId);
+				
+			refNo = "II-"
+						+ warehouse.getWarehouseCode() + "/1/"
+						+ yyyy;
+			
+		}
+		logger.debug("returnVal:" + refNo.toString());
+		logger.info("exiting generateIssueRefNo");
+		return refNo;
+	}
+
+	
+	
+	
 	@Override
 	public ItemStock getItemStock(String itemCode, String warehouseId) {
 		logger.info("entering getItemStock");
@@ -253,6 +348,7 @@ public class RequisitionServiceImpl implements RequisitionService {
 		logger.info("exiting updateItemStock");
 
 	}
+	
 	
 	@Override
 	public void saveItemIssued(ItemIssue itemIssue) {

@@ -9,6 +9,7 @@ import java.util.Set;
 import com.railtech.po.entity.FlexiBean;
 import com.railtech.po.entity.ItemIssue;
 import com.railtech.po.entity.ItemStock;
+import com.railtech.po.entity.ItemStockPK;
 import com.railtech.po.entity.Requisition;
 import com.railtech.po.entity.RequisitionItem;
 import com.railtech.po.exeception.RailtechException;
@@ -25,7 +26,7 @@ public interface RequisitionService {
 
 	public List<Requisition> getRequisitions(FlexiBean requestParams) throws RailtechException;
 	
-	void saveOrUpdate(Requisition requisition) throws RailtechException;
+	void saveOrUpdate(Requisition requisition, Boolean shallowSave) throws RailtechException;
 
 	public String generateRequisitionRefNo(String firmId, String storeId);
 
@@ -40,6 +41,15 @@ public interface RequisitionService {
 	public void saveItemIssued(ItemIssue itemIssue);
 
 	public RequisitionItem getRequisitionItemById(Long requisitionItemId);
+
+	public String generateIssueRefNo(String firmId, String warehouseId);
+
+	//public List<Requisition> getRequisitions() throws RailtechException;
+
+	
+	
+
+	
 
 	
 

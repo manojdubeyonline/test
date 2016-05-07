@@ -1,27 +1,30 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-
+<style>
+.container{width:100%}
+</style>
 <script type="text/javascript">
 $(document).ready(function(){
-
-
+	//var w=screen.width;
+     var w = 1000;
 	$("#pendingStockIssue").attr("class","active");
-		var w=1000;
+		
 		$('#flex1').flexigrid({
 		url:'getPendingStockIssue',
 		method: 'POST',
 		dataType : 'json',
 	  
 	  colModel : [
-	       	{display: '', name : 'ite', width:w*0.035, sortable : false, align: 'center'},
-			{display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
-			{display: 'Requisition Ref No', name : 'requisitionRefNo', sortable : true, align: 'left',width:120},
-			{display: 'Item', name : '', width:300, sortable : true, align: 'left'},
-			{display: 'Qty', name : '', width:90, sortable : true, align: 'left'},
-			{display: 'Request Date', name : 'requestedDate', width:120, sortable : true, align: 'center'},
-			{display: 'Requested By', name : 'requestedByUser', width:120, sortable : true, align: 'center'},
-			{display: 'Due Date', name : 'dueDate', width:120, sortable : true, align: 'center'},
-			{display: 'Status', name : 'fullFillmentStatus', width:60, sortable : true, align: 'center'},
+	       	{display: '', name : 'ite', width:w*0.045, sortable : false, align: 'center'},
+			{display: 'Sr', name : '', width:w*0.045, sortable : false, align: 'center'},
+			{display: 'Requisition Ref No', name : 'requisitionRefNo', sortable : true, align: 'left',width:150},
+			{display: 'Item', name : '', width:400, sortable : true, align: 'left'},
+			{display: 'Available Qty', name : '', width:120, sortable : true, align: 'left'},
+			{display: 'Qty', name : '', width:120, sortable : true, align: 'left'},
+			{display: 'Request Date', name : 'requestedDate', width:150, sortable : true, align: 'center'},
+			{display: 'Requested By', name : 'requestedByUser', width:150, sortable : true, align: 'center'},
+			{display: 'Due Date', name : 'dueDate', width:150, sortable : true, align: 'center'},
+			{display: 'Status', name : 'fullFillmentStatus', width:90, sortable : true, align: 'center'},
 			
 			
 				],
@@ -46,7 +49,8 @@ $(document).ready(function(){
 		rp: 20,
 	//	showTableToggleBtn: true,//toggle button for the whole table
 		resizable: false,
-		//width: w,
+		//width: w*.80,
+		//height: screen.height*.50,
 		singleSelect: true
 
 	});
@@ -57,14 +61,15 @@ $(document).ready(function(){
 			dataType : 'json',
 		  
 		  colModel : [
-		       	{display: '', name : 'ite', width:w*0.035, sortable : false, align: 'center'},
-				{display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
+		       	{display: '', name : 'ite', width:w*0.045, sortable : false, align: 'center'},
+				{display: 'Sr', name : '', width:w*0.045, sortable : false, align: 'center'},
+				{display: 'Issue Ref No', name : 'requisitionRefNo', sortable : true, align: 'left',width:120},
 				{display: 'Requisition Ref No', name : 'requisitionRefNo', sortable : true, align: 'left',width:120},
-				{display: 'Item', name : '', width:300, sortable : true, align: 'left'},
-				{display: 'Issued Qty', name : '', width:90, sortable : true, align: 'left'},
-				{display: 'Request Date', name : 'requestedDate', width:120, sortable : true, align: 'center'},
-				{display: 'Issued By', name : 'requestedByUser', width:120, sortable : true, align: 'center'},
-				{display: 'Issued Date', name : 'dueDate', width:120, sortable : true, align: 'center'},
+				{display: 'Item', name : '', width:360, sortable : true, align: 'left'},
+				{display: 'Issued Qty', name : '', width:120, sortable : true, align: 'right'},
+				{display: 'Request Date', name : 'requestedDate', width:150, sortable : true, align: 'center'},
+				{display: 'Issued By', name : 'requestedByUser', width:150, sortable : true, align: 'center'},
+				{display: 'Issued Date', name : 'dueDate', width:150, sortable : true, align: 'center'},
 				
 				
 				
@@ -83,14 +88,22 @@ $(document).ready(function(){
 			rp: 20,
 		//	showTableToggleBtn: true,//toggle button for the whole table
 			resizable: false,
-			//width: w,
+			//width: w*.80,
 			singleSelect: true
 
 		});
-getUsers('user');
+//getUsers('user');
 //getItems("item");
 //getFirms("firm");
 //getWarehouses("warehouse");
+
+
+var user =${_SessionUser.userId};
+
+getUserFirms("firm",user)
+
+
+
 addRow();
    
 });
@@ -105,7 +118,8 @@ addRow();
 		if(requisitionRefNo!='' && requisitionItemId !=''){
 			populateRequisitionItemPopup(requisitionRefNo,requisitionItemId);
 		}
-		
+		//$("#addItem").attr("disabled","disabled");
+		$("#addItem").hide();
 
 	}
 	
@@ -135,7 +149,8 @@ addRow();
 		$("#reqItemTable").find("tr:gt(0)").remove();
 		addRow();
 		
-		$('#modal-add-req').modal.show()
+		$('#modal-add-req').modal.show();
+		$("#addItem").removeAttr("disabled");
 	}
 	function saveItemIssue() {
 		$('.close').click();
@@ -148,6 +163,10 @@ addRow();
 				BootstrapDialog.alert('Item issue saved successfully.');
 				$('#flex1').flexOptions({
 					url : "getPendingStockIssue",
+					newp : 1
+				}).flexReload();
+				$('#flex2').flexOptions({
+					url : "getStockIssuedHistory",
 					newp : 1
 				}).flexReload();
 				return;
@@ -177,15 +196,17 @@ addRow();
 				if(data!=null){
 						$("#requisitionId").val(data.requisitionId);
 						$("#reqItemId").val(reqItemId);
-						$("#requisitionRefNo").val(data.requisitionRefNo);
-						$("#dueDate").val(myDateFormatter(data.dueDate));
 						$("#user").val(data.requestedByUser.userId);
-						getUserFirms('firm',data.requestedByUser.userId);
+						getUserFirms('firm',data.requestedByUser.userId,data.requestedForFirm.firmId);
 						$("#firm").val(data.requestedForFirm.firmId);
 						getFirmWarehouses('warehouse', data.requestedForFirm.firmId,data.requestedAtWareHouse.wareId) 
-						$("#warehouse").val(data.requestedAtWareHouse.wareId);
+						$("#warehouseId").val(data.requestedAtWareHouse.wareId);
+						$("#firmId").val(data.requestedForFirm.firmId);
+						generateIssueRefNo(data.requestedForFirm.firmId,data.requestedAtWareHouse.wareId);
+						$("#issueRefNo").val();
+						$("#dueDate").val(myDateFormatter(data.dueDate));
 						
-                         
+
 						$("#requisitionRefNo").attr('disabled', 'disabled');
 						$("#warehouse").attr('disabled', 'disabled');
 						$("#user").attr('disabled', 'disabled');
@@ -454,10 +475,10 @@ addRow();
 
 <div class="mainPanel">
     <div class="panel-group" id="accordion">
-        <div class="panel panel-default" id="pendingPanel">
+        <div class="panel panel-default" id="pendingPanel" >
             <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#pendingContent">
                 <h4 class="panel-title">
-                   Pending Stock Issue<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
+                   <strong>Pending Stock Issue</strong><span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
                 </h4>
             </div>
            
@@ -466,10 +487,10 @@ addRow();
                 </div>
            
         </div>
-        <div class="panel panel-default" id="donePanel">
+        <div class="panel panel-default" id="donePanel" >
             <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#doneContent">
                <h4 class="panel-title">
-                   Stock Issued History<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
+                   <strong>Stock Issued History</strong><span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
                 </h4>
             </div>
         

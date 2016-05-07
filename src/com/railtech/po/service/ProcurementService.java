@@ -14,5 +14,7 @@ public interface ProcurementService {
 	public List<Procurement> getProcurements(FlexiBean requestParams);
 	public List<Procurement> getProcurementByMultipleId(String procurementId);
 	public void saveProcurementMarking(Procurement procurement);
-	public Double getProcureQtyByReqItemId(Integer requisitionItemId);
+	public List<Procurement> getProcureQtyByReqItemId(Integer requisitionItemId);
+	public List<Procurement> getProcurementQtyByReqItemId(Integer requisitionItemId);
+	public List<Procurement> getProcurements() throws RailtechException;
 }

@@ -78,6 +78,17 @@ public class RequisitionController {
 		return new ModelAndView("pendingStockIssue");
 	}
 	
+	@RequestMapping(value = { "/generateIssueRefNo" }, method = { RequestMethod.POST })
+	public  @ResponseBody String generateIssueRefNo(@RequestBody ModelForm modelRequest)
+	{
+		String  firmId = modelRequest.getId();
+		String warehouseId = modelRequest.getId2();
+		
+		String issueRefNo = requisitionService.generateIssueRefNo(firmId, warehouseId);
+		
+		return issueRefNo;
+		
+	}
 	 
 		
 	@RequestMapping(value = { "/getRequisitions" }, method = { RequestMethod.POST })
@@ -85,11 +96,21 @@ public class RequisitionController {
 	{
 		FlexiBean params = new FlexiBean(request);
 		List<Requisition> requisitions  = requisitionService.getRequisitions(params);
+		User currentUser =((User) request.getSession().getAttribute("_SessionUser"));
 		List<String> requisitionRow = null;
 		Map<String, List<String>> strMap = new LinkedHashMap<String, List<String>>();
 		if(!CollectionUtils.isEmpty(requisitions)){
 			int count = 0;
 			for(Requisition requisition: requisitions){
+				//if(!currentUser.getUserWarehouses().contains(requisition.getRequestedAtWareHouse())){
+				//	continue;
+				//}
+				//if(!currentUser.getUserWarehouses().contains(requisition.getRequestedAtWareHouse())){
+					//continue;
+				for(Warehouse warehouse:currentUser.getUserWarehouses()){
+					if(warehouse.getWareId().intValue() == requisition.getRequestedAtWareHouse().getWareId().intValue()){
+						
+					
 				requisitionRow =  new LinkedList<String>();
 				requisitionRow.add("<input type='radio' name='requisitionId' value='"+requisition.getRequisitionId()+"'>");
 				requisitionRow.add(String.valueOf(++count));
@@ -112,8 +133,11 @@ public class RequisitionController {
 				
 				
 				strMap.put(String.valueOf(count), requisitionRow);
+					}
+				}
+				}
 			}
-		}
+		//}
 		Util.doWriteFlexi(request, response, strMap, params);
 	}
 	
@@ -134,6 +158,12 @@ public class RequisitionController {
 			for(Requisition requisition: requisitions){
 				for (RequisitionItem item : requisition.getRequisitionItems()) {
 					//if (item.getFullFillmentStatus()==null || item.getFullFillmentStatus().equalsIgnoreCase("N")) {
+					ItemStock its = requisitionService.getItemStock(item.getItemCode().getCodeId()+"", ""+requisition.getRequestedAtWareHouse().getWareId());
+					if(its == null){
+						continue;
+					}
+					Double availQty = its.getAvailableQty();
+					
 					procQty = 0;
 					for(Procurement procurement: procurementMarkings){
 						
@@ -150,7 +180,10 @@ public class RequisitionController {
 						//}
 					}
 					qty = item.getQty()-(procQty + issueQty);
-					if (qty>0) {
+					if(availQty>0 && issueQty == 0){
+						qty = item.getQty();
+					}
+					if (qty>0 && availQty>0) {
 						requisitionItemRow = new LinkedList<String>();
 						requisitionItemRow
 								.add("<input type='radio' name='requisitionItemId' value='"+item.getItemKey()+ "'>");
@@ -158,8 +191,11 @@ public class RequisitionController {
 						requisitionItemRow.add(requisition.getRequisitionRefNo());
 					
 						requisitionItemRow.add(item.getItemCode().getCodeDesc());
+						requisitionItemRow.add(String.valueOf(availQty)+ "  "
+								+ item.getUnit().getUnitName());
 						requisitionItemRow.add(String.valueOf(qty)+ "  "
 								+ item.getUnit().getUnitName());
+						
 						requisitionItemRow.add(Util.getDateString(
 								requisition.getRequestedDate(), "dd/MM/yyyy"));
 						requisitionItemRow.add(requisition.getRequestedByUser()
@@ -173,6 +209,7 @@ public class RequisitionController {
 						
 					}
 				}
+				
 				
 			}
 		}
@@ -202,18 +239,21 @@ public class RequisitionController {
 		requisition.setRequestedForFirm(firm);
 		requisition.setRequisitionRefNo(requisitionRefNo);
 		
+		requisition.setRemarks(request.getParameter("remaks"));
+		
 		String warehouseId = request.getParameter("warehouse");
 		Warehouse warehouse = masterservice.getWareHouseById(warehouseId);
 		requisition.setRequestedAtWareHouse(warehouse);
 
-		//User requestedByUser =((User) request.getSession().getAttribute("_SessionUser"));
-		User requestedByUser =masterservice.getUserById("27");
+		User requestedByUser =((User) request.getSession().getAttribute("_SessionUser"));
+		//User requestedByUser =masterservice.getUserById("27");
 		requisition.setRequestedByUser(requestedByUser);
 		
 		//requisition.setQty(Float.valueOf(request.getParameter("qty")));
 		requisition.setDueDate(Util.getDate(request.getParameter("dueDate"),"dd/MM/yyyy"));
 		requisition.setRequestedDate(new Date());
 		requisition.setFullFillmentStatus("N");
+		requisition.setCurrentStatus(POConstants.STATUS_REQUSITIONED);
 		
 		
 		
@@ -229,6 +269,7 @@ public class RequisitionController {
 			requisition.setRequisitionItems(new LinkedList<RequisitionItem>());
 		}
 		for (int i = 0; i < maxRows; i++) {
+			
 			String itemCodeId = request.getParameter("codeId" + i);
 			String itemKeyStr = request.getParameter("itemKey" + i);
 
@@ -262,6 +303,8 @@ public class RequisitionController {
 						.getParameter("priority" + i)));
 				reqItem.setQty(Double.parseDouble(request.getParameter("qty"
 						+ i).trim()));
+				reqItem.setHistQty(Double.parseDouble(request.getParameter("qty"
+						+ i).trim()));
 				reqItem.setUnit(itemUnit);
 				reqItem.setModifiedByUser(requestedByUser);
 				reqItem.setCurrentStatus("R");
@@ -270,7 +313,7 @@ public class RequisitionController {
 				}
 			}
 		}
-		requisitionService.saveOrUpdate(requisition);
+		requisitionService.saveOrUpdate(requisition,true);
 
 	}
 	
@@ -351,7 +394,8 @@ public class RequisitionController {
 			item.setFullFilledByUser(user);
 			item.setFullFillmentStatus("Y");
 			//item.setCurrentStatus("S");
-			requisitionService.saveOrUpdate(requisition);
+			requisition.setCurrentStatus(item.getQty() == qty?POConstants.STATUS_FULL_ISSUED:POConstants.STATUS_PART_ISSUED);
+			requisitionService.saveOrUpdate(requisition,true);
 		}
 
 	}
@@ -389,15 +433,20 @@ public class RequisitionController {
 				Double markedQty = 0.0;
 				Double issueQty = 0.0;
 				//if(item.getCurrentStatus().equals(POConstants.STATUS_MARKED)){
-					 markedQty = procurementService.getProcureQtyByReqItemId(item.getItemKey());
-					
+				List<Procurement> procurement= procurementService.getProcureQtyByReqItemId(item.getItemKey());
+				for(Procurement procure: procurement){
+					markedQty = markedQty + procure.getProcurementQty(); 
+				 }
 					//item.setQty(item.getQty()-markedQty);
 				//}
 				//if(item.getCurrentStatus().equals(POConstants.STATUS_PART_ISSUED)){
-					 issueQty = stockService.getIssuedQtyByReqItemId(item.getItemKey());
+					 List<ItemIssue> itemIssues = stockService.getIssuedQtyByReqItemId(item.getItemKey());
+					 for(ItemIssue itemIssue: itemIssues){
+						 issueQty = issueQty + itemIssue.getIssueQty(); 
+					 }
 					 
 				//}
-				item.setQty(item.getQty()-(markedQty+issueQty));
+				item.setQty(item.getHistQty()-(markedQty+issueQty));
 			}
 		}
 		return requisition;

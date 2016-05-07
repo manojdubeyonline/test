@@ -4,7 +4,7 @@
 <script type="text/javascript">
 $(document).ready(function(){
 	$("#pendingWarehouse").attr("class","active");
-		var w=1000;
+	var w=1000;
 		
 		
 			
@@ -28,8 +28,8 @@ $(document).ready(function(){
 				
 					],
 		  buttons : [
-					{separator: true},
-				 	{name: ' Direct', bclass: 'glyphicon glyphicon-export', onpress : addWarehouse},
+					//{separator: true},
+				 	//{name: ' Direct', bclass: 'glyphicon glyphicon-export', onpress : addWarehouse},
 				 	{separator: true},
 				 	{name: ' Issue', bclass: 'glyphicon glyphicon-send', onpress : issue},
 		            {separator: true},
@@ -48,7 +48,7 @@ $(document).ready(function(){
 			rp: 1000,
 			showTableToggleBtn: true,//toggle button for the whole table
 			resizable: false,
-			//width: w,
+			//width: w*.74,
 			singleSelect: true
 
 		});
@@ -61,6 +61,7 @@ $(document).ready(function(){
 		  colModel : [
 				{display: '', name : '', width:w*0.035, sortable : false, align: 'center'},
 				{display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
+				{display: 'Warehouse Borrow No', name : '', width:120, sortable : false, align: 'center'},
 				{display: 'Donor Firm', name : '', width:150, sortable : false, align: 'center'},
 				{display: 'Reciever Firm', name : '', width:150, sortable : true, align: 'left'},
 				{display: 'Item', name : '', width:400, sortable : true, align: 'left'},
@@ -91,15 +92,17 @@ $(document).ready(function(){
 			rp: 1000,
 			showTableToggleBtn: true,//toggle button for the whole table
 			resizable: false,
-			//width: w,
+			//width: w*.74,
 			singleSelect: true
 
 		});
-getUsers('user');
+//getUsers('user');
+var user =${_SessionUser.userId};
 
-getFirms("firm");
-getReceiverFirm("receiverFirm");
-getFromFirm("fromFirm");
+getUserFirms("fromFirm",user)
+//getFirms("firm");
+///getReceiverFirm("receiverFirm");
+//getFromFirm("fromFirm");
 //getWarehouses("warehouse");
 //getVendors("vendor");
 getUnits("unit");
@@ -195,12 +198,17 @@ function saveWarehouse() {
 		data : $("#warehouseForm").serialize(),
 		asynch : true,
 		success : function(data) {
-			BootstrapDialog.alert(' saved successfully.');
+			BootstrapDialog.alert('Saved successfully.');
 			$('#flex1').flexOptions({
 				url : "getPendingWarehouseList",
 				newp : 1
 			}).flexReload();
+			$('#flex2').flexOptions({
+				url : "getWarehouseBorrowList",
+				newp : 1
+			}).flexReload();
 			return;
+			
 		},
 		error : function(data) {
 			BootstrapDialog.alert('Error Saving ');
@@ -304,19 +312,29 @@ function push(id, plNo, desc) {
 	function issue() {
 		//var requisitionId =  "";
 		var procurementId ="";
-		var row = $('#flex1 tbody tr').has("input[name='marking_id']:checked")
-		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
-		procurementId = $(row).find("input[name='marking_id']:checked").val();
-		if(procurementId !=''){
-			populateWarehouseBorrowIssuePopup(procurementId);
-		}
+		var procurementIds="";
+		$('#flex1 tbody tr').has("input[name='marking_id']:checked").each(function(index,id){
+		
+			procurementId =$(id).find("input[name='marking_id']:checked").val();
+			if(procurementId !=''){
+			procurementIds += procurementId+",";
+			
+				
+			}
+		})
+	
+
+		procurementIds = procurementIds.substr(0, procurementIds.length-1);
+		
+		populateWarehouseBorrowIssuePopup(procurementIds);
+		
 	}
 	
 	function populateWarehouseBorrowIssuePopup(procId) {
 
 		var jsonRecord = {};
 		
-		url = 'getProcurementMarkingById';
+		url = 'getMultipleProcurementMarkingById';
 		
 		jsonRecord.id = procId;
 		
@@ -328,28 +346,81 @@ function push(id, plNo, desc) {
 			dataType : 'json',
 			success : function(data) {
 				if(data!=null){
+					var checkStatus=0;
+					var fid = data[0].warehouse.firmId;
+					var wid = data[0].warehouse.wareId;
+					for(var i=0;i<data.length;i++)
+						{
+						if(fid==data[i].warehouse.firmId && wid==data[i].warehouse.wareId)
+							checkStatus++;
+						}
 					
-					var itemCode = data.requisitionItemId.itemCode
-					var warehouse = data.warehouse;
-					
-						$("#itemCode").val(itemCode.codeId);
-						$("#item1").val(itemCode.codeDesc);
-						$("#qty").val(data.procurementQty);
-						$("#dueDate").val(myDateFormatter(data.dueDate));
-						$("#firm2").val(warehouse.firmId);
-						getFirmById('firm1',warehouse.firmId);
-						$("#warehouse2").val(warehouse.wareId);
-						$("#warehouse1").val(warehouse.warehouseName);
-						//getFirmWarehouses('warehouse',warehouse.firmId,warehouse.wareId);
-						//getUnits('unit');
-						$("#unit").val(data.unit.unitId);
-						$("#marking_id").val(data.markingId);
+					if(checkStatus == data.length ){
+						
+						$("#firmId").val(data[0].reqId.requestedForFirm.firmId);
+						$("#firmName").val(data[0].reqId.requestedForFirm.firmName);
+						$("#warehouseId").val(data[0].warehouse.wareId);
+						$("#warehouseName").val(data[0].warehouse.warehouseName);
+						$("#requisitionId").val(data[0].reqId.requisitionId);
+						
 						$("#orderType").val(data.procurementType);
-						generateOrderNo("orderNo",$("#firm2").val()); 
+						
+						
+						var count = $("#rowhid").val();
+						
+						var tbl = document.getElementById("reqItemTable");
+						$("#reqItemTable").find("tr:gt(0)").remove();
+						
+						
+						for(var r=0;r<data.length;r++){
+							var lastRow = tbl.rows.length;
+							var newRow = tbl.insertRow(lastRow);
+							var itemCode = data[r].requisitionItemId.itemCode;
+							
+							var content = "<td>";
+							
+							content+=" <input type=\"text\" class=\"form-control\" readonly name=\"itemCode"+count+"\""
+							+" 	id=\"itemCode"+count+"\" value=\""+itemCode.code+" \"/><input type=\"hidden\" name=\"item"
+							+ count+ "\" value=\""+itemCode.codeId+" \" ><input type=\"hidden\" name=\"marking_id"
+							+ count+ "\" value=\""+data[r].markingId+" \" ><input type=\"hidden\" name=\"requisition_id"
+							+ count+ "\" value=\""+data[r].reqId.requisitionId+" \" ><input type=\"hidden\" name=\"requisitionItem_id"
+							+ count+ "\" value=\""+data[r].requisitionItemId.itemKey+" \" >"
+									
+									+ " </td>"
+									+ "<td><input type=\"text\" required readonly name=\"itemName"
+									+ count
+									+ "\""
+									+ " 	class=\"form-control\" id=\"itemName"
+									+ count
+									+ "\"  value=\""+itemCode.codeDesc+" \" ></td>"
+									
+									+ " <td><input type=\"hidden\" class=\"form-control\""
+									+" 	id=\"qty"+count+"\" name=\"qty"+count+"\"  value=\""+data[r].procurementQty+"\" ><span class=\"form-control\""
+							+" 	id=\"qty1"+count+"\" name=\"qty1"+count+"\" placeholder=\"Quantity\" ></span></td>"
+							+ " <td><input type=\"text\" class=\"form-control\""
+							+" 	id=\"Borrow_Qty"+count+"\" name=\"Borrow_Qty"+count+"\" placeholder=\"Borrow Qty\" value=\"\" style =\"width:90px;\"  onkeypress=\"return numbersonly(this,event, true);\" onchange=\"qtyCheck();purchaseRateCalc();\"></td>"
+									+ " <td><input type=\"hidden\" class=\"form-control\""
+									+" 	id=\"unit"+count+"\" name=\"unit"+count+"\"  value=\""+data[r].unit.unitId+"\" ><span class=\"form-control\" id=\"unit1"+count+"\""
+							+" 	name=\"unit1"+count+"\" value=\"\">"
+								+ " </span> "
+
+							+ " </td></td>"
+							$(newRow).html(content);
+							$(newRow).attr("id", "reqItemTableRow" + count);
+							
+							$("#qty1"+count).html(data[r].procurementQty);
+							$("#unit1"+count).html(data[r].unit.unitName);
+							$("#rowhid").val(++count);
+						}
 						$('#warehouse_borriwing_form').modal({
 							keyboard : true
 						});
 						$('#warehouse_borriwing_form').modal("show");
+				}
+				}
+                else{
+					
+					BootstrapDialog.alert('Error Firm and warehouse are different' );
 				}
 			},
 			error : function(data) {
@@ -360,6 +431,137 @@ function push(id, plNo, desc) {
 		});
 	}
 
+	/*
+function populateWarehouseBorrowIssuePopup(procId) {
+
+	var jsonRecord = {};
+	
+	url = 'getMultipleProcurementMarkingById';
+	
+	jsonRecord.id = procId;
+	
+	
+	$.ajax({
+		url : url,
+		type : 'POST',
+		data : JSON.stringify(jsonRecord),
+		contentType : 'application/json',
+		
+		success : function(data) {
+			var checkStatus=0;
+			var fid = data[0].warehouse.firmId;
+			var wid = data[0].warehouse.wareId;
+			for(var i=0;i<data.length;i++)
+				{
+				if(fid==data[i].warehouse.firmId && wid==data[i].warehouse.wareId)
+					checkStatus++;
+				}
+			if(checkStatus == data.length ){
+			$("#firm").val(data[0].warehouse.firmId);
+			$("#firm1").val(data[0].warehouse.firmId);
+			$("#warehouse").val(data[0].warehouse.wareId);
+			
+			$("#orderType").val(data[0].procurementType);
+			
+			//generateOrderNo("orderNo",$("#firm").val());
+			var count = $("#rowhid").val();
+			var counter = $("#rowId").val();
+			//var counter=0;
+			var tbl = document.getElementById("reqItemTable");
+			$("#reqItemTable").find("tr:gt(0)").remove();
+			
+			
+			for(var r=0;r<data.length;r++){
+				var lastRow = tbl.rows.length;
+				var newRow = tbl.insertRow(lastRow);
+				var itemCode = data[r].requisitionItemId.itemCode;
+				
+				var content = "<td>";
+				
+				content+=" <input type=\"text\" class=\"form-control\" readonly name=\"itemCode"+count+"\""
+				+" 	id=\"itemCode"+count+"\" value=\""+itemCode.code+" \"/><input type=\"hidden\" name=\"item"
+				+ count+ "\" value=\""+itemCode.codeId+" \" ><input type=\"hidden\" name=\"marking_id"
+				+ count+ "\" value=\""+data[r].markingId+" \" ><input type=\"hidden\" name=\"requisition_id"
+				+ count+ "\" value=\""+data[r].reqId.requisitionId+" \" ><input type=\"hidden\" name=\"requisitionItem_id"
+				+ count+ "\" value=\""+data[r].requisitionItemId.itemKey+" \" >"
+						
+						+ " </td>"
+						+ "<td><input type=\"text\" required readonly name=\"itemName"
+						+ count
+						+ "\""
+						+ " 	class=\"form-control\" id=\"itemName"
+						+ count
+						+ "\"  value=\""+itemCode.codeDesc+" \" ></td>"
+						
+						+ " <td><input type=\"hidden\" class=\"form-control\""
+						+" 	id=\"qty"+count+"\" name=\"qty"+count+"\"  value=\""+data[r].procurementQty+"\" ><span class=\"form-control\""
+				+" 	id=\"qty1"+count+"\" name=\"qty1"+count+"\" placeholder=\"Quantity\" ></span></td>"
+				+ " <td><input type=\"text\" class=\"form-control\""
+				+" 	id=\"Order_Qty"+count+"\" name=\"Order_Qty"+count+"\" placeholder=\"Order Qty\" value=\"\" style =\"width:90px;\"  onkeypress=\"return numbersonly(this,event, true);\" onchange=\"qtyCheck();purchaseRateCalc();\"></td>"
+						+ " <td><input type=\"hidden\" class=\"form-control\""
+						+" 	id=\"unit"+count+"\" name=\"unit"+count+"\"  value=\""+data[r].unit.unitId+"\" ><span class=\"form-control\" id=\"unit1"+count+"\""
+				+" 	name=\"unit1"+count+"\" value=\"\">"
+					+ " </span> "
+
+				+ " </td></td>"
+				$(newRow).html(content);
+				$(newRow).attr("id", "reqItemTableRow" + count);
+				
+				var nextRowHeader = tbl.rows.length;
+				var nextHeader =tbl.insertRow(nextRowHeader);
+				var headerContent="<td colspan=\"5\" class=\"active\">"
+					headerContent+="Rate Per Unit </td>"
+				$(nextHeader).html(headerContent);
+					
+					
+				var nextlastRow = tbl.rows.length;
+				var nextRow =tbl.insertRow(nextlastRow);
+				var nextContent ="<td colspan=\"5\">"
+					nextContent+="<table class=\"table table-bordered table-hover\" id=\"innerItemTable"+count+"\" width=\"100%\"><td><select class=\"form-control\" name=\"rateName"+count+counter+"\""
+				+" 	id=\"rateName"+count+counter+"\" onchange=\"purchaseRateCalc();\">"
+				
+				+ " </select></td><td><input type=\"text\" class=\"form-control\""
+				+" 	id=\"rateValue"+count+counter+"\" name=\"rateValue"+count+counter+"\" placeholder=\"Rate Value\"    onchange=\"purchaseRateCalc();\" onkeypress=\"return numbersonly(this,event, true);\" /></td>"
+				+"<td><a href='#' onclick='addRow(" +count+")'><div class =\"btn-group\" style=\"float:right\"><button type=\"button\" id=\"myBtn"+count+"\" class=\"btn btn-default\" ><span class=\"glyphicon glyphicon-plus\" ></span></button></div></a><input type=\"hidden\" class=\"form-control\""
+				+" 	id=\"itemLevelTotal"+count+"\" name=\"itemLevelTotal"+count+"\" value=\"0\" ></td></table></td>"
+
+				
+				$(nextRow).html(nextContent);	
+				getRates('rateName'+count+counter);			
+				   $(nextRow).attr("id", "innerItemTableRow" + count);       
+				
+				//getUnits('unit' +count);
+				$("#qty1"+count).html(data[r].procurementQty);
+				$("#unit1"+count).html(data[r].unit.unitName);
+				$("#rowhid").val(++count);
+				$("#rowId").val(++counter);
+				$("#warehouse").val(data[r].warehouse.wareId);
+				
+
+			}
+			
+			
+			
+			$('#modal-add-req').modal({
+				keyboard : true
+			});
+			$('#modal-add-req').modal("show");
+			}
+			else{
+				
+				BootstrapDialog.alert('Error Firm and warehouse are different' );
+			}
+		},
+		error : function(data) {
+			BootstrapDialog.alert('Error Pulling Purchase Order Details' + data);
+		
+		}
+
+	});
+}
+	
+*/
+	
 	
 	function open() {
 		//var requisitionId =  "";
@@ -463,7 +665,7 @@ function push(id, plNo, desc) {
 
 
 
-<%@ include file="include/warehouse_form_Direct.jsp" %>
+
 
 <%@ include file="include/warehouse_borrowing_form.jsp" %>
 
@@ -471,7 +673,7 @@ function push(id, plNo, desc) {
 
 <script>
 $(document).ready(function() {
-     $('#dateRangePicker')
+     $('#dateRangePicker1')
         .datepicker({
             format: "dd/mm/yyyy",
             startDate : new Date(),

@@ -2,11 +2,13 @@
     pageEncoding="ISO-8859-1"%>
 
 <script type="text/javascript">
+var userRoleData = "";
 $(document).ready(function(){
-
+	//var w=screen.width;
+	var w = 1000;
 
 	$("#requisitionApproval").attr("class","active");
-		var w=1000;
+	
 		$('#flex1').flexigrid({
 		url:'getPendingProcurementMarkingList',
 		method: 'POST',
@@ -44,7 +46,7 @@ $(document).ready(function(){
 		rp: 20,
 	//	showTableToggleBtn: true,//toggle button for the whole table
 		resizable: false,
-		//width: w,
+		//width: w*.78,
 		singleSelect: true
 	});
 
@@ -61,7 +63,7 @@ $(document).ready(function(){
 				{display: 'Item', name : '', width:550, sortable : true, align: 'left'},
 				{display: 'Ware house', name : '', width:200, sortable : true, align: 'left'},
 				{display: 'Marked Qty', name : '', width:100, sortable : true, align: 'left'},
-				{display: 'Due Date', name : '', width:100, sortable : true, align: 'left'},
+				{display: 'Marking Date', name : '', width:100, sortable : true, align: 'left'},
 				{display: 'Procurement Method', name : '', width:100, sortable : true, align: 'left'},
 				
 					],
@@ -83,7 +85,7 @@ $(document).ready(function(){
 			rp: 20,
 		//	showTableToggleBtn: true,//toggle button for the whole table
 			resizable: false,
-		//	width: w,
+			//width: w*.78,
 			singleSelect: true
 			//height: screen.height*.20,
 
@@ -97,6 +99,8 @@ $(document).ready(function(){
 getFirms("firm");
 getWarehouses("warehouse");
 //addRow();
+var userRoleId = ${_SessionUser.userRole.roleId};
+getUserByRoleId(userRoleId);
    
 });
 
@@ -146,20 +150,36 @@ getWarehouses("warehouse");
 			success : function(data) {
 				if(data!=null){
 					
+					var role = "";
+					var userAccessCheck = null;
+					if(userRoleData != null){
+						role = userRoleData;
+					}
+					for(var u=0;u<role.access.length;u++){
+						var userAccessLevel = role.access[u].accessLevel;
+						if(parseInt(role.access[u].menu.menuId) == 503 && (userAccessLevel == 'E')){
+							userAccessCheck++;
+						}
+					}
+					if(userAccessCheck != null){
+					
 					var itemCode = data.requisitionItemId.itemCode;
 					var warehouse = data.warehouse;
 					
 						$("#item").val(itemCode.codeId);
 						$("#item1").val(itemCode.codeDesc);
 						$("#qty").val(data.procurementQty);
+						$("#associatedRequisitionItemId").val(data.requisitionItemId.itemKey);
+						$("#associatedRequisitionId").val(data.reqId.requisitionId);
 					
 						$("#dueDate").val(myDateFormatter(data.dueDate));
 						$("#firm").val(warehouse.firmId);
 						getFirmById('firm1',warehouse.firmId);
 						getFirmWarehouses('warehouse',warehouse.firmId,warehouse.wareId) 
 						$("#warehouse").val(warehouse.wareId);
-						getUnits('unit');
-						//$("#unit").val(data.unit.unitId)
+						//getUnits('unit');
+						$("#unit").val(data.unit.unitId)
+						$("#unit1").html(data.unit.unitName);
 						$("#marking_id").val(data.markingId)
 						$("#procurementType").val(data.procurementType)
 						generateOrderNo("orderNo",$("#firm").val()); 
@@ -167,6 +187,12 @@ getWarehouses("warehouse");
 							keyboard : true
 						});
 						$('#modal-add-req').modal("show");
+				}
+				
+				else{
+					BootstrapDialog.alert('Access Denied');
+					return;
+				}
 				}
 			},
 			error : function(data) {
@@ -178,30 +204,7 @@ getWarehouses("warehouse");
 	}
 	
 	
-	function add1() {
-		$('#modal-add-req').modal({
-			keyboard : true
-			
-		});
-		$("#requisitionRefNo").removeAttr('disabled');
-		$("#warehouse").removeAttr('disabled');
-		$("#user").removeAttr('disabled');
-		$("#dueDate").removeAttr('disabled');
-		$("#firm").removeAttr('disabled');
-
-		$("#requisitionRefNo").val('');
-		$("#warehouse").val('');
-		$("#user").val('');
-		$("#dueDate").val('');
-		$("#firm").val('');
-		$("#warehouse").val("");
-		$("#rowhid").val(0);
-		
-		$("#reqItemTable").find("tr:gt(0)").remove();
-		addRow();
-		
-		$('#modal-add-req').modal.show()
-	}
+	
 	function saveProcurement() {
 		$('.close').click();
 		$.ajax({
@@ -213,6 +216,10 @@ getWarehouses("warehouse");
 				BootstrapDialog.alert('procurement marking saved successfully.');
 				$('#flex1').flexOptions({
 					url : "getPendingProcurementMarkingList",
+					newp : 1
+				}).flexReload();
+				$('#flex2').flexOptions({
+					url : "getProcurementMarkingList",
 					newp : 1
 				}).flexReload();
 				return;
@@ -242,6 +249,19 @@ getWarehouses("warehouse");
 			success : function(data) {
 				if(data !=null){
 					
+					var role = "";
+					var userAccessCheck = null;
+					if(userRoleData != null){
+						role = userRoleData;
+					}
+					for(var u=0;u<role.access.length;u++){
+						var userAccessLevel = role.access[u].accessLevel;
+						if(parseInt(role.access[u].menu.menuId) == 503 && (userAccessLevel == 'E' || userAccessLevel == 'W')){
+							userAccessCheck++;
+						}
+					}
+					if(userAccessCheck != null){
+					
 					for(var r=0;r<data.requisitionItems.length;r++){
 						if(requisitionItemId!=data.requisitionItems[r].itemKey){
 							continue;
@@ -264,6 +284,12 @@ getWarehouses("warehouse");
 							keyboard : true
 						});
 						$('#modal-add-req').modal("show");
+				}
+				}
+				
+				else{
+					BootstrapDialog.alert('Access Denied');
+					return;
 				}
 				}
 			},
@@ -334,6 +360,29 @@ getWarehouses("warehouse");
 		});
 
 	}
+	
+	function getUserByRoleId(userRoleId){
+		var modelRequest = {};
+		modelRequest.id = userRoleId
+		$.ajax({
+			url : 'getUserRoleByRoleId',
+			type : 'POST',
+			data : JSON.stringify(modelRequest),
+			contentType : 'application/json',
+			dataType : 'json',
+			success : function(data) {
+				if (data != null) {
+					userRoleData = data;
+					//alert(userRoleData);
+                         }
+							},
+			error : function(data) {
+				BootstrapDialog.alert('Error Unable to pull the item list');
+			}
+		});
+	
+	}
+	
 
 	function push(id, plNo, desc) {
 		dlg.close();
@@ -400,7 +449,7 @@ getWarehouses("warehouse");
 
 <div class="mainPanel">
     <div class="panel-group" id="accordion">
-        <div class="panel panel-default" id="pendingPanel">
+        <div class="panel panel-default" id="pendingPanel" >
             <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#pendingContent">
                 <h4 class="panel-title">
                    Pending Marking<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
@@ -412,7 +461,7 @@ getWarehouses("warehouse");
                 </div>
            
         </div>
-        <div class="panel panel-default" id="donePanel">
+        <div class="panel panel-default" id="donePanel" >
             <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#doneContent">
                <h4 class="panel-title">
                    Procurement Markings<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>

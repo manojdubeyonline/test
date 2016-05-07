@@ -6,7 +6,9 @@ package com.railtech.po.entity;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -15,6 +17,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -50,8 +53,10 @@ public class GRPOReceiptEntry implements Serializable {
 	
 	@ManyToOne
 	@JoinColumn(name="marking_id")
-	private Procurement markingId;
+	private Procurement procurementMarking;
 	
+	
+
 	@ManyToOne
 	@JoinColumn(name="item_code_id")
 	private Code itemCode;
@@ -59,13 +64,18 @@ public class GRPOReceiptEntry implements Serializable {
 
 	@Column(name="inward_qty")
 	private Float inwardQty;
+	
+	@Column(name="gr_approve_qty")
+	private Float grApproveQty;
 
 	@ManyToOne
 	@JoinColumn(name="unit_id")
 	private Unit unit;
 	
-	@Column(name="basic_rate")
-	private Double basicRate;
+	
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy ="grRecieptId", cascade=CascadeType.ALL)
+	private Set<GRRateApplied> itemLevelGRRates;
 	
 	@Column(name="last_modified")
 	private Timestamp lastModified;
@@ -126,19 +136,7 @@ public class GRPOReceiptEntry implements Serializable {
 		this.orderItemId = orderItemId;
 	}
 
-	/**
-	 * @return the markingId
-	 */
-	public Procurement getMarkingId() {
-		return markingId;
-	}
-
-	/**
-	 * @param markingId the markingId to set
-	 */
-	public void setMarkingId(Procurement markingId) {
-		this.markingId = markingId;
-	}
+	
 
 	/**
 	 * @return the itemCode
@@ -170,6 +168,20 @@ public class GRPOReceiptEntry implements Serializable {
 	}
 
 	/**
+	 * @return the grApproveQty
+	 */
+	public Float getGrApproveQty() {
+		return grApproveQty;
+	}
+
+	/**
+	 * @param grApproveQty the grApproveQty to set
+	 */
+	public void setGrApproveQty(Float grApproveQty) {
+		this.grApproveQty = grApproveQty;
+	}
+
+	/**
 	 * @return the unit
 	 */
 	public Unit getUnit() {
@@ -183,18 +195,21 @@ public class GRPOReceiptEntry implements Serializable {
 		this.unit = unit;
 	}
 
+	
+
+
 	/**
-	 * @return the basicRate
+	 * @return the itemLevelGRRates
 	 */
-	public Double getBasicRate() {
-		return basicRate;
+	public Set<GRRateApplied> getItemLevelGRRates() {
+		return itemLevelGRRates;
 	}
 
 	/**
-	 * @param basicRate the basicRate to set
+	 * @param itemLevelGRRates the itemLevelGRRates to set
 	 */
-	public void setBasicRate(Double basicRate) {
-		this.basicRate = basicRate;
+	public void setItemLevelGRRates(Set<GRRateApplied> itemLevelGRRates) {
+		this.itemLevelGRRates = itemLevelGRRates;
 	}
 
 	/**
@@ -212,6 +227,19 @@ public class GRPOReceiptEntry implements Serializable {
 	}
 	
 
+	/**
+	 * @return the procurementMarking
+	 */
+	public Procurement getProcurementMarking() {
+		return procurementMarking;
+	}
+
+	/**
+	 * @param procurementMarking the procurementMarking to set
+	 */
+	public void setProcurementMarking(Procurement procurementMarking) {
+		this.procurementMarking = procurementMarking;
+	}
 	
 	
 	

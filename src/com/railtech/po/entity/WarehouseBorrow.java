@@ -2,21 +2,25 @@ package com.railtech.po.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 
 @Entity
-@Table(name="warehouse_borrow")
+@Table(name="warehouseBorrow")
 public class WarehouseBorrow implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
@@ -26,9 +30,8 @@ public class WarehouseBorrow implements Serializable{
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Integer borrowId;
 	
-	@ManyToOne
-	@JoinColumn(name="item_code_id")
-	private Code itemCode;
+	@Column(name="warehouseRefNo")
+	private String warehouseRefNo;
 	
 	@ManyToOne
 	@JoinColumn(name="from_firm_id")
@@ -50,16 +53,17 @@ public class WarehouseBorrow implements Serializable{
 	@Column(name="status")
 	private String status;
 
-	
-
-
-	@Column(name="borrow_qty")
-	private double borrowQty;
-	
 	@ManyToOne
-	@JoinColumn(name="unit_id")
-	private Unit unit;
+	@JoinColumn(name="requisitionId")
+	private Requisition requisition;
 	
+	@Column(name="remarks")
+	private String remarks;
+	
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "warehouseBorrow", cascade=CascadeType.ALL)
+	private List<WarehouseBorrowItem> warehouseBorrowItem;
+
 	@ManyToOne
 	@JoinColumn(name="added_by")
 	private User addedBy;
@@ -86,13 +90,20 @@ public class WarehouseBorrow implements Serializable{
 	}
 
 
-	public Code getItemCode() {
-		return itemCode;
+
+	/**
+	 * @return the warehouseRefNo
+	 */
+	public String getWarehouseRefNo() {
+		return warehouseRefNo;
 	}
 
 
-	public void setItemCode(Code itemCode) {
-		this.itemCode = itemCode;
+	/**
+	 * @param warehouseRefNo the warehouseRefNo to set
+	 */
+	public void setWarehouseRefNo(String warehouseRefNo) {
+		this.warehouseRefNo = warehouseRefNo;
 	}
 
 
@@ -136,24 +147,7 @@ public class WarehouseBorrow implements Serializable{
 	}
 
 
-	public double getBorrowQty() {
-		return borrowQty;
-	}
-
-
-	public void setBorrowQty(double borrowQty) {
-		this.borrowQty = borrowQty;
-	}
-
-
-	public Unit getUnit() {
-		return unit;
-	}
-
-
-	public void setUnit(Unit unit) {
-		this.unit = unit;
-	}
+	
 
 
 	public User getAddedBy() {
@@ -202,6 +196,54 @@ public class WarehouseBorrow implements Serializable{
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+
+	/**
+	 * @return the requisition
+	 */
+	public Requisition getRequisition() {
+		return requisition;
+	}
+
+
+	/**
+	 * @param requisition the requisition to set
+	 */
+	public void setRequisition(Requisition requisition) {
+		this.requisition = requisition;
+	}
+
+
+	/**
+	 * @return the remarks
+	 */
+	public String getRemarks() {
+		return remarks;
+	}
+
+
+	/**
+	 * @param remarks the remarks to set
+	 */
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
+
+	/**
+	 * @return the warehouseBorrowItem
+	 */
+	public List<WarehouseBorrowItem> getWarehouseBorrowItem() {
+		return warehouseBorrowItem;
+	}
+
+
+	/**
+	 * @param warehouseBorrowItem the warehouseBorrowItem to set
+	 */
+	public void setWarehouseBorrowItem(List<WarehouseBorrowItem> warehouseBorrowItem) {
+		this.warehouseBorrowItem = warehouseBorrowItem;
 	}
 
 

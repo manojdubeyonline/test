@@ -81,6 +81,8 @@ public class Procurement implements Serializable {
 	@ManyToOne
 	@JoinColumn(name="requisition_id")
 	private Requisition reqId;
+	
+	
 
 	public Procurement() {
 	}
@@ -243,6 +245,9 @@ public class Procurement implements Serializable {
 	public void setReqId(Requisition reqId) {
 		this.reqId = reqId;
 	}
+
+
+	
 	
 	
 

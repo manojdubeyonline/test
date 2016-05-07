@@ -134,7 +134,7 @@
 				</div>
 				<div class="form-group">
 						<label for="item">Total</label> <input type="text" class="form-control"
-							id="total" name="total" placeholder="Total" readonly="readonly">
+							id="orderLevelGrandTotal" name="orderLevelGrandTotal" placeholder="Total" readonly="readonly">
 					</div>
 					
 					

@@ -69,6 +69,12 @@ public class User implements Serializable {
                 inverseJoinColumns={@JoinColumn(name="firm_id")})
     private Set<Firm> userFirms = new HashSet<Firm>();
 	
+	@ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(name="user_warehouse", 
+                joinColumns={@JoinColumn(name="user_id")}, 
+                inverseJoinColumns={@JoinColumn(name="ware_id")})
+    private Set<Warehouse> userWarehouses = new HashSet<Warehouse>();
+	
 	public User() {
 	}
 
@@ -176,6 +182,47 @@ public class User implements Serializable {
 	public void setUserFirms(Set<Firm> userFirms) {
 		this.userFirms = userFirms;
 	}
+
+	public Set<Warehouse> getUserWarehouses() {
+		return userWarehouses;
+	}
+
+	public void setUserWarehouses(Set<Warehouse> userWarehouses) {
+		this.userWarehouses = userWarehouses;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		User other = (User) obj;
+		if (userId == null) {
+			if (other.userId != null)
+				return false;
+		} else if (!userId.equals(other.userId))
+			return false;
+		return true;
+	}
+
+	
 
 	
 }

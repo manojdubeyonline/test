@@ -1,8 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
+	pageEncoding="ISO-8859-1"%>
 
 <script type="text/javascript">
-$(document).ready(function(){
+var sessionUserId = null;
+var userRoleData = "";
+$(document).ready(function(){ 
 	$("#purchaseOrders").attr("class","active");
 		var w=1000;
 		
@@ -17,7 +19,7 @@ $(document).ready(function(){
 				{display: 'Item', name : '', width:550, sortable : true, align: 'left'},
 				{display: 'Ware house', name : '', width:200, sortable : true, align: 'left'},
 				{display: 'Marked Qty', name : '', width:100, sortable : true, align: 'left'},
-				{display: 'Due Date', name : '', width:100, sortable : true, align: 'left'},
+				{display: 'Marking Date', name : '', width:100, sortable : true, align: 'left'},
 				{display: 'Procurement Method', name : '', width:100, sortable : true, align: 'left'},
 				
 					],
@@ -27,8 +29,9 @@ $(document).ready(function(){
 		            {separator: true},
 				 	{name: ' Direct Order', bclass: 'glyphicon glyphicon-export', onpress : direct},
 		            {separator: true},
-				 	{name: ' Job Work', bclass: 'glyphicon glyphicon-transfer', onpress : jobWork},
-		            {separator: true}
+				 	//{name: ' Job Work', bclass: 'glyphicon glyphicon-transfer', onpress : jobWork},
+		           // {separator: true},
+				 	
 	      ],
 	      searchitems : [
 	                {display: 'Requisition Ref No', name : 'requisitionRefNo'},
@@ -55,20 +58,21 @@ $(document).ready(function(){
 		  colModel : [
 		       	{display: '', name : '', width:w*0.035, sortable : false, align: 'center'},
 				{display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
+				{display: 'Requisition Ref No', name : '', width:100, sortable : false, align: 'center'},
 				{display: 'Item', name : '', width:550, sortable : true, align: 'left'},
 				{display: 'Ware house', name : '', width:200, sortable : true, align: 'left'},
 				{display: 'Marked Qty', name : '', width:100, sortable : true, align: 'left'},
-				{display: 'Due Date', name : '', width:100, sortable : true, align: 'left'},
+				{display: 'Order Date', name : '', width:100, sortable : true, align: 'left'},
 				{display: 'Procurement Method', name : '', width:100, sortable : true, align: 'left'},
 				
 					],
 		  buttons : [
 					{separator: true},
-				 	{name: ' Create', bclass: 'glyphicon glyphicon-plus', onpress : addSecond},
-		            {separator: true}
+				 	//{name: ' Create', bclass: 'glyphicon glyphicon-plus', onpress : addSecond},
+		            //{separator: true}
 	      ],
 	      searchitems : [
-	                {display: 'Requisition Ref No', name : 'requisitionRefNo'},
+	                {display: 'Code Description', name :'codeDesc'},
 	             
 					
 	      ],
@@ -97,7 +101,7 @@ $(document).ready(function(){
 		       	{display: '', name : '', width:w*0.035, sortable : false, align: 'center'},
 				{display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
 				{display: 'Purchase Order No', name : '', width:150, sortable : false, align: 'center'},
-				
+				{display: 'Vendor', name : '', width:200, sortable : true, align: 'left'},
 				{display: 'Firm', name : '', width:150, sortable : true, align: 'left'},
 				{display: 'Item', name : '', width:400, sortable : true, align: 'left'},
 				{display: 'Qty', name : '', width:100, sortable : true, align: 'left'},
@@ -110,6 +114,8 @@ $(document).ready(function(){
 					{separator: true},
 				 	{name: ' Edit', bclass: 'glyphicon glyphicon-pencil', onpress : open},
 		            {separator: true},
+		           //{name: ' PDF', bclass: 'glyphicon glyphicon-file', onpress : pdf},
+		           //{separator: true},
 				 	{name: ' Delete', bclass: 'glyphicon glyphicon-remove', onpress : remove},
 		            {separator: true},
 				 	
@@ -133,7 +139,7 @@ $(document).ready(function(){
 		});
 		
 		
-		
+		/*
 		$('#flex4').flexigrid({
 			url:'getJobWorkOrderList',
 			method: 'POST',
@@ -177,17 +183,24 @@ $(document).ready(function(){
 			singleSelect: true
 
 		});
-
+*/
 
 //getUsers('user');
 
-getFirms("firm1");
-getFirms("firm2");
+//getFirms("firm1");
+//getFirms("firm2");
 //getFromFirm("firm1");
 //getWarehouses("warehouse");
+ sessionUserId =${_SessionUser.userId};
+
+getUserFirms("firm1",sessionUserId);
+getUserFirms("firm2",sessionUserId);
+
 getVendors("vendor");
 getVendors("vendor5");
-getUnits("unit");
+var userRoleId = ${_SessionUser.userRole.roleId};
+getUserByRoleId(userRoleId);
+//getUnits("unit");
 
 });
 
@@ -218,11 +231,210 @@ getUnits("unit");
 
 	}
 	
+	function pdf() {
+		
+		var orderId ="";
+		var row = $('#flex3 tbody tr').has("input[name='order_id']:checked")
+		//requisitionId =  $(row).find('td[abbr="requisitionRefNo"] >div', this).html();
+		orderId = $(row).find("input[name='order_id']:checked").val();
+		if(orderId !=undefined && orderId !=null && orderId !=''){
+			populatePdfPopup(orderId);
+		}
+	}
+	
+	function populatePdfPopup(orderId) {
+
+		var jsonRecord = {};
+				
+				url = 'getPurchaseOrderById';
+				
+				jsonRecord.id = orderId;
+				$.ajax({
+					url : url,
+					type : 'POST',
+					data : JSON.stringify(jsonRecord),
+					contentType : 'application/json',
+					
+					success : function(data) {
+						
+						
+						var firmInfor = data.firm;
+						$("#firmLocation").html(firmInfor.firmLocation);
+						$("#firmLocation1").html(firmInfor.firmLocation1);
+						$("#firmName").html(firmInfor.firmName);
+						$("#firmName1").html(firmInfor.firmName);
+						$("#firmPhone").html(firmInfor.firmPhone);
+						$("#firmEmail").html(firmInfor.firmEmail);
+						$("#firmFax").html(firmInfor.firmFax);
+						$("#tinNo").html(firmInfor.tinNo);
+						$("#panNo").html(firmInfor.panNo);
+						$("#exciseCodeNo").html(firmInfor.centralNo);
+			
+						var img = firmInfor.firmLogo;
+						document.getElementById("imageId").src="resources/images/"+img+"";
+						
+							 // $("#store").html(data.requestedAtWareHouse.warehouseName);
+							 $("#vendorCode").html(data.vendor.vendorId);
+							 $("#vendorName").html(data.vendor.vendorName);
+							 $("#address").html(data.vendorDetail.clientAddress);
+							 $("#contactDetails").html("("+data.vendorDetail.clientTel+")");
+							 $("#contactPerson").html(data.ContactPerson);
+							 $("#email").html(data.vendorDetail.clientEmail);
+							// $("#usName").html(data.addedBy.userName);
+							// $("#userEmail").html(data.addedBy.email);
+							 
+							 $("#city").html(data.vendorDetail.clientCity);
+							 $("#state").html(data.vendorDetail.vendorState);
+							 $("#pin").html(data.vendorDetail.vendorPin);
+							 
+							 $("#impDetails").html(data.importantDetails);
+							 $("#discount").html(data.discount);
+							 $("#deliveryTerms").html(data.deliveryTerm);
+							 $("#deliveryPeriod").html(data.deliveryPeriod);
+							 $("#paymentTerms").html(data.paymentTerm);
+							 $("#freight").html(data.freight);
+							 $("#packing").html(data.packing);
+							 $("#insurance").html(data.insurance);
+							 $("#sales").html(data.saleTax);
+							 $("#qtyTolerance").html(data.qtyTolerance);
+							 $("#quality").html(data.qualityAssurance);
+							 $("#otherIns").html(data.otherInstruction);
+							 
+							 $("#poNo").html(data.purchaseOrderNo);
+							//  $("#requestedBy").html(data.requestedByUser.userName);
+							 $("#poDate").html(dateConversion(myDateFormatter(data.dueDate)));
+							 // $("#reqDate").html(dateConversion(myDateFormatter(data.requestedDate)));
+							  
+							  var count = $("#rowhid").val();
+							  var tbl = document.getElementById("itemTable");
+								//$("#itemTable").find("tr:gt(0)").remove();
+								// $('#reqItemTable tr:last-child').remove();
+								
+								for(var r=0;r<data.orderItems.length;r++){
+									var lastRow = tbl.rows.length;
+									var newRow = tbl.insertRow(lastRow);
+									
+									var content = "<td>";
+									
+									content+="<div id=\"sr"+count+"\" align=\"center\"></div></td>"
+											+ " <td ><div id=\"code"+count+"\" style=\"float:left;font-weight:bold;\"></div><div style=\"float:left;\">&nbsp;-&nbsp;</div><div id=\"codedesc"+count+"\" style=\"float:left;\"></div></td>"
+											+ " <td align=\"right\"><div id=\"qty"+count+"\" style=\"float:left;width:65%\"></div><div id=\"unit"+count+"\"></div></td>"
+											+ " <td align=\"right\"><div id=\"basicRate"+count+"\" style=\"float:right;\"></div></td>"
+											+ " <td align=\"right\"><div id=\"total"+count+"\" style=\"float:right;\"></div></td>"
+											
+
+									$(newRow).html(content);
+									$(newRow).attr("id", "itemTableRow" + count);
+									//getUnits('unit' + count);
+									//$("#unit"+ count).val(data.orderItems[r].unit.unitName);
+									$("#codedesc"+count).html(data.orderItems[r].itemCode.codeDesc);
+									$("#sr"+count).html(r+1);
+									$("#code"+count).html(data.orderItems[r].itemCode.code);
+									$("#unit"+count).html(data.orderItems[r].unit.unitName);
+									var qt = data.orderItems[r].qty;
+									$("#qty"+count).html(qt);
+									
+									var orderItem = data.orderItems[r];
+									
+									var basic = null;
+									var sale = null;
+									var cst = null;
+									var excise = null;
+									var amount = null;
+									for(var k=0;k<orderItem.itemLevelRates.length;k++){
+										var rateApplied = orderItem.itemLevelRates[k];
+										if(rateApplied.rate.rateId==1){
+											basic = rateApplied.appliedAmount;
+										}
+										if(rateApplied.rate.rateId==2){
+											excise = parseFloat(rateApplied.appliedAmount);
+										}
+										if(rateApplied.rate.rateId==3){
+											sale = parseFloat(rateApplied.appliedAmount);
+										}
+										if(rateApplied.rate.rateId==4){
+											cst = parseFloat(rateApplied.appliedAmount);
+										}
+										
+										
+									}
+										
+										
+										$("#basicRate"+count).html(basic);
+										var total = parseFloat(qt*basic);
+										
+										var exciseValue = parseFloat(total*(excise/100));
+										var cstValue = parseFloat(exciseValue*(cst/100));
+										var salesValue = parseFloat(((exciseValue+cstValue+total)*(sale/100)));
+										
+										
+										
+										$("#total"+count).html(parseFloat(qt*basic).toFixed( 2 ));
+										$("#subTotal").html(parseFloat(qt*basic).toFixed( 2 ));
+										$("#exDuty").html(exciseValue.toFixed( 2 ));
+										$("#cess").html(cstValue.toFixed( 2 ));
+										$("#saletax").html(salesValue.toFixed( 2 ));
+										$("#excise").html(excise+"%");
+										$("#cesson").html(cst+"%");
+										$("#sale").html(sale+"%");
+										
+										amount = total+exciseValue+cstValue+salesValue;
+										$("#totalInWord").html(inWords(Math.round(amount,2)));
+										$("#totalInFigure").html(Math.round(amount,2).toFixed( 2 ));
+										$("#totalRound").html(Math.round(amount,2).toFixed( 2 ));
+											
+									
+									
+									
+									$("#rowhid").val(++count);
+						
+								}
+						$('#firmDetail').modal({
+							keyboard : true
+						});
+						$('#firmDetail').modal("show");
+					},
+					error : function(data) {
+						BootstrapDialog.alert('Error Pulling Purchase Order Pdf' + data);
+					
+					}
+
+				});
+			}
 	
 	
 
-	
+	function inWords (num) {
+		var a = ['','one ','two ','three ','four ', 'five ','six ','seven ','eight ','nine ','ten ','eleven ','twelve ','thirteen ','fourteen ','fifteen ','sixteen ','seventeen ','eighteen ','nineteen '];
+		var b = ['', '', 'twenty','thirty','forty','fifty', 'sixty','seventy','eighty','ninety'];
+	    if ((num = num.toString()).length > 9) return 'overflow';
+	    n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+	    if (!n) return; var str = '';
+	    str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'crore ' : '';
+	    str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'lakh ' : '';
+	    str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'thousand ' : '';
+	    str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'hundred ' : '';
+	    str += (n[5] != 0) ? ((str != '') ? ' ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'only ' : '';
+	    return str;
+	}
 
+function dateConversion(dateCon){
+		
+		var monthNames = [
+		                  "Jan", "Feb", "Mar",
+		                  "Apr", "May", "June", "July",
+		                  "Aug", "Sep", "Oct",
+		                  "Nov", "Dec"
+		                ];
+		                var d = (dateCon).split('/');
+		                var day = d[0];
+		                var monthIndex = d[1];
+		                while(monthIndex.charAt(0) === '0')
+		                	monthIndex = monthIndex.substr(1);
+		                var year = d[2];
+		                var con = day + '-' + monthNames[monthIndex-1] + '-' + year
+		                return con;
+	}
    
 	function add() {
 		//var requisitionId =  "";
@@ -270,6 +482,18 @@ getUnits("unit");
 	}
 	
 	function direct() {
+		var role = "";
+		var userAccessCheck = null;
+		if(userRoleData != null){
+			role = userRoleData;
+		}
+		for(var u=0;u<role.access.length;u++){
+			var userAccessLevel = role.access[u].accessLevel;
+			if(parseInt(role.access[u].menu.menuId) == 504 && (userAccessLevel == 'E' || userAccessLevel == 'W')){
+				userAccessCheck++;
+			}
+		}
+		if(userAccessCheck != null){
 		$('#modal-add-req').modal({
 			keyboard : true
 		});
@@ -285,6 +509,7 @@ getUnits("unit");
 		$("#reqItemTable").find("tr:gt(0)").remove();
 		addDirectRow();
 		 $('#reqItemTable th:nth-child(3)').remove();
+		}
 	}
 	
 	function jobWork() {
@@ -767,7 +992,7 @@ function addDirectRow() {
 						+ count
 						+ "\" onclick=\"popPicker('"
 						+ count
-						+ "')\" / placeHolder=\"Click to pick item\"><input type=\"hidden\" name=\"itemId"
+						+ "')\" / placeHolder=\"Click to pick item\"><input type=\"hidden\" name=\"item"
 						+ count+ "\" id=\"item"+count+"\" value=\"\" >"
 							
 							+ " </td>"
@@ -798,23 +1023,18 @@ function addDirectRow() {
 					var nextRow =tbl.insertRow(nextlastRow);
 					var nextContent ="<td colspan=\"5\">"
 						nextContent+="<table class=\"table table-bordered table-hover\" id=\"innerItemTable"+count+"\" width=\"100%\"><td><select class=\"form-control\" name=\"rateName"+count+counter+"\""
-					+" 	id=\"rateName"+count+counter+"\" >"
-					+ " 		<option value=\"\" selected disabled>--Select--</option>"
-					+ " 		<option value=\"0\">Basic Rate</option>"
-					+ " 		<option value=\"1\">Excise</option>"
-					+ " 		<option value=\"2\">Cess</option>"
-					+ " 		<option value=\"3\">Sales</option>"
-					+ " 		<option value=\"4\">Freight</option>"
-					+ " 		<option value=\"5\">Other Charges</option>"
+					+" 	id=\"rateName"+count+counter+"\" onchange=\"purchaseRateCalc();\">"
+				
 					+ " </select></td><td><input type=\"text\" class=\"form-control\""
 					+" 	id=\"rateValue"+count+counter+"\" name=\"rateValue"+count+counter+"\" placeholder=\"Rate Value\"    onchange=\"purchaseRateCalc();\" onkeypress=\"return numbersonly(this,event, true);\" /></td>"
 					+"<td><a href='#' onclick='addRow(" +count+")'><div class =\"btn-group\" style=\"float:right\"><button type=\"button\" id=\"myBtn"+count+"\" class=\"btn btn-default\" ><span class=\"glyphicon glyphicon-plus\" ></span></button></div></a><input type=\"hidden\" class=\"form-control\""
-					+" 	id=\"subTotal"+count+"\" name=\"subTotal"+count+"\" value=\"0\" ></td></table></td>"
+					+" 	id=\"itemLevelTotal"+count+"\" name=\"itemLevelTotal"+count+"\" value=\"0\" ></td></table></td>"
 
 					
 					$(nextRow).html(nextContent);				
 					   $(nextRow).attr("id", "innerItemTableRow" + count); 
 					   getUnits('unit' + count);
+					   getRates('rateName'+count+counter);
 					   $("#rowhid").val(++count);
 					   $("#rowId").val(++counter);
 
@@ -865,142 +1085,372 @@ function push(id, plNo, desc) {
 	$('#item' + selectedCounter).val(id);
 }
 	
-	
-	
-	function populatePurchaseOrderViewPopup(orderId) {
 
-		var jsonRecord = {};
-		
-		url = 'getPurchaseOrderById';
-		
-		jsonRecord.id = orderId;
-		
-		$.ajax({
-			url : url,
-			type : 'POST',
-			data : JSON.stringify(jsonRecord),
-			contentType : 'application/json',
-			dataType : 'json',
-			success : function(data) {
-				if(data!=null){
-					
-					$("#firm").val(data.firm.firmId);
-					$("#firm1").val(data.firm.firmId);
-					$("#vendor").val(data.vendor.vendorId);
-					$("#orderNo").val(data.purchaseOrderNo);
-					$("#orderId").val(data.orderId);
-					$("#purchaseOrderDate").val(myDateFormatter(data.dueDate));
-					
-					//generateOrderNo("orderNo",$("#firm").val());
-					var count = $("#rowhid").val();
-					var counter = $("#rowId").val();
-					//var counter=0;
-					var tbl = document.getElementById("reqItemTable");
-					$("#reqItemTable").find("tr:gt(0)").remove();
-					$('#reqItemTable th:nth-child(3)').remove();
-					
-					for(var r=0;r<data.orderItems.length;r++){
-						var lastRow = tbl.rows.length;
-						var newRow = tbl.insertRow(lastRow);
-						
-						
-						var total = data.orderItems[r];
-						var rateAppliedId = null;
-						for(var k=0;k<total.itemLevelRates.length;k++){
-							$("#total").val(total.itemLevelRates[k].appliedAmount);
-							rateAppliedId = total.itemLevelRates[k].rateAppliedId;
+function populatePurchaseOrderViewPopup(orderId) {
+
+	var jsonRecord = {};
+	
+	url = 'getPurchaseOrderById';
+	
+	jsonRecord.id = orderId;
+	
+	$.ajax({
+		url : url,
+		type : 'POST',
+		data : JSON.stringify(jsonRecord),
+		contentType : 'application/json',
+		dataType : 'json',
+		success : function(data) {
+			if(data!=null){
+				var role = "";
+				var userAccessCheck = null;
+				if(userRoleData != null){
+					role = userRoleData;
+				}
+				for(var u=0;u<role.access.length;u++){
+					var userAccessLevel = role.access[u].accessLevel;
+					if(parseInt(role.access[u].menu.menuId) == 504 && (userAccessLevel == 'E')){
+						userAccessCheck++;
+					}
+				}
+				if(userAccessCheck != null){
+				
+				$("#firm").val(data.firm.firmId);
+				$("#firm1").val(data.firm.firmId);
+				//$("#warehouse").val(data.warehouse.wareId);
+				getUserWarehouse("warehouse","", data.warehouse.wareId,sessionUserId);
+				$("#vendor").val(data.vendor.vendorId);
+				//$("#vendorAddress").val(data.vendorDetail.locationId);
+				getVendorAddress("vendorAddress",data.vendor.vendorId,data.vendorDetail.locationId);
+				$("#impDetails").val(data.importantDetails);
+				
+				$("#discount").val(data.discount);
+				$("#deliveryTerms").val(data.deliveryTerm);
+				$("#deliveryPeriod").val(data.deliveryPeriod);
+				$("#freight").val(data.freight);
+				$("#packing").val(data.packing);
+				$("#insurance").val(data.insurance);
+				$("#saleTax").val(data.saleTax);
+				$("#qualityTolerance").val(data.qtyTolerance);
+				$("#qualityAss").val(data.qualityAssurance);
+				$("#paymentTerm").val(data.paymentTerm);
+				$("#otherInstruction").val(data.otherInstruction);
+				
+				$("#instructorName").val(data.instructorName);
+				$("#instructorCont").val(data.instructorContact);
+				$("#instructorEmail").val(data.instructorEmail);
+				
+				$("#orderNo").val(data.purchaseOrderNo);
+				$("#orderId").val(data.orderId);
+				$("#purchaseOrderDate").val(myDateFormatter(data.dueDate));
+				$("#quotationDate").val(myDateFormatter(data.quotationDate));
+				$("#quotationDetail").val(data.quotationDetail);
+				$("#contactPerson").val(data.contactPerson);
+				$("#orderType").val(data.orderType);
+				
+				for(var n=0;n<data.orderLevelRates.length;n++){
+					if(data.orderLevelRates[n].rate.rateId == 23){
+					$("#orderLevelGrandTotalRateId").val(data.orderLevelRates[n].rateAppliedId);
+					}
+					if(data.orderLevelRates[n].rate.rateId == 22){
+						$("#orderLevelTotalRateId").val(data.orderLevelRates[n].rateAppliedId);
 						}
-						var itemCode = data.orderItems[r].itemCode;
-						
-						var content = "<td>";
-						
-						content+=" <input type=\"text\" class=\"form-control\" readonly name=\"itemCode"+count+"\""
-						+" 	id=\"itemCode"+count+"\" value=\""+itemCode.code+" \"/><input type=\"hidden\" name=\"item"
-						+ count+ "\" value=\""+itemCode.codeId+" \" ><input type=\"hidden\" name=\"itemKey"
-						+ count+ "\" value=\""+data.orderItems[r].itemKey+" \" ><input type=\"hidden\" name=\"rateAppliedId"
-						+ count+ "\" value=\""+rateAppliedId+" \" >"
-								
-								+ " </td>"
-								+ "<td><input type=\"text\" required readonly name=\"itemName"
-								+ count
-								+ "\""
-								+ " 	class=\"form-control\" id=\"itemName"
-								+ count
-								+ "\"  value=\""+itemCode.codeDesc+" \" ></td>"
-								
-								+ " <td id=\"3\"><input type=\"hidden\" class=\"form-control\""
-								+" 	id=\"qty"+count+"\" name=\"qty"+count+"\"  value=\""+data.orderItems[r].histQty+"\" ><span class=\"form-control\""
-						+" 	id=\"qty1"+count+"\" name=\"qty1"+count+"\" placeholder=\"Quantity\" ></span></td>"
-						+ " <td><input type=\"text\" class=\"form-control\""
-						+" 	id=\"Order_Qty"+count+"\" name=\"Order_Qty"+count+"\" placeholder=\"Order Qty\" value=\""+data.orderItems[r].qty+"\" style =\"width:70px;\" onchange=\"qtyCheck();\"></td>"
-								+ " <td><input type=\"hidden\" class=\"form-control\""
-								+" 	id=\"unit"+count+"\" name=\"unit"+count+"\"  value=\""+data.orderItems[r].unit.unitId+"\" ><span class=\"form-control\" id=\"unit1"+count+"\""
-						+" 	name=\"unit1"+count+"\" value=\"\">"
-							+ " </span> "
+					
+					}
+				
+				//generateOrderNo("orderNo",$("#firm").val());
+				var count = $("#rowhid").val();
+				var counter = $("#rowId").val();
+				var rateCounter = counter;
+				//var counter=0;
+				var tbl = document.getElementById("reqItemTable");
+				$("#reqItemTable").find("tr:gt(0)").remove();
+				//$('#reqItemTable th:nth-child(3)').remove();
+				
+				for(var r=0;r<data.orderItems.length;r++){
+					var lastRow = tbl.rows.length;
+					var newRow = tbl.insertRow(lastRow);
+					var orderItem = data.orderItems[r];
+					
+					var itemLevelTotalId = null;
+					for(var x=0;x<orderItem.itemLevelRates.length;x++){
+						if(orderItem.itemLevelRates[x].rate.rateId==21){
+							itemLevelTotalId = orderItem.itemLevelRates[x].rateAppliedId;
+						}
+					}
+					
+					
+					var rateAppliedId = null;
+					var rateId = null;
+					
+					var itemCode = data.orderItems[r].itemCode;
+					
+					var content = "<td>";
+					
+					content+=" <input type=\"hidden\" name=\"orderItemTotalRateId"
+						+ count+ "\" id=\"orderItemTotalRateId"+count+"\" value=\""+itemLevelTotalId+"\"><input type=\"text\" class=\"form-control\" readonly name=\"itemCode"+count+"\""
+					+" 	id=\"itemCode"+count+"\" value=\""+itemCode.code+" \"/><input type=\"hidden\" name=\"item"
+					+ count+ "\" value=\""+itemCode.codeId+" \" ><input type=\"hidden\" name=\"itemKey"
+					+ count+ "\" value=\""+data.orderItems[r].itemKey+" \" ><input type=\"hidden\" name=\"rateAppliedId"
+					+count+ "\" value=\""+rateAppliedId+" \" ><input type=\"hidden\" name=\"rateId"
+					+ count+ "\" value=\""+rateAppliedId+" \" >"
+							
+							+ " </td>"
+							+ "<td><input type=\"text\" required readonly name=\"itemName"
+							+ r
+							+ "\""
+							+ " 	class=\"form-control\" id=\"itemName"
+							+ r
+							+ "\"  value=\""+itemCode.codeDesc+" \" ></td>"
+							
+							+ " <td id=\"3\"><input type=\"text\" class=\"form-control\""
+							+" 	id=\"qty"+count+"\" name=\"qty"+count+"\"  value=\""+data.orderItems[r].histQty+"\" readonly=\"readonly\"></td>"
+					+ " <td><input type=\"text\" class=\"form-control\""
+					+" 	id=\"Order_Qty"+count+"\" name=\"Order_Qty"+count+"\" placeholder=\"Order Qty\" value=\""+data.orderItems[r].qty+"\"  onchange=\"qtyCheck();purchaseRateCalc();\"></td>"
+							+ " <td><input type=\"hidden\" class=\"form-control\""
+							+" 	id=\"unit"+count+"\" name=\"unit"+count+"\"  value=\""+data.orderItems[r].unit.unitId+"\" readonly><input type=\"text\" class=\"form-control\""
+							+" 	id=\"unit"+count+"\" name=\"unit"+count+"\"  value=\""+data.orderItems[r].unit.unitName+"\" readonly=\"readonly\">"
 
-						+ " </td></td>"
-						$(newRow).html(content);
-						$(newRow).attr("id", "reqItemTableRow" + count);
+					+ " </td>"
+					$(newRow).html(content);
+					$(newRow).attr("id", "reqItemTableRow" + count);
+					
+					var nextRowHeader = tbl.rows.length;
+					var nextHeader =tbl.insertRow(nextRowHeader);
+					
+					var headerContent="<td colspan=\"5\" class=\"active\">"
+						headerContent+="Rate Per Unitx</td>"
+					$(nextHeader).html(headerContent);
 						
-						var nextRowHeader = tbl.rows.length;
-						var nextHeader =tbl.insertRow(nextRowHeader);
-						
-						var headerContent="<td colspan=\"5\" class=\"active\">"
-							headerContent+="Rate Per Unit</td>"
-						$(nextHeader).html(headerContent);
-							
-							
 						var nextlastRow = tbl.rows.length;
 						var nextRow =tbl.insertRow(nextlastRow);
-						var nextContent ="<td colspan=\"5\">"
-							nextContent+="<table class=\"table table-bordered table-hover\" id=\"innerItemTable"+count+"\" width=\"100%\"><td><select class=\"form-control\" name=\"rateName"+count+counter+"\""
-						+" 	id=\"rateName"+count+counter+"\">"
-						+ " 		<option value=\"0\">Basic Rate</option>"
-						+ " 		<option value=\"1\">Excise</option>"
-						+ " 		<option value=\"2\">Cess</option>"
-						+ " 		<option value=\"3\">Sales</option>"
-						+ " 		<option value=\"4\">Freight</option>"
-						+ " 		<option value=\"5\">Other Charges</option>"
+						var nextContent ="<td colspan=\"5\"><table class=\"table table-bordered table-hover\" id=\"innerItemTable"+r+"\" width=\"100%\">";
+						
+					for(var k=0;k<orderItem.itemLevelRates.length;k++){
+						
+						var currentRateApplied = orderItem.itemLevelRates[k];
+						if(currentRateApplied.rate.rateId==21 ||currentRateApplied.rate.rateId==22 ||currentRateApplied.rate.rateId==23){
+							continue;
+						}
+						//if(currentRateApplied.levelStatus == "I")
+						//{
+						nextContent+="<tr><td><input type=\"hidden\" class=\"form-control\""
+							+" 	id=\"orderItemRateId"+count+counter+"\" name=\"orderItemRateId"+count+counter+"\"  value=\""+currentRateApplied.rateAppliedId+"\"  ><select class=\"form-control\" name=\"rateName"+count+counter+"\""
+						+" 	id=\"rateName"+count+counter+"\" onchange=\"purchaseRateCalc();\">"
+					
 						+ " </select></td><td><input type=\"text\" class=\"form-control\""
-						+" 	id=\"rateValue"+count+counter+"\" name=\"rateValue"+count+counter+"\" placeholder=\"Rate Value\"  value=\""+data.orderItems[r].basicRate+"\"  onchange=\"purchaseRateCalc();\"></td>"
-						+"<td><a href='#' onclick='addRow(" +count+")'><div class =\"btn-group\" style=\"float:right\"><button type=\"button\" class=\"btn btn-default\"><span class=\"glyphicon glyphicon-plus\" ></span></button></div></a><input type=\"hidden\" class=\"form-control\""
-						+" 	id=\"subTotal"+count+"\" name=\"subTotal"+count+"\" value=\"0\" ></td></table></td>"
+						+" 	id=\"rateValue"+count+counter+"\" name=\"rateValue"+count+counter+"\" placeholder=\"Rate Value\"  value=\"\"  onchange=\"purchaseRateCalc();\"></td>"
+						+"<td><input type=\"hidden\" class=\"form-control\""+
+						" 	id=\"itemLevelTotal"+count+"\" name=\"itemLevelTotal"+count+"\" value=\"0\" ></td></tr>"
 
+						//getRatesView(count+""+counter,itemRateApplied.itemLevelRates);
+						//}
+						 $("#rowId").val(++counter);
 						
-						$(nextRow).html(nextContent);				
-						   $(nextRow).attr("id", "innerItemTableRow" + count);    
-						   //$("#rowhid").val(++count);
-						  
-						   if(data.orderItems[r].ProcurementMarking == null && data.orderItems[r].histQty == 0){
-								$('table#reqItemTable td#3').remove();
-								}
-						//getUnits('unit' +count);
-						$("#qty1"+count).html(data.orderItems[r].histQty);
-						$("#unit1"+count).html(data.orderItems[r].unit.unitName);
-						$("#rowhid").val(++count);
-						$("#rowId").val(++counter);
-						//$("#warehouse").val(data.warehouse.wareId);
-						document.getElementById("addButton").style.display = "none";
-						
-						
-				}
-					$('#modal-add-req').modal({
-						keyboard : true
-					});
-					$('#modal-add-req').modal("show");
-				}
-				
-			},
-			error : function(data) {
-				BootstrapDialog.alert('Error Pulling Purchase Order Details' + data);
-				return;
+				 }
+					nextContent+="</table></td>";
+					$(nextRow).html(nextContent);	
+					  $(nextRow).attr("id", "innerItemTableRow" + r);
+					   
+					for(var z=0;z<orderItem.itemLevelRates.length;z++){
+						var currentRateApplied = orderItem.itemLevelRates[z];
+						//getRates('rateName'+count+rateCounter,currentRateApplied.rate.rateId);
+						// $("#rateName"+r+z).val(currentRateApplied.rate.rateId);
+						// $("#rateName"+r+z+" option").eq(currentRateApplied.rate.rateId).prop('selected', true);
+						//alert(currentRateApplied.rate.rateId)
+						if(currentRateApplied.rate.rateId==23){
+							$("#orderLevelGrandTotal").val(currentRateApplied.appliedAmount);
+						}
+						if(currentRateApplied.rate.rateId==21){
+							$("#itemLevelTotal"+count).val(currentRateApplied.appliedAmount);
+						}
+						if(currentRateApplied.rate.rateId==21 ||currentRateApplied.rate.rateId==22 ||currentRateApplied.rate.rateId==23){
+							continue;
+						}	
+						//if(currentRateApplied.levelStatus == "I")
+						//{
+						 $("#rateName"+count+rateCounter).val(currentRateApplied.rate.rateId);
+						 $("#rateValue"+count+rateCounter).val(currentRateApplied.appliedAmount);
+						//}
+						getRates('rateName'+count+rateCounter,currentRateApplied.rate.rateId);
+						 ++rateCounter;
+						 
+					}
+					
+					 
+					   
+					   $("#rowhid").val(++count);
+					  
+				  
+					
+					
+					$("#qty1"+count).html(data.orderItems[r].histQty);
+					$("#unit1"+count).html(data.orderItems[r].unit.unitName);
+					
+					document.getElementById("addButton").style.display = "none";
+					
+					
 			}
 
-		});
-	}
 
+				///order level
+				
+				var Ordercount = $("#orderLevelRowId").val();
+				var OrderExist = Ordercount;
+				//	alert(count);
+					var tbl = document.getElementById("addMultipleTable");
+					for(var m=0;m<data.orderLevelRates.length;m++){
+						var orderRateApplied =data.orderLevelRates[m];
+						if(orderRateApplied.rate.rateId==21 ||orderRateApplied.rate.rateId==22 ||orderRateApplied.rate.rateId==23 || orderRateApplied.rate.rateId==1){
+							continue;
+						}
+						if(orderRateApplied.levelStatus == "O")
+						{
+					var lastRow = tbl.rows.length;
+					
+					//alert(lastRow)
+					
+					var newRow = tbl.insertRow(lastRow);
+					var content="</td>"		
+						+ " <td><input type=\"hidden\" class=\"form-control\""
+						+" 	id=\"orderLevelRateId"+Ordercount+"\" name=\"orderLevelRateId"+Ordercount+"\"  value=\""+orderRateApplied.rateAppliedId+"\"  ><select class=\"form-control\" name=\"ratesName"+Ordercount+"\""
+						+" 	id=\"ratesName"+Ordercount+"\" >"
+						   
+								+ " </select></td>"
+								+ " 	<td><input type=\"text\" name=\"orderLevelRate"+Ordercount+"\""
+								+" 	id=\"orderLevelRate"+Ordercount+"\" class=\"form-control\" placeholder=\"Order Level Rate\" onfocus=\"if(this.value=='0'){this.value=''}\"  value=\"0\"  onchange=\"purchaseRateCalc();\"  onkeypress=\"return numbersonly(this,event, true);\" />"
+								+ "</td>"
+						
+					
+					content += "<td>";
+					if(lastRow >1){
+						content+="<a href='#' onclick='deleteRow("+Ordercount+"),purchaseRateCalc()'><div class =\"btn-group\" style=\"float:right\"><button type=\"button\" class=\"btn btn-default\"><span class=\"glyphicon glyphicon-minus\" ></span></button></div></a></td>";
+					}
+					$("#orderLevelRowId").val(++Ordercount);
+						}			
+					newRow.innerHTML = content;
+					//getRates('ratesName'+Ordercount);
+					$(newRow).attr("id", "addMultipleTableRow" + Ordercount);
+					
+					}
+					
+					for(var n=0;n<data.orderLevelRates.length;n++){
+						var orderRateApplied =data.orderLevelRates[n];
+						
+						
+						if(orderRateApplied.rate.rateId==23){
+							$("#orderLevelGrandTotal").val(orderRateApplied.appliedAmount);
+						}
+						
+						if(orderRateApplied.rate.rateId==21 ||orderRateApplied.rate.rateId==22 ||orderRateApplied.rate.rateId==23 ||orderRateApplied.rate.rateId==1){
+							continue;
+						}
+						if(orderRateApplied.levelStatus == "O")
+						{
+						 $("#ratesName"+OrderExist).val(orderRateApplied.rate.rateId);
+						 $("#orderLevelRate"+OrderExist).val(orderRateApplied.appliedAmount);
+						 getRates('ratesName'+OrderExist,orderRateApplied.rate.rateId);
+						 ++OrderExist;
+						}
+						
+						 
+					}
+					
+				var oType = data.orderType;
+				if(oType == "Direct Purchase"){
+					$('#reqItemTable th:nth-child(3)').remove();
+					$('#reqItemTable td:nth-child(3)').remove();
+				}
+				$('#modal-add-req').modal({
+					keyboard : true
+				});
+				$('#modal-add-req').modal("show");
+			}
+			
+			else{
+				BootstrapDialog.alert('Access Denied');
+				return;
+			}
+			}
+		},
+		error : function(data) {
+			BootstrapDialog.alert('Error Pulling Purchase Order Details' + data);
+			return;
+		}
+
+	});
+}
+
+
+	
+	
+	
 	function remove() {
 		var recordId = $("input[name='order_id']:checked").val();
+		
+           
+            	var modelRequest = {};
+        		modelRequest.id = recordId
+        		
+        		$.ajax({
+        			url : 'getPurchaseOrderById',
+        			type : 'POST',
+        			dataType : 'JSON',
+        			data : JSON.stringify(modelRequest),
+        			contentType : 'application/json',
+
+        			success : function(data) {
+        				
+        				var role = "";
+        				var userAccessCheck = null;
+        				if(userRoleData != null){
+        					role = userRoleData;
+        				}
+        				for(var u=0;u<role.access.length;u++){
+        					var userAccessLevel = role.access[u].accessLevel;
+        					if(parseInt(role.access[u].menu.menuId) == 504 && (userAccessLevel == 'E')){
+        						userAccessCheck++;
+        					}
+        				}
+        				if(userAccessCheck != null){
+        				
+        				if(data.approvalStatus == null){
+        					deletePurchaseOrder();
+        				}
+        				else{
+        					BootstrapDialog
+    						.alert('Purchase order can not be delete');
+        				
+        				
+        				$('#flex3').flexOptions({
+        					url : "getPurchaseOrderList",
+        					newp : 1
+        				}).flexReload();
+        				}
+        				}
+        				else{
+        					BootstrapDialog.alert('Access Denied');
+        					return;
+        				}
+        			},
+        			error : function(data) {
+        				//BootstrapDialog
+        						//.alert('Error unable to delete the requisition');
+        				BootstrapDialog
+						.alert(' Error unable to delete the Purchase order');
+        				$('#flex3').flexOptions({
+        					url : "getPurchaseOrderList",
+        					newp : 1
+        				}).flexReload();
+        			}
+        		});
+            
+       
+
+	}
+	
+	function deletePurchaseOrder() {
+		
 		BootstrapDialog.confirm('Are you sure you want to delete?', function(result){
             if(result) {
             	var modelRequest = {};
@@ -1104,6 +1554,10 @@ function push(id, plNo, desc) {
 					url : "getPurchaseOrderList",
 					newp : 1
 				}).flexReload();
+				$('#flex4').flexOptions({
+					url : "getJobWorkOrderList",
+					newp : 1
+				}).flexReload();
 				return;
 			},
 			error : function(data) {
@@ -1149,9 +1603,9 @@ function push(id, plNo, desc) {
 	
 	
 	function addOrderLevelRates() {
-		var count = $("#rowhid").val();
+		var count1 = $("#rowhid").val();
 		
-		for(i=0;i<count; i++) {
+		for(i=0;i<count1; i++) {
 	  		  document.getElementById("myBtn"+i).style.display = "none";
 	  		
 	  	 }	   
@@ -1169,12 +1623,7 @@ function push(id, plNo, desc) {
 		var content="</td>"		
 			+ " <td><select class=\"form-control\" name=\"ratesName"+count+"\""
 			+" 	id=\"ratesName"+count+"\" >"
-			      
-					+ " 		<option value=\"1\">Excise</option>"
-					+ " 		<option value=\"2\">Cess</option>"
-					+ " 		<option value=\"3\">Sales</option>"
-					+ " 		<option value=\"4\">Freight</option>"
-					+ " 		<option value=\"5\">Other Charges</option>"
+			   
 					+ " </select></td>"
 					+ " 	<td><input type=\"text\" name=\"orderLevelRate"+count+"\""
 					+" 	id=\"orderLevelRate"+count+"\" class=\"form-control\" placeholder=\"Order Level Rate\" onfocus=\"if(this.value=='0'){this.value=''}\"  value=\"0\"  onchange=\"purchaseRateCalc();\"  onkeypress=\"return numbersonly(this,event, true);\" />"
@@ -1187,8 +1636,10 @@ function push(id, plNo, desc) {
 		}	
 					
 		newRow.innerHTML = content;
+		getRates('ratesName'+count);
 		$(newRow).attr("id", "addMultipleTableRow" + count);
 		$("#orderLevelRowId").val(++count);
+		
 	}
 	function deleteRow(count) {
 		$("#addMultipleTableRow" + count).remove();
@@ -1214,6 +1665,20 @@ function push(id, plNo, desc) {
 			contentType : 'application/json',
 			
 			success : function(data) {
+				
+				var role = "";
+				var userAccessCheck = null;
+				if(userRoleData != null){
+					role = userRoleData;
+				}
+				for(var u=0;u<role.access.length;u++){
+					var userAccessLevel = role.access[u].accessLevel;
+					if(parseInt(role.access[u].menu.menuId) == 504 && (userAccessLevel == 'E' || userAccessLevel == 'W')){
+						userAccessCheck++;
+					}
+				}
+				if(userAccessCheck != null){
+				
 				var checkStatus=0;
 				var fid = data[0].warehouse.firmId;
 				var wid = data[0].warehouse.wareId;
@@ -1225,6 +1690,8 @@ function push(id, plNo, desc) {
 				if(checkStatus == data.length ){
 				$("#firm").val(data[0].warehouse.firmId);
 				$("#firm1").val(data[0].warehouse.firmId);
+				$("#warehouse").val(data[0].warehouse.wareId);
+				getUserWarehouse("warehouse","", data[0].warehouse.wareId,sessionUserId);
 				$("#orderType").val(data[0].procurementType);
 				
 				generateOrderNo("orderNo",$("#firm").val());
@@ -1261,7 +1728,7 @@ function push(id, plNo, desc) {
 							+" 	id=\"qty"+count+"\" name=\"qty"+count+"\"  value=\""+data[r].procurementQty+"\" ><span class=\"form-control\""
 					+" 	id=\"qty1"+count+"\" name=\"qty1"+count+"\" placeholder=\"Quantity\" ></span></td>"
 					+ " <td><input type=\"text\" class=\"form-control\""
-					+" 	id=\"Order_Qty"+count+"\" name=\"Order_Qty"+count+"\" placeholder=\"Order Qty\" value=\"\" style =\"width:70px;\"  onkeypress=\"return numbersonly(this,event, true);\" onchange=\"qtyCheck();\"></td>"
+					+" 	id=\"Order_Qty"+count+"\" name=\"Order_Qty"+count+"\" placeholder=\"Order Qty\" value=\"\" style =\"width:90px;\"  onkeypress=\"return numbersonly(this,event, true);\" onchange=\"qtyCheck();purchaseRateCalc();\"></td>"
 							+ " <td><input type=\"hidden\" class=\"form-control\""
 							+" 	id=\"unit"+count+"\" name=\"unit"+count+"\"  value=\""+data[r].unit.unitId+"\" ><span class=\"form-control\" id=\"unit1"+count+"\""
 					+" 	name=\"unit1"+count+"\" value=\"\">"
@@ -1282,21 +1749,16 @@ function push(id, plNo, desc) {
 					var nextRow =tbl.insertRow(nextlastRow);
 					var nextContent ="<td colspan=\"5\">"
 						nextContent+="<table class=\"table table-bordered table-hover\" id=\"innerItemTable"+count+"\" width=\"100%\"><td><select class=\"form-control\" name=\"rateName"+count+counter+"\""
-					+" 	id=\"rateName"+count+counter+"\" >"
-					+ " 		<option value=\"\" selected disabled>--Select--</option>"
-					+ " 		<option value=\"0\">Basic Rate</option>"
-					+ " 		<option value=\"1\">Excise</option>"
-					+ " 		<option value=\"2\">Cess</option>"
-					+ " 		<option value=\"3\">Sales</option>"
-					+ " 		<option value=\"4\">Freight</option>"
-					+ " 		<option value=\"5\">Other Charges</option>"
+					+" 	id=\"rateName"+count+counter+"\" onchange=\"purchaseRateCalc();\">"
+					
 					+ " </select></td><td><input type=\"text\" class=\"form-control\""
 					+" 	id=\"rateValue"+count+counter+"\" name=\"rateValue"+count+counter+"\" placeholder=\"Rate Value\"    onchange=\"purchaseRateCalc();\" onkeypress=\"return numbersonly(this,event, true);\" /></td>"
 					+"<td><a href='#' onclick='addRow(" +count+")'><div class =\"btn-group\" style=\"float:right\"><button type=\"button\" id=\"myBtn"+count+"\" class=\"btn btn-default\" ><span class=\"glyphicon glyphicon-plus\" ></span></button></div></a><input type=\"hidden\" class=\"form-control\""
-					+" 	id=\"subTotal"+count+"\" name=\"subTotal"+count+"\" value=\"0\" ></td></table></td>"
+					+" 	id=\"itemLevelTotal"+count+"\" name=\"itemLevelTotal"+count+"\" value=\"0\" ></td></table></td>"
 
 					
-					$(nextRow).html(nextContent);				
+					$(nextRow).html(nextContent);	
+					getRates('rateName'+count+counter);			
 					   $(nextRow).attr("id", "innerItemTableRow" + count);       
 					
 					//getUnits('unit' +count);
@@ -1320,6 +1782,11 @@ function push(id, plNo, desc) {
 					
 					BootstrapDialog.alert('Error Firm and warehouse are different' );
 				}
+				}
+				else{
+					BootstrapDialog.alert('Access Denied');
+					return;
+				}
 			},
 			error : function(data) {
 				BootstrapDialog.alert('Error Pulling Purchase Order Details' + data);
@@ -1342,6 +1809,28 @@ function push(id, plNo, desc) {
 		}
 		
 		
+	}
+	
+	function getUserByRoleId(userRoleId){
+		var modelRequest = {};
+		modelRequest.id = userRoleId
+		$.ajax({
+			url : 'getUserRoleByRoleId',
+			type : 'POST',
+			data : JSON.stringify(modelRequest),
+			contentType : 'application/json',
+			dataType : 'json',
+			success : function(data) {
+				if (data != null) {
+					userRoleData = data;
+					//alert(userRoleData);
+                         }
+							},
+			error : function(data) {
+				BootstrapDialog.alert('Error Unable to pull the User Role Details');
+			}
+		});
+	
 	}
 	
 	
@@ -1379,7 +1868,7 @@ function push(id, plNo, desc) {
 			else
 			{
 				var rateName =document.getElementById("rateName"+i+j).value;
-				if(rateName == 0){
+				if(rateName == 1){
 					var conCheck = parseFloat(document.getElementById("rateValue"+i+j).value);
 					basicRate = basicRate + conCheck;
 				}
@@ -1387,22 +1876,24 @@ function push(id, plNo, desc) {
 			//total = total+basicRate*orderQty;
 			total =basicRate*orderQty;
 		
-		
+		if(rateName == 1){
+			total =  ((total+((excise/100)*(total)) + ((cess/100)*(excise/100)*total))+((sales/100)*((total)+((excise/100)*(total))+((cess/100)*((excise/100)*((total)+((excise/100)*(total)))))))) + (freight) + (otherCharges);
+		}
 		
 			
-			if(rateName == 1){
+			if(rateName == 2){
 				 excise = parseFloat(document.getElementById("rateValue"+i+j).value);
 				
 				exciseValue = (excise/100)*basicRate;
 				total = (total+((excise/100)*(total)) + ((cess/100)*(excise/100)*total)) +  ((sales/100)*((total)+((excise/100)*(total))+((cess/100)*((excise/100)*((total)+((excise/100)*(total))))))) + (freight) + (otherCharges);
 				
 			}
-			if(rateName == 2 ){
+			//if(rateName == 4 ){
 				
-			 cess = parseFloat(document.getElementById("rateValue"+i+j).value);
-			   cessValue += (cess/100)*((excise/100)*basicRate);
-			 total = (total+((excise/100)*(total)) + ((cess/100)*(excise/100)*total)) + ((sales/100)*((total)+((excise/100)*(total))+((cess/100)*((excise/100)*((total)+((excise/100)*(total))))))) + (freight) + (otherCharges);
-			}
+			// cess = parseFloat(document.getElementById("rateValue"+i+j).value);
+			//   cessValue += (cess/100)*((excise/100)*basicRate);
+			// total = (total+((excise/100)*(total)) + ((cess/100)*(excise/100)*total)) + ((sales/100)*((total)+((excise/100)*(total))+((cess/100)*((excise/100)*((total)+((excise/100)*(total))))))) + (freight) + (otherCharges);
+			//}
 			if(rateName == 3){
 				
 				 sales = parseFloat(document.getElementById("rateValue"+i+j).value);
@@ -1427,7 +1918,7 @@ function push(id, plNo, desc) {
 			
 		}
 		
-		document.getElementById("subTotal"+i).value=addStatus;
+		document.getElementById("itemLevelTotal"+i).value=addStatus;
 		totalCalc();
 		}
 		
@@ -1449,7 +1940,7 @@ function totalCalc(){
 		var total = 0;
 		for(var i=0;i<count;i++)
 			{
-			 subTotal = parseFloat(document.getElementById("subTotal"+i).value);
+			 subTotal = parseFloat(document.getElementById("itemLevelTotal"+i).value);
 			 basicRate +=subTotal;
 		
 			}
@@ -1470,19 +1961,19 @@ function totalCalc(){
 			
 			var rateName = document.getElementById("ratesName"+r).value;
 			
-			if(rateName == 1){
+			if(rateName == 2){
 				 excise = parseFloat(document.getElementById("orderLevelRate"+r).value);
 				
 				exciseValue = (excise/100)*basicRate;
 				total = (basicRate+((excise/100)*(basicRate)) + ((cess/100)*(excise/100)*basicRate)) +  ((sales/100)*((basicRate)+((excise/100)*(basicRate))+((cess/100)*((excise/100)*((basicRate)+((excise/100)*(basicRate))))))) + (freight) + (otherCharges);
 				
 			}
-			if(rateName == 2 ){
+			//if(rateName == 4 ){
 				
-			 cess = parseFloat(document.getElementById("orderLevelRate"+r).value);
-			   cessValue += (cess/100)*((excise/100)*basicRate);
-			 total = (basicRate+((excise/100)*(basicRate)) + ((cess/100)*(excise/100)*basicRate)) + ((sales/100)*((basicRate)+((excise/100)*(basicRate))+((cess/100)*((excise/100)*((basicRate)+((excise/100)*(basicRate))))))) + (freight) + (otherCharges);
-			}
+			// cess = parseFloat(document.getElementById("orderLevelRate"+r).value);
+			  // cessValue += (cess/100)*((excise/100)*basicRate);
+			 //total = (basicRate+((excise/100)*(basicRate)) + ((cess/100)*(excise/100)*basicRate)) + ((sales/100)*((basicRate)+((excise/100)*(basicRate))+((cess/100)*((excise/100)*((basicRate)+((excise/100)*(basicRate))))))) + (freight) + (otherCharges);
+			//}
 			if(rateName == 3){
 				
 				 sales = parseFloat(document.getElementById("orderLevelRate"+r).value);
@@ -1501,7 +1992,7 @@ function totalCalc(){
 			}
 		}
 		}
-		
+		document.getElementById("orderLevelTotal").value=Math.round(total,2);
 		}
 		else{
 			total = basicRate;
@@ -1509,7 +2000,8 @@ function totalCalc(){
 		
 		
 		
-		 document.getElementById("total").value=total;
+		 document.getElementById("orderLevelGrandTotal").value=Math.round(total,2);
+		 
 		
 	}
 	
@@ -1552,13 +2044,7 @@ function totalCalc(){
 		
 			content+="<select class=\"form-control\" name=\"rateName"+count+counter+"\""
 			+" 	id=\"rateName"+count+counter+"\"  size\"6\"/>"
-			+ " 		<option value=\"\"  selected disabled>--Select--</option>"
-			+ " 		<option value=\"0\">Basic Rate</option>"
-			+ " 		<option value=\"1\">Excise</option>"
-			+ " 		<option value=\"2\">Cess</option>"
-			+ " 		<option value=\"3\">Sales</option>"
-			+ " 		<option value=\"4\">Freight</option>"
-			+ " 		<option value=\"5\">Other Charges</option>"
+					
 			+ " </select></td><td><input type=\"text\" class=\"form-control\""
 			+" 	id=\"rateValue"+count+counter+"\" name=\"rateValue"+count+counter+"\" placeholder=\"Rate Value\" onfocus=\"if(this.value=='0'){this.value=''}\"  value=\"0\" onchange=\"purchaseRateCalc();\" onkeypress=\"return numbersonly(this,event, true);\"></td>"
 			+"<td><a href='#' onclick='removeRow("
@@ -1566,6 +2052,7 @@ function totalCalc(){
 
 		newRow.innerHTML = content;
 			//var count = $("#newrowhid").val();
+			getRates('rateName'+count+counter);	
 		$(newRow).attr("id", "innerItemRows" + counter);
 		$("#rowId").val(++counter);
 		//$("#rowId").val(++count);
@@ -1622,59 +2109,73 @@ function totalCalc(){
 
 
 <div class="mainPanel">
-    <div class="panel-group" id="accordion">
-        <div class="panel panel-default" id="pendingPanel">
-            <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#pendingContent">
-                <h6 class="panel-title">
-                   Pending Purchase Order<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
-                </h6>
-            </div>
-           
-                <div class="panel-body collapse in" id="pendingContent" style="margin:0px; padding:0px;">
-                   <table style="width:100%" id="flex1"></table>
-                </div>
-           
-        </div>
-        <div class="panel panel-default" id="donePanel">
-            <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#doneContent">
-               <h5 class="panel-title">
-                    Pending Local Purchase<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
-                </h5>
-            </div>
-        
-                <div class="panel-body" id="doneContent" style="margin:0px; padding:0px;">
-                   <table style="width:100%" id="flex2"></table>
-                </div>
+	<div class="panel-group" id="accordion">
+		<div class="panel panel-default" id="pendingPanel">
+			<div class="panel-heading clicable" data-parent="#accordion"
+				data-toggle="collapse" data-target="#pendingContent">
+				<h6 class="panel-title">
+					Pending Purchase Order<span class="pull-right clickable"> <i
+						class="glyphicon glyphicon-chevron-up"></i></span>
+				</h6>
+			</div>
 
-        </div>
-        
-        
-        <div class="panel panel-default" id="donePanel" >
-            <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#doneContent" >
-               <h5 class="panel-title">
-                    View Purchase Orders<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
-                </h5>
-            </div>
-        
-                <div class="panel-body" id="doneContent" style="margin:0px; padding:0px;">
-                   <table style="width:100%" id="flex3"></table>
-                </div>
+			<div class="panel-body collapse in" id="pendingContent"
+				style="margin: 0px; padding: 0px;">
+				<table style="width: 100%" id="flex1"></table>
+			</div>
 
-        </div>
-        
-         <div class="panel panel-default" id="donePanel" >
-            <div class="panel-heading clicable" data-parent="#accordion"  data-toggle="collapse" data-target = "#doneContent" >
-               <h5 class="panel-title">
-                    View Job Work<span class="pull-right clickable"> <i class="glyphicon glyphicon-chevron-up"></i></span>
-                </h5>
-            </div>
-        
-                <div class="panel-body" id="doneContent" style="margin:0px; padding:0px;">
-                   <table style="width:100%" id="flex4"></table>
-                </div>
+		</div>
+		<div class="panel panel-default" id="donePanel">
+			<div class="panel-heading clicable" data-parent="#accordion"
+				data-toggle="collapse" data-target="#doneContent">
+				<h5 class="panel-title">
+					Pending Local Purchase<span class="pull-right clickable"> <i
+						class="glyphicon glyphicon-chevron-up"></i></span>
+				</h5>
+			</div>
 
-        </div>
-    </div>
+			<div class="panel-body" id="doneContent"
+				style="margin: 0px; padding: 0px;">
+				<table style="width: 100%" id="flex2"></table>
+			</div>
+
+		</div>
+
+
+		<div class="panel panel-default" id="donePanel">
+			<div class="panel-heading clicable" data-parent="#accordion"
+				data-toggle="collapse" data-target="#doneContent">
+				<h5 class="panel-title">
+					View Purchase Orders<span class="pull-right clickable"> <i
+						class="glyphicon glyphicon-chevron-up"></i></span>
+				</h5>
+			</div>
+
+			<div class="panel-body" id="doneContent"
+				style="margin: 0px; padding: 0px;">
+				<table style="width: 100%" id="flex3"></table>
+			</div>
+
+		</div>
+<!-- 
+		<div class="panel panel-default" id="donePanel">
+			<div class="panel-heading clicable" data-parent="#accordion"
+				data-toggle="collapse" data-target="#doneContent">
+				<h5 class="panel-title">
+					View Job Work<span class="pull-right clickable"> <i
+						class="glyphicon glyphicon-chevron-up"></i></span>
+				</h5>
+			</div>
+
+			<div class="panel-body" id="doneContent"
+				style="margin: 0px; padding: 0px;">
+				<table style="width: 100%" id="flex4"></table>
+			</div>
+
+		</div>
+		 -->
+		
+	</div>
 </div>
 
 
@@ -1691,12 +2192,12 @@ function totalCalc(){
 
 
 
-<%@ include file="include/purchase_order_form.jsp" %>
-<%@ include file="include/job_work_form.jsp" %>
-
+<%@ include file="include/purchase_order_form.jsp"%>
+<%@ include file="include/job_work_form.jsp"%>
+<%@ include file="include/purPdf.jsp"%>
 <script>
 $(document).ready(function() {
-     $('.date')
+     $('#dateRangePicker')
         .datepicker({
             format: "dd/mm/yyyy",
             startDate : new Date(),
@@ -1705,6 +2206,8 @@ $(document).ready(function() {
         }) 
 
 });
+
+
 
 
       </script>

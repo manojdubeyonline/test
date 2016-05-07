@@ -22,7 +22,8 @@ public class Rate implements Serializable {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Column(name="rate_id")
 	private Integer rateId;
-	private String rateName;
+	
+	private String rateLabel;
 	private String rateApplicableType;
 	private Double percentage;
 	private Date applicableToDate;
@@ -41,14 +42,15 @@ public class Rate implements Serializable {
 		this.rateId = rateId;
 	}
 
-	public String getRateName() {
-		return rateName;
-	}
 	
-	public void setRateName(String rateName) {
-		this.rateName = rateName;
+	public String getRateLabel() {
+		return rateLabel;
 	}
-	
+
+	public void setRateLabel(String rateLabel) {
+		this.rateLabel = rateLabel;
+	}
+
 	public String getRateApplicableType() {
 		return rateApplicableType;
 	}
@@ -64,6 +66,7 @@ public class Rate implements Serializable {
 	public void setPercentage(Double percentage) {
 		this.percentage = percentage;
 	}
+	
 	public Date getApplicableToDate() {
 		return applicableToDate;
 	}

@@ -1,4 +1,52 @@
+<script>
+function validation(){
+var count = document.getElementById('rowhid').value;
+var rowCount = document.getElementById('rowId').value;
+var grLevel = document.getElementById('grLevelRateId').value;
 
+for(var i=0;i<count;i++){
+	var qty = document.getElementById('gr_Approve_Qty'+i).value;
+	if(qty == ''){
+		BootstrapDialog.alert('Please Enter GR Approval Qty');
+		return false;
+	}
+	for(var j=0;j<rowCount;j++){
+		for(var k=0;k<rowCount;k++){
+			if(document.getElementById("rateName"+i+j) == null || document.getElementById("rateName"+i+k) == null  )
+				continue;
+			else
+			{
+				if( document.getElementById('rateName'+i+j).value == document.getElementById('rateName'+i+k).value && j != k){
+					BootstrapDialog.alert('Two rate names can not be same');
+				return false;
+				}
+			}
+		}			
+	} 
+	for(var j=0;j<rowCount;j++){
+		if(document.getElementById('rateValue'+i+j) == null)
+			continue;
+		else{
+		var hiddenBasicRate = parseFloat(document.getElementById('hiddenRateValue'+i+j).value);
+		var basicRate = parseFloat(document.getElementById('rateValue'+i+j).value);
+		if(basicRate>hiddenBasicRate){
+			BootstrapDialog.alert('Basic Rate Should Be Less Then Privious Basic Rate(Rs.'+hiddenBasicRate+' ) ');
+			return false;
+		 }
+		}
+	}
+}
+for(var m=0;m<grLevel;m++){
+	for(var n=0;n<grLevel;n++){
+		if( document.getElementById('ratesName'+m).value == document.getElementById('ratesName'+n).value && m != n){
+			BootstrapDialog.alert('Two rate names can not be same at order level');
+			return false;
+		}	
+	}
+}
+saveGRPOApproval()
+}
+</script>
 
 
 <style>#modal-add-req{overflow-y:scroll;}</style>
@@ -15,8 +63,8 @@
 				</div>
 				<div class="modal-body">
 					<div class="form-group  form-group-sm">
-						<label for="item">Purchase Order Number</label> <input type="text" class="form-control"
-							id="orderNo" name="orderNo" readonly="readonly"><input type="hidden" 
+						<label for="item">Goods Reciept Number</label> <input type="text" class="form-control"
+							id="grRecieptNo" name="grRecieptNo" readonly="readonly"><input type="hidden" 
 							id="orderId" name="orderId" ><input type="hidden" 
 							id="grpoId" name="grpoId" ><input type="hidden" 
 							id="orderType" name="orderType"  value="PurchaseOrder"><input type="hidden" 
@@ -119,21 +167,51 @@
 									<th><b>GR Qty</b></th>
 									<th><b>Approval Qty</b></th>
 									<th><b>Unit</b></th>
-									<th><b>Basic Rate</b></th>
+									
 								</tr>
 								
 							
 							</table>
 							<input type="hidden" name="rowhid" id="rowhid" value="0"/>
 							<input type="hidden" name="rowId" id="rowId" value="0"/>
-							<input type="hidden" name="reqid" id="reqid" value=""/>
+							<input type="hidden" name="grLevelRateId" id="grLevelRateId" value="0"/>
+							
 
 						</div>
 					</div>
 					
+					
+					<div class="panel panel-default">
+
+						<div class="panel-heading">GR Level Rates 
+						
+						<div class="btn-group" style="float: right">
+											<button type="button" class="btn btn-default" id="orderLevelButton"
+												onclick="addGrLevelRates()" >
+												<span class="glyphicon glyphicon-plus"></span>
+											</button>
+						</div>
+						<div class="panel-body" style="padding: 0px;">
+						<table id="addMultipleTable" class="table table-bordered ">
+							<tr>
+									<th>Rate Name</th>
+									<th colspan="2">Rate Value</th>
+									
+								</tr>
+							
+							<input type="hidden" name="grLevelTotal" id="grLevelTotal" value="0"/>
+						</table>	
+						<input type="hidden" name="rowId" id="rowId" value="1"/>									
+						</div>
+					</div>
+					
+				</div>
+					
 					<div class="form-group  form-group-sm" >
 						<label for="rate" style="vertical-align: top">Bill Amount</label> 
-						<input type="number" id="rate" name="rate" class="form-control"  disabled>
+						<input type="number" id="totalBillAmount" name="totalBillAmount" class="form-control" readonly>
+						<input type="hidden" id="grTotalRateAppliedId" name="grTotalRateAppliedId" >
+						<input type="hidden" id="grLevelId" name="grLevelId" >
 					</div>
 					
 					<div class="form-group  form-group-sm">
@@ -157,7 +235,7 @@
 					<div class="form-group  form-group-sm">
 
 						<button type="button" class="btn btn-success" id="addReqSave"
-							onClick="saveGRPOApproval()">
+							onClick="validation()">
 							<span class="glyphicon glyphicon-floppy-save"></span>
 						</button>
 

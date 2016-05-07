@@ -1,7 +1,5 @@
 
 
-
-
 function generateRefNo() {
 		var modelRequest = {};
 		modelRequest.id = $("#firm").val();
@@ -24,6 +22,123 @@ function generateRefNo() {
 }
 
 
+function generateWarehouseRefNo() {
+	var modelRequest = {};
+	modelRequest.id = $("#fromFirm").val();
+	modelRequest.id2 = $("#fromWarehouse").val();
+
+	$.ajax({
+		url : 'generateWarehouseRefNo',
+		type : 'POST',
+		data : JSON.stringify(modelRequest),
+		contentType : 'application/json',
+		success : function(data) {
+			if (data != null) {
+				$("#warehouseRefNo").val(data);
+			}
+		},
+		error : function(data) {
+			BootstrapDialog.alert('Error Unable to generate the Warehouse ref no.');
+		}
+	});
+}
+
+function generateIssuesRefNo() {
+	var modelRequest = {};
+	modelRequest.id = $("#firm").val();
+	modelRequest.id2 = $("#warehouse").val();
+	var sel = $("#issueRefNo");
+
+	$.ajax({
+		url : 'generateIssueRefNo',
+		type : 'POST',
+		data : JSON.stringify(modelRequest),
+		contentType : 'application/json',
+		success : function(data) {
+			if (data != null) {
+				$(sel).val(data);
+			}
+		},
+		error : function(data) {
+			BootstrapDialog.alert('Error Unable to generate the Issue ref no.');
+		}
+	});
+}
+
+function generateIssueRefNo(firmId,warehouseId) {
+	var modelRequest = {};
+	modelRequest.id = firmId
+	modelRequest.id2 = warehouseId
+	var sel = $("#issueRefNo");
+
+	$.ajax({
+		url : 'generateIssueRefNo',
+		type : 'POST',
+		data : JSON.stringify(modelRequest),
+		contentType : 'application/json',
+		success : function(data) {
+			if (data != null) {
+				$(sel).val(data);
+			}
+		},
+		error : function(data) {
+			BootstrapDialog.alert('Error Unable to generate the Issue ref no.');
+		}
+	});
+}
+
+
+function getVendorAddress(field, vendorId,selectedAddress) {
+	var modelRequest = {};
+	modelRequest.id = vendorId
+	var sel = $("#" + field);
+	$.ajax({
+		url : 'getVendorAddress',
+		type : 'POST',
+		data : JSON.stringify(modelRequest),
+		contentType : 'application/json',
+		success : function(data) {
+			if (data != null) {
+				sel.html('<option value="" selected>Select Vendor Address</option>');
+				for (var i = 0; i < data.length; i++) {
+					if(selectedAddress == data[i].locationId){
+						sel.append('<option value="' + data[i].locationId + '"selected >'
+								+ data[i].clientAddress + '</option>');
+					}
+					else{
+					sel.append('<option value="' + data[i].locationId + '">'
+							+ data[i].clientAddress + '</option>');
+					}
+				}
+			}
+		},
+		error : function(data) {
+			BootstrapDialog.alert('Error Unable to get vendor addresses');
+		}
+	});
+}
+
+
+function generateRecieptNo(field, firmId) {
+	var modelRequest = {};
+	modelRequest.id = firmId
+	var sel = $("#" + field);
+	$.ajax({
+		url : 'generateGoodsRecieptNo',
+		type : 'POST',
+		data : JSON.stringify(modelRequest),
+		contentType : 'application/json',
+		success : function(data) {
+			if (data != null) {
+				$(sel).val(data);
+			}
+		},
+		error : function(data) {
+			BootstrapDialog.alert('Error Unable to generate the reciept no.');
+		}
+	});
+}
+
 
 function generateOrderNo(field, firmId) {
 	var modelRequest = {};
@@ -44,6 +159,7 @@ function generateOrderNo(field, firmId) {
 		}
 	});
 }
+
 
 function generateJobWorkNo(field, firmId) {
 	var modelRequest = {};
@@ -160,7 +276,7 @@ function generateJobWorkNo(field, firmId) {
 	
 	
 	
-
+	
 	function getFirmWarehouses(field, firmId, defaultVal) {
 		var modelRequest = {};
 		modelRequest.id = firmId
@@ -177,6 +293,7 @@ function generateJobWorkNo(field, firmId) {
 					sel.html('<option value="" selected>Store</option>');
 					
 					for (var i = 0; i < data.length; i++) {
+						
 						if(defaultVal==data[i].wareId){
 							sel.append('<option value="' + data[i].wareId + '"selected >'
 									+ data[i].warehouseName + '</option>');
@@ -322,7 +439,7 @@ function generateJobWorkNo(field, firmId) {
 			}
 		});
 	}
-	function getUnits(field) {
+	function getUnits(field, selectedVal) {
 		var sel = $("#" + field);
 		$.ajax({
 			url : 'getUnits',
@@ -333,8 +450,14 @@ function generateJobWorkNo(field, firmId) {
 			success : function(data) {
 				if (data != null) {
 					for (var i = 0; i < data.length; i++) {
-						sel.append('<option value="' + data[i].unitId + '">'
-								+ data[i].unitName + '</option>');
+						if(selectedVal == data[i].unitId){
+							sel.append('<option value="' + data[i].unitId + '" selected>'
+									+ data[i].unitName + '</option>');
+						}else{
+							sel.append('<option value="' + data[i].unitId + '">'
+									+ data[i].unitName + '</option>');
+						}
+						
 					}
 				}
 			},
@@ -344,7 +467,7 @@ function generateJobWorkNo(field, firmId) {
 		});
 	}
 	
-	function getUserFirms(field, userId) {
+	function getUserFirms(field, userId,defaultValue) {
 		var jsonRecord = {};
 		jsonRecord.id = userId;
 		var sel = $("#" + field);
@@ -359,8 +482,14 @@ function generateJobWorkNo(field, firmId) {
 				if (data != null) {
 					var firms = data.userFirms;
 					for (var i = 0; i < firms.length; i++) {
-						sel.append('<option value="' + firms[i].firmId + '">'
+						if(defaultValue == firms[i].firmId){
+						sel.append('<option value="' + firms[i].firmId + '" selected>'
 								+ firms[i].firmName + '</option>');
+						}
+						else{
+							sel.append('<option value="' + firms[i].firmId + '">'
+									+ firms[i].firmName + '</option>');
+						}
 					}
 				}
 			},
@@ -369,6 +498,142 @@ function generateJobWorkNo(field, firmId) {
 			}
 		});
 
+	}
+	
+	function getUserWarehouse(field, firmId, defaultVal,userId) {
+		var modelRequest = {};
+		modelRequest.id = userId
+		var sel = $("#" + field);
+		$.ajax({
+			url : 'getUserById',
+			type : 'POST',
+			dataType : 'JSON',
+			data : JSON.stringify(modelRequest),
+			contentType : 'application/json',
+
+			success : function(data) {
+				if (data != null) {
+					sel.html('<option value="" selected disabled>Warehouse</option>');
+					var warehouses = data.userWarehouses;
+					for (var i = 0; i < warehouses.length; i++) {
+						if(defaultVal == warehouses[i].wareId){
+							sel.append('<option value="' + warehouses[i].wareId + '" selected>'
+									+ warehouses[i].warehouseName + '</option>');
+						}
+						else{
+						if(firmId==warehouses[i].firmId){
+							sel.append('<option value="' + warehouses[i].wareId + '" >'
+									+ warehouses[i].warehouseName + '</option>');
+						 }
+						}
+					}
+				}
+			},
+			error : function(data) {
+				BootstrapDialog
+						.alert('Error Unable to pull the warehouse list ');
+			}
+		});
+	}
+	
+	
+	function getUWarehouse(field,userId,defaultVal) {
+		var modelRequest = {};
+		modelRequest.id = userId
+		var sel = $("#" + field);
+		$.ajax({
+			url : 'getUserById',
+			type : 'POST',
+			dataType : 'JSON',
+			data : JSON.stringify(modelRequest),
+			contentType : 'application/json',
+
+			success : function(data) {
+				if (data != null) {
+					sel.html('<option value="" selected disabled>Warehouse</option>');
+					var warehouses = data.userWarehouses;
+					for (var i = 0; i < warehouses.length; i++) {
+						if(defaultVal == warehouses[i].wareId){
+							sel.append('<option value="' + warehouses[i].wareId + '" selected>'
+									+ warehouses[i].warehouseName + '</option>');
+						}
+						else{
+						
+							sel.append('<option value="' + warehouses[i].wareId + '" >'
+									+ warehouses[i].warehouseName + '</option>');
+						}
+					}
+				}
+			},
+			error : function(data) {
+				BootstrapDialog
+						.alert('Error Unable to pull the warehouse list ');
+			}
+		});
+	}
+	
+	
+	function getUFirms(field,wareId,userId) {
+		var jsonRecord = {};
+		jsonRecord.id = userId;
+		var sel = $("#" + field);
+		sel.html('<option value="" selected disabled>For the Firm</option>');
+		$.ajax({
+			url : 'getUserById',
+			type : 'POST',
+			data : JSON.stringify(jsonRecord),
+			contentType : 'application/json',
+
+			success : function(data) {
+				if (data != null) {
+					var warehouse = data.userWarehouses;
+					for (var i = 0; i < warehouse.length; i++) {
+						if(wareId == warehouse[i].wareId){
+						//sel.append('<option value="' + warehouse[i].firmId + '">'
+								//+ warehouse[i].firmId + '</option>');
+						sel.val(warehouse[i].firmId);
+						}
+					}
+				}
+			},
+			error : function(data) {
+				BootstrapDialog.alert('Error Unable to pull the User Firms list');
+			}
+		});
+
+	}
+	
+	
+	
+	function getRates(field, selectedVal) {
+		var sel = $("#" + field);
+		$.ajax({
+			url : 'getRates',
+			type : 'POST',
+			dataType : 'json',
+			contentType : 'application/json',
+
+			success : function(data) {
+				if (data != null) {
+					for (var i = 0; i < data.length; i++) {
+						if(data[i].rateId==21 ||data[i].rateId==22 ||data[i].rateId==23){
+							continue;
+						}
+						if(selectedVal == data[i].rateId){
+							sel.append('<option value="' + data[i].rateId + '" selected>'
+									+ data[i].rateLabel + '</option>');
+						}else{
+							sel.append('<option value="' + data[i].rateId + '">'
+									+ data[i].rateLabel + '</option>');
+						}
+						
+					}
+				}
+			},
+			error : function(data) {
+				BootstrapDialog.alert('Error Unable to pull the rate name list');
+			}
+		});
 	}
 	
 	function getItemOption(field,id){

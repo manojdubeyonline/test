@@ -4,6 +4,7 @@
 package com.railtech.po.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +31,9 @@ import org.springframework.web.servlet.ModelAndView;
 import com.railtech.po.entity.Code;
 import com.railtech.po.entity.Firm;
 import com.railtech.po.entity.FlexiBean;
+import com.railtech.po.entity.GRPO;
+import com.railtech.po.entity.GRPOReceiptEntry;
+import com.railtech.po.entity.ItemIssue;
 import com.railtech.po.entity.JobWork;
 import com.railtech.po.entity.JobWorkItemMaster;
 import com.railtech.po.entity.JobWorkItems;
@@ -43,11 +48,14 @@ import com.railtech.po.entity.RequisitionItem;
 import com.railtech.po.entity.Unit;
 import com.railtech.po.entity.User;
 import com.railtech.po.entity.Vendor;
+import com.railtech.po.entity.VendorDetails;
 import com.railtech.po.entity.Warehouse;
+import com.railtech.po.service.GRPOService;
 import com.railtech.po.service.MasterInfoService;
 import com.railtech.po.service.ProcurementService;
 import com.railtech.po.service.PurchaseService;
 import com.railtech.po.service.RequisitionService;
+import com.railtech.po.util.POConstants;
 import com.railtech.po.util.Util;
 
 /**
@@ -61,6 +69,9 @@ public class PurchaseController {
 	
 	@Autowired
 	RequisitionService requisitionService;
+	
+	@Autowired
+	GRPOService grpoService;
 	
 	@Autowired
 	PurchaseService purchaseService;
@@ -89,6 +100,28 @@ public class PurchaseController {
 		return order;
 	}
 	
+	@RequestMapping(value = { "/getPurchaseOrderByIdForGRPO" }, method = { RequestMethod.POST })
+	public @ResponseBody PurchaseOrder getPurchaseOrderByIdForGRPO(@RequestBody ModelForm modelRequest)
+	{
+		PurchaseOrder order = purchaseService.getOrderByIdForGRPO(Integer.parseInt(modelRequest.getId()));
+		if(order !=null){
+			for(PurchaseOrderItem item:order.getOrderItems()){
+				Double grQty = 0.0;
+				
+				
+				List<GRPOReceiptEntry> receiptEntry= grpoService.getOrderByOrderItemId(item.getItemKey());
+				for(GRPOReceiptEntry entry: receiptEntry){
+					grQty = grQty + entry.getInwardQty(); 
+				 }
+					
+				
+				
+				item.setQty(item.getQty()-grQty);
+			}
+		}
+		return order;
+	}
+	
 	@RequestMapping(value = { "/getJobWorkOrderById" }, method = { RequestMethod.POST })
 	public @ResponseBody JobWork getJobWorkOrderById(@RequestBody ModelForm modelRequest)
 	{
@@ -102,6 +135,14 @@ public class PurchaseController {
 		PurchaseOrder order = purchaseService.getOrderById(Integer.parseInt(modelRequest.getId()));
 		return order;
 	}
+	
+	@RequestMapping(value = { "/getRateAppliedByitemKey" }, method = { RequestMethod.POST })
+	public @ResponseBody RateApplied getRateAppliedByitemKey(@RequestBody ModelForm modelRequest)
+	{
+		RateApplied rateApplied = purchaseService.getRateAppliedById(Integer.parseInt(modelRequest.getId()));
+		return rateApplied;
+	}
+
 	
 	@RequestMapping(value = { "/generatePurchaseOrderNo" }, method = { RequestMethod.POST })
 	public @ResponseBody String generatePurchaseOrderNo(@RequestBody ModelForm modelRequest)
@@ -186,46 +227,73 @@ public class PurchaseController {
 		purchase.setDueDate(Util.getDate(request.getParameter("purchaseOrderDate"),
 			"dd/MM/yyyy"));
 		purchase.setPurchaseOrderNo(request.getParameter("orderNo"));
-		User addedByUser = masterservice.getUserById("27");
+		User addedByUser =((User)request.getSession().getAttribute("_SessionUser"));
+		//User addedByUser = masterservice.getUserById("27");
 		purchase.setAddedBy(addedByUser);
 		
 		purchase.setOrderType(request.getParameter("orderType"));
 		
+		purchase.setImportantDetails(request.getParameter("impDetails"));
+		purchase.setDiscount(request.getParameter("discount"));
+		purchase.setDeliveryTerm(request.getParameter("deliveryTerms"));
+		purchase.setDeliveryPeriod(request.getParameter("deliveryPeriod"));
+		purchase.setFreight(request.getParameter("freight"));
+		purchase.setPacking(request.getParameter("packing"));
+		purchase.setInsurance(request.getParameter("insurance"));
+		purchase.setSaleTax(request.getParameter("saleTax"));
+		purchase.setQualityAssurance(request.getParameter("qualityAss"));
+		purchase.setQtyTolerance(request.getParameter("qualityTolerance"));
+		
+		purchase.setInstructorName(request.getParameter("instructorName"));
+		purchase.setInstructorContact(request.getParameter("instructorCont"));
+		purchase.setInstructorEmail(request.getParameter("instructorEmail"));
+		
+		purchase.setQuotationDetail(request.getParameter("quotationDetail"));
+		purchase.setQuotationDate(Util.getDate(request.getParameter("quotationDate"),"dd/MM/yyyy"));
+	
+		
+		purchase.setOtherInstruction(request.getParameter("otherInstruction"));
+		purchase.setContactPerson(request.getParameter("contactPerson"));
+		purchase.setPaymentTerm(request.getParameter("paymentTerm"));
+		
+String locationId = request.getParameter("vendorAddress");
+		
+if(locationId!=null){
+	VendorDetails vendorDetails = masterservice.getVendorDetailsById(locationId);
+	purchase.setVendorDetail(vendorDetails);
+}
+		
 		String rowCount = request.getParameter("rowhid");
 		String innerRowCount = request.getParameter("rowId");
+		String orderCount = request.getParameter("orderLevelRowId");
 		
         int maxRows = 0;
         int innerMaxRows = 0;
+        int orderRows = 0;
        
-		if(null!=rowCount && null!=innerRowCount){
+		if(null!=rowCount && null!=innerRowCount ){
 			maxRows = Integer.parseInt(rowCount);
 			innerMaxRows = Integer.parseInt(innerRowCount);
 			
 			
+			
 		}
+		if(null != orderCount){
+			orderRows = Integer.parseInt(orderCount);
+			}
 		
 		if(isNew || purchase.getOrderItems() ==null){
 			purchase.setOrderItems(new HashSet<PurchaseOrderItem>());
 		}
+		Boolean isNewGrRates = Boolean.FALSE;
+		PurchaseOrderItem purchaseItem = null;
 		for(int i=0;i<maxRows;i++)
 		{
-			/*
-			for(int j=0;j<innerMaxRows;j++)
-			{
-				String rateValue = request.getParameter("rateValue"+i+j);
-				if(rateValue == null) 
-					continue;
-				System.out.println("I : " + i+", J : "+j +" "+rateValue );
-			}*/
-			
-			
-			
-			
+			Set<RateApplied> itemLevelRatesApplied = new HashSet<RateApplied> ();
 			String itemKeyStr = request.getParameter("itemKey" + i);
 			Integer itemKey = null!=itemKeyStr?Integer.parseInt(itemKeyStr.trim()):null;
 			Boolean isFound = Boolean.FALSE;
-			Boolean isApplied = Boolean.FALSE;
-			PurchaseOrderItem purchaseItem = null;
+			
 			if(!isNew){
 				Iterator <PurchaseOrderItem>itr = purchase.getOrderItems().iterator();
 				while(itr.hasNext()){
@@ -240,7 +308,7 @@ public class PurchaseController {
 			}
 			if(!isFound){
 				purchaseItem = new PurchaseOrderItem();
-				isApplied = Boolean.TRUE;
+				isNewGrRates = Boolean.TRUE;
 			}
 			
 			String itemCodeId = request.getParameter("item"+i);
@@ -272,8 +340,8 @@ public class PurchaseController {
 			
 			purchaseItem.setPurchaseOrder(purchase);
 			
-			//User requestedByUser =((User)request.getSession().getAttribute("_SessionUser"));
-			User requestedByUser = masterservice.getUserById("27");
+			User requestedByUser =((User)request.getSession().getAttribute("_SessionUser"));
+			//User requestedByUser = masterservice.getUserById("27");
 			purchaseItem.setModifiedByUser(requestedByUser);
 			
 			purchaseItem.setQty(Double.parseDouble(request
@@ -285,70 +353,226 @@ public class PurchaseController {
 			}
 			
 			
-			String basicRates = null;
+			
+			
 			for(int j=0;j<innerMaxRows;j++)
 			{
 				String rateValue = request.getParameter("rateValue"+i+j);
 				if(rateValue == null) 
 					continue;
 				else{
-					Integer rateName = Integer.parseInt(request.getParameter("rateName"+i+j));
-					if(rateName == 0){
-						basicRates = request.getParameter("rateValue"+i+j);
+					RateApplied orderItemRate = null;
+					String rateAppliedIdStr = request.getParameter("orderItemRateId"+i+j);
+					//Integer rateAppliedId = null!=rateAppliedIdStr?Integer.parseInt(rateAppliedIdStr.trim()):null;
+					Integer rateAppliedId = null;
+					if(rateAppliedIdStr != null && rateAppliedIdStr != ""){
+						rateAppliedId = Integer.parseInt(rateAppliedIdStr.trim());
 					}
+					
+					Boolean isRateApplied = Boolean.FALSE;
+					
+					if(!isNewGrRates){
+						Iterator <RateApplied>itr = purchaseItem.getItemLevelRates().iterator();
+						while(itr.hasNext()){
+							RateApplied itm = itr.next();
+							if(itm.getRateAppliedId().intValue() ==rateAppliedId.intValue()){
+								isRateApplied = Boolean.TRUE;
+								orderItemRate =itm;
+								break;
+							}
+						}
+					}
+					if(!isRateApplied){
+						orderItemRate = new RateApplied();
+					}
+					
+					Integer rateId = Integer.parseInt(request.getParameter("rateName"+i+j));
+					Rate rate = masterservice.getRateById(rateId);
+					//RateApplied rateApplied = new RateApplied();
+					orderItemRate.setRate(rate);
+					orderItemRate.setAppliedAmount(new Double(rateValue));
+					orderItemRate.setLevelStatus(POConstants.STATUS_ITEM_LEVEL);
+					orderItemRate.setItemKeyId(purchaseItem);
+					orderItemRate.setMasterKeyId(purchase);
+					itemLevelRatesApplied.add(orderItemRate);
 				}
 				
 			}
+			//Item level total value
+			RateApplied orderItemTotalRate = null;
+			String rateAppliedIdStr = request.getParameter("orderItemTotalRateId"+i);
+			//Integer rateAppliedId = null!=rateAppliedIdStr?Integer.parseInt(rateAppliedIdStr.trim()):null;
+			Integer rateAppliedId = null;
+			if(rateAppliedIdStr != null && rateAppliedIdStr != ""){
+				rateAppliedId = Integer.parseInt(rateAppliedIdStr.trim());
+			}
 			
-			//String basicRates = request.getParameter("subTotal" + i);
-			purchaseItem.setBasicRate(Double.parseDouble(basicRates));
+			Boolean isRateApplied = Boolean.FALSE;
+			
+			if(!isNewGrRates){
+				Iterator <RateApplied>itr = purchaseItem.getItemLevelRates().iterator();
+				while(itr.hasNext()){
+					RateApplied itm = itr.next();
+					if(itm.getRateAppliedId().intValue() == rateAppliedId.intValue()){
+						isRateApplied = Boolean.TRUE;
+						orderItemTotalRate =itm;
+						break;
+					}
+				}
+			}
+			if(!isRateApplied){
+				orderItemTotalRate = new RateApplied();
+			}
+			
+			String rateValue = request.getParameter("itemLevelTotal"+i);
+			Rate rate = masterservice.getRateById(21);
+			//RateApplied rateApplied = new RateApplied();
+			orderItemTotalRate.setRate(rate);
+			if(!StringUtils.isEmpty(rateValue)){
+				orderItemTotalRate.setAppliedAmount(new Double(rateValue));
+				orderItemTotalRate.setLevelStatus(POConstants.STATUS_ITEM_LEVEL);
+				orderItemTotalRate.setItemKeyId(purchaseItem);
+				orderItemTotalRate.setMasterKeyId(purchase);
+			itemLevelRatesApplied.add(orderItemTotalRate);
+			}
 			Integer unitId = Integer.parseInt(request.getParameter("unit"+i));
 
 			Unit itemUnit = masterservice.getUnitById(unitId);
 			
 			purchaseItem.setUnit(itemUnit);
-			
-			if(isNew || purchaseItem.getItemLevelRates() ==null){
-				purchaseItem.setItemLevelRates(new HashSet<RateApplied>());
-			}
-			
-			String rateAppliedId = request.getParameter("rateAppliedId" + i);
-			Integer rateAppId = null!=rateAppliedId?Integer.parseInt(rateAppliedId.trim()):null;
-			Boolean isAppliedFound = Boolean.FALSE;
-			RateApplied rateApplied = null;
-			if(!isApplied){
-				Iterator <RateApplied>itr = purchaseItem.getItemLevelRates().iterator();
-				while(itr.hasNext()){
-					RateApplied rateApp = itr.next();
-					if(rateApp.getRateAppliedId() ==rateAppId){
-						isAppliedFound = Boolean.TRUE;
-						rateApplied =rateApp;
-						break;
-			        }
-				}
-			}
-			if(!isAppliedFound){
-				rateApplied = new RateApplied();
-				
-			}
-			
-			
-			String total = request.getParameter("total");
-			rateApplied.setAppliedAmount(Double.parseDouble(total));			
-			rateApplied.setMasterKeyId(purchase);
-			rateApplied.setItemKeyId(purchaseItem);
-			
-			if(!isAppliedFound){
-				purchaseItem.getItemLevelRates().add(rateApplied);
-			}
-			
+			purchaseItem.setItemLevelRates(itemLevelRatesApplied);
 			
 			if(!isFound){
 				purchase.getOrderItems().add(purchaseItem);
 			}		
 			
+			
+		}
+		//End of Item Level Order Rates
+		
+		//Order Level Rates
+		Set<RateApplied> orderLevelRatesApplied = new HashSet<RateApplied> ();
+		
+		for(int j=0;j<orderRows;j++)
+		{
+			String rateValue = request.getParameter("orderLevelRate"+j);
+			if(rateValue == null) 
+				continue;
+			else{
+				RateApplied orderLevelRate = null;
+				String rateAppliedIdStr = request.getParameter("orderLevelRateId"+j);
+				//Integer rateAppliedId = null!=rateAppliedIdStr?Integer.parseInt(rateAppliedIdStr.trim()):null;
+				Integer rateAppliedId = null;
+				if(rateAppliedIdStr != null && rateAppliedIdStr != ""){
+					rateAppliedId = Integer.parseInt(rateAppliedIdStr.trim());
+				}
+				
+				Boolean isRateApplied = Boolean.FALSE;
+				
+				if(!isNewGrRates){
+					Iterator <RateApplied>itr = purchase.getOrderLevelRates().iterator();
+					while(itr.hasNext()){
+						RateApplied itm = itr.next();
+						if(itm.getRateAppliedId().intValue() ==rateAppliedId.intValue()){
+							isRateApplied = Boolean.TRUE;
+							orderLevelRate =itm;
+							break;
+						}
+					}
+				}
+				if(!isRateApplied){
+					orderLevelRate = new RateApplied();
+				}
+				
+				Integer rateId = Integer.parseInt(request.getParameter("ratesName"+j));
+				Rate rate = masterservice.getRateById(rateId);
+				//RateApplied rateApplied = new RateApplied();
+				orderLevelRate.setRate(rate);
+				orderLevelRate.setAppliedAmount(new Double(rateValue));
+				orderLevelRate.setLevelStatus(POConstants.STATUS_ORDER_LEVEL);
+				//orderLevelRate.setItemKeyId(purchaseItem);
+				orderLevelRate.setMasterKeyId(purchase);
+				orderLevelRatesApplied.add(orderLevelRate);
+			}
+			
+		}
+		//order level total value
+		String rateValue = request.getParameter("orderLevelTotal");
+		int rateV = Integer.parseInt(rateValue);
+		Rate rate = masterservice.getRateById(22);
+		
+		
+		if(!StringUtils.isEmpty(rateValue) && rateV !=0){
+			RateApplied orderLevelTotalRate = null;
+
+			String rateAppliedIdStr = request.getParameter("orderLevelTotalRateId");
+			//Integer rateAppliedId = null!=rateAppliedIdStr?Integer.parseInt(rateAppliedIdStr.trim()):null;
+			Integer rateAppliedId = null;
+			if(rateAppliedIdStr != null && rateAppliedIdStr != ""){
+				rateAppliedId = Integer.parseInt(rateAppliedIdStr.trim());
+			}
+			Boolean isRateApplied = Boolean.FALSE;
+			
+			if(!isNewGrRates){
+				Iterator <RateApplied>itr = purchase.getOrderLevelRates().iterator();
+				while(itr.hasNext()){
+					RateApplied itm = itr.next();
+					if(itm.getRateAppliedId().intValue() ==rateAppliedId.intValue()){
+						isRateApplied = Boolean.TRUE;
+						orderLevelTotalRate =itm;
+						break;
+					}
+				}
+			}
+			if(!isRateApplied){
+				orderLevelTotalRate = new RateApplied();
+			}
+			
+			orderLevelTotalRate.setRate(rate);
+			orderLevelTotalRate.setAppliedAmount(new Double(rateValue));
+			orderLevelTotalRate.setLevelStatus(POConstants.STATUS_ORDER_LEVEL);
+			//orderLevelTotalRate.setItemKeyId(purchaseItem);
+			orderLevelTotalRate.setMasterKeyId(purchase);
+		orderLevelRatesApplied.add(orderLevelTotalRate);
 		}
 		
+		//order level grand total value
+		RateApplied orderLevelGrandTotalRate = null;
+
+		String rateAppliedIdStr = request.getParameter("orderLevelGrandTotalRateId");
+		//Integer rateAppliedId = null!=rateAppliedIdStr?Integer.parseInt(rateAppliedIdStr.trim()):null;
+		Integer rateAppliedId = null;
+		if(rateAppliedIdStr != null && rateAppliedIdStr != ""){
+			rateAppliedId = Integer.parseInt(rateAppliedIdStr.trim());
+		}
+		Boolean isRateApplied = Boolean.FALSE;
+		
+		if(!isNewGrRates){
+			Iterator <RateApplied>itr = purchase.getOrderLevelRates().iterator();
+			while(itr.hasNext()){
+				RateApplied itm = itr.next();
+				if(itm.getRateAppliedId().intValue() ==rateAppliedId.intValue()){
+					isRateApplied = Boolean.TRUE;
+					orderLevelGrandTotalRate =itm;
+					break;
+				}
+			}
+		}
+		if(!isRateApplied){
+			orderLevelGrandTotalRate = new RateApplied();
+		}
+		rateValue = request.getParameter("orderLevelGrandTotal");
+		rate = masterservice.getRateById(23);
+		//rateApplied = new RateApplied();
+		orderLevelGrandTotalRate.setRate(rate);
+		orderLevelGrandTotalRate.setAppliedAmount(new Double(rateValue));
+		orderLevelGrandTotalRate.setLevelStatus("T");
+		orderLevelGrandTotalRate.setMasterKeyId(purchase);
+		//orderLevelGrandTotalRate.setItemKeyId(purchaseItem);
+		orderLevelRatesApplied.add(orderLevelGrandTotalRate);
+		
+		
+		purchase.setOrderLevelRates(orderLevelRatesApplied);
 		purchaseService.savePurchaseOrder(purchase);
 
 	}
@@ -397,7 +621,8 @@ public class PurchaseController {
 		jobWork.setQuotationDate(Util.getDate(request.getParameter("quotationDate"),
 			"dd/MM/yyyy"));
 		jobWork.setJobWorkOrderNo(request.getParameter("jobWorkNo"));
-		User addedByUser = masterservice.getUserById("27");
+		User addedByUser =((User)request.getSession().getAttribute("_SessionUser"));
+		//User addedByUser = masterservice.getUserById("27");
 		jobWork.setAddByUser(addedByUser);
 		
 		
@@ -487,8 +712,8 @@ public class PurchaseController {
 			
 			jobItemMaster.setJobWork(jobWork);
 			
-			//User requestedByUser =((User)request.getSession().getAttribute("_SessionUser"));
-			User requestedByUser = masterservice.getUserById("27");
+			User requestedByUser =((User)request.getSession().getAttribute("_SessionUser"));
+			//User requestedByUser = masterservice.getUserById("27");
 			//purchaseItem.setModifiedByUser(requestedByUser);
 			
 			jobItemMaster.setQty(Double.parseDouble(request
@@ -597,10 +822,10 @@ public class PurchaseController {
 		purchase.setApprovalStatus(request.getParameter("approvalStatus"));
 		purchase.setApprovalDate(new Date());
 		
-		// User requestedByUser =((User)
-				// request.getSession().getAttribute("_SessionUser"));
-		User approvedByUser = masterservice.getUserById("27");
-		purchase.setApprovedBy(approvedByUser);
+		User requestedByUser =((User)
+				request.getSession().getAttribute("_SessionUser"));
+	//User approvedByUser = masterservice.getUserById("27");
+		purchase.setApprovedBy(requestedByUser);
 		
 		
 		purchaseService.savePurchaseOrder(purchase);
@@ -614,14 +839,18 @@ public class PurchaseController {
 		FlexiBean requestParams = new FlexiBean(request);
 		logger.info("entering getPurchaseOrderList");
 		List<PurchaseOrder> orders = purchaseService.getOrderList(requestParams);
-
+		User currentUser =((User) request.getSession().getAttribute("_SessionUser"));
 		List<String> stockRow = null;
 		Map<String, List<String>> strMap = new LinkedHashMap<String, List<String>>();
 		if (!CollectionUtils.isEmpty(orders)) {
 			int count = 0;
 			for (PurchaseOrder order : orders) {
 				 
-				if(order.getApprovalStatus()!=null){
+         for(Warehouse warehouse:currentUser.getUserWarehouses()){
+					if(warehouse.getWareId().intValue() == order.getWarehouse().getWareId().intValue()){
+				
+				
+				if(null != order.getApprovalStatus() && order.getApprovalStatus().equalsIgnoreCase("Y")){
 					continue;
 				}
 				
@@ -636,6 +865,7 @@ public class PurchaseController {
 						+ order.getOrderId()+ "'>");
 				stockRow.add(String.valueOf(++count));
 				stockRow.add(order.getPurchaseOrderNo());
+				stockRow.add(order.getVendor().getVendorName());
 				stockRow.add(order.getFirm().getFirmName());
 				StringBuilder itemMarge = new StringBuilder();
 				StringBuilder itemQty = new StringBuilder();
@@ -656,6 +886,8 @@ public class PurchaseController {
 				stockRow.add("" + order.getOrderType());
 				strMap.put(String.valueOf(count), stockRow);
 			
+			}
+		}
 			}
 		}
 		Util.doWriteFlexi(request, response, strMap, requestParams);
@@ -724,16 +956,19 @@ public class PurchaseController {
 		FlexiBean requestParams = new FlexiBean(request);
 		logger.info("entering getPurchaseOrderListApprovalCompleted");
 		List<PurchaseOrder> orders = purchaseService.getOrderList(requestParams);
-
+		User currentUser =((User) request.getSession().getAttribute("_SessionUser"));
 		List<String> stockRow = null;
 		Map<String, List<String>> strMap = new LinkedHashMap<String, List<String>>();
 		if (!CollectionUtils.isEmpty(orders)) {
 			int count = 0;
 			for (PurchaseOrder order : orders) {
+				
 				//for (PurchaseOrderItem purchaseItem : order.getOrderItems()) {
-				if(order.getApprovalStatus()==null){
-					continue;
-				}
+				if(null != order.getApprovalStatus() && order.getApprovalStatus().equalsIgnoreCase("Y")){
+					
+					//if(!currentUser.getUserWarehouses().contains(order.getWarehouse())){
+					//	continue;
+					//}
 				stockRow = new LinkedList<String>();
 				 //Code itemCode = purchaseItem.getItemCode();
 				Warehouse itemWareHouse = order.getWarehouse();
@@ -742,6 +977,7 @@ public class PurchaseController {
 						+ order.getOrderId()+ "'>");
 				stockRow.add(String.valueOf(++count));
 				stockRow.add(order.getPurchaseOrderNo());
+				stockRow.add(order.getVendor().getVendorName());
 				stockRow.add(order.getFirm().getFirmName());
 				StringBuilder itemMarge = new StringBuilder();
 				StringBuilder itemQty = new StringBuilder();
@@ -758,12 +994,12 @@ public class PurchaseController {
 				stockRow.add(itemQty.toString());
 				stockRow.add(Util.getDateString(order.getDueDate(), "dd/MM/yyyy"));
 				stockRow.add(order.getOrderType());
-				stockRow.add(order.getApprovalStatus().equalsIgnoreCase("Y")?"Approved":"Rejected");
+				
 				stockRow.add(Util.getDateString(order.getApprovalDate(), "dd/MM/yyyy"));
 				
 				
 				strMap.put(String.valueOf(count), stockRow);
-			
+			}
 		  }      
 		}
 		Util.doWriteFlexi(request, response, strMap, requestParams);
@@ -778,6 +1014,7 @@ public class PurchaseController {
 		logger.info("entering getPurchaseOrder");
 		List<Procurement> procurementMarkings = procurementService.getProcurements(requestParams);
 		List<PurchaseOrder> orders = purchaseService.getOrderList(requestParams);
+		User currentUser =((User) request.getSession().getAttribute("_SessionUser"));
 		List<String> stockRow = null;
 		Map<String, List<String>> strMap = new LinkedHashMap<String, List<String>>();
 		if (!CollectionUtils.isEmpty(procurementMarkings)) {
@@ -785,6 +1022,13 @@ public class PurchaseController {
 			Double Qty = 0.0;
 			double orderQty =  0;
 			for (Procurement marking : procurementMarkings) {
+				
+				//if(!currentUser.getUserWarehouses().contains(marking.getWarehouse())){
+				//	continue;
+				//}
+                  for(Warehouse warehouse:currentUser.getUserWarehouses()){
+					if(warehouse.getWareId().intValue() == marking.getWarehouse().getWareId().intValue()){
+				
 				if(marking.getProcurementType().equalsIgnoreCase("Purchase Order"))
 				{
 					Qty = 0.0;
@@ -813,11 +1057,13 @@ public class PurchaseController {
 				stockRow.add(itemCode.getCodeDesc());
 				stockRow.add(itemWareHouse.getWarehouseName());
 				stockRow.add("" + orderQty + " "+marking.getUnit().getUnitName());
-				stockRow.add("" + Util.getDateString(marking.getDueDate(), "dd/MM/yyyy"));
+				stockRow.add("" + Util.getDateString(marking.getMarkingDate(), "dd/MM/yyyy"));
 				stockRow.add("" + marking.getProcurementType());
 				strMap.put(String.valueOf(count), stockRow);
 					}
 				}
+			}
+		}
 			}
 		}
 		Util.doWriteFlexi(request, response, strMap, requestParams);
@@ -833,14 +1079,42 @@ public class PurchaseController {
 		FlexiBean requestParams = new FlexiBean(request);
 		logger.info("entering getLocalPurchaseOrder");
 		List<Procurement> procurementMarkings = procurementService.getProcurements(requestParams);
-
+		User currentUser =((User) request.getSession().getAttribute("_SessionUser"));
+		List<GRPO> grpos = grpoService.getGRPOList(requestParams);
 		List<String> stockRow = null;
 		Map<String, List<String>> strMap = new LinkedHashMap<String, List<String>>();
 		if (!CollectionUtils.isEmpty(procurementMarkings)) {
 			int count = 0;
+			
+			double orderQty =  0;
 			for (Procurement marking : procurementMarkings) {
+				//if(!currentUser.getUserWarehouses().contains(marking.getWarehouse())){
+				//	continue;
+				//}
+				for(Warehouse warehouse:currentUser.getUserWarehouses()){
+					if(warehouse.getWareId().intValue() == marking.getWarehouse().getWareId().intValue()){
+				
 				if(marking.getProcurementType().equalsIgnoreCase("Local Purchase"))
 				{
+					
+					
+					Double GrQty = 0.0;
+	                   for(GRPO grpo: grpos){	
+	                	// GrQty = 0.0;
+							for(GRPOReceiptEntry receiptEntry:grpo.getGrpoReceiptItems()){
+								if( receiptEntry.getProcurementMarking() != null){
+						
+								if(marking.getMarkingId() == receiptEntry.getProcurementMarking().getMarkingId())
+									GrQty = GrQty + receiptEntry.getInwardQty();
+								}
+							}
+							 
+							}
+					orderQty = marking.getProcurementQty() - GrQty;
+			//for (Procurement marking : procurementMarkings) {
+				//if(marking.getProcurementType().equalsIgnoreCase("Local Purchase"))
+				//{
+					if(orderQty>0){
 				stockRow = new LinkedList<String>();
 				
 				Code itemCode = marking.getRequisitionItemId().getItemCode();
@@ -849,13 +1123,17 @@ public class PurchaseController {
 				stockRow.add("<input type='checkbox' name='marking_id' id='marking_id' value='"
 						+ marking.getMarkingId()+ "'>");
 				stockRow.add(String.valueOf(++count));
+				stockRow.add(marking.getReqId().getRequisitionRefNo());
 				stockRow.add(itemCode.getCodeDesc());
 				stockRow.add(itemWareHouse.getWarehouseName());
-				stockRow.add("" + marking.getProcurementQty() + " "+marking.getUnit().getUnitName());
-				stockRow.add("" + Util.getDateString(marking.getDueDate(), "dd/MM/yyyy"));
+				stockRow.add("" +orderQty + " "+marking.getUnit().getUnitName());
+				stockRow.add("" + Util.getDateString(marking.getMarkingDate(), "dd/MM/yyyy"));
 				stockRow.add("" + marking.getProcurementType());
 				strMap.put(String.valueOf(count), stockRow);
+					}
 				}
+			}
+		}
 			}
 		}
 		Util.doWriteFlexi(request, response, strMap, requestParams);
@@ -867,7 +1145,7 @@ public class PurchaseController {
 	public void getWarehouseBorrow(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		FlexiBean requestParams = new FlexiBean(request);
-		logger.info("entering getLocalPurchaseOrder");
+		logger.info("entering getWarehouseBorrow");
 		List<Procurement> procurementMarkings = procurementService.getProcurements(requestParams);
 
 		List<String> stockRow = null;
@@ -888,14 +1166,14 @@ public class PurchaseController {
 				//stockRow.add(itemCode.getCodeDesc());
 				stockRow.add(itemWareHouse.getWarehouseName());
 				stockRow.add("" + marking.getProcurementQty() + " "+marking.getUnit().getUnitName());
-				stockRow.add("" + Util.getDateString(marking.getDueDate(), "dd/MM/yyyy"));
+				stockRow.add("" + Util.getDateString(marking.getMarkingDate(), "dd/MM/yyyy"));
 				stockRow.add("" + marking.getProcurementType());
 				strMap.put(String.valueOf(count), stockRow);
 				}
 			}
 		}
 		Util.doWriteFlexi(request, response, strMap, requestParams);
-		logger.info("exiting getLocalPurchaseOrder");
+		logger.info("exiting getWarehouseBorrow");
 
 	}
 

@@ -1,9 +1,23 @@
 <script>
 function validate(){
 	
-	var billAmount = document.getElementById('billAmount').value;
-	if(billAmount == ''){
-		BootstrapDialog.alert('Please Enter Bill Amount');
+	
+	
+	var VendorInvoice = document.getElementById('vendorInvoiceNo').value;
+	if(VendorInvoice == ''){
+		BootstrapDialog.alert('Please Enter Vendor Invoice Number');
+		return false;
+	}
+	
+	var VendorInvoiceDate = document.getElementById('vendorInvoicedate').value;
+	if(VendorInvoiceDate == ''){
+		BootstrapDialog.alert('Please Enter Vendor Invoice Date');
+		return false;
+	}
+	
+	var VehicleNo = document.getElementById('vehicleNo').value;
+	if(VehicleNo == ''){
+		BootstrapDialog.alert('Please Enter Vehicle Number');
 		return false;
 	}
 	
@@ -15,8 +29,18 @@ function validate(){
 				return false;
 			}	
 		}
+		var GrQty = document.getElementById('gr_Qty'+m).value;
+		if(GrQty == ''){
+			BootstrapDialog.alert('Please Enter Quantity');
+			return false;
+		}
 	}
-	
+	var billAmount = document.getElementById('grLevelGrandTotal').value;
+	if(billAmount == ''){
+		BootstrapDialog.alert('Please Enter Bill Amount');
+		return false;
+	}
+	saveGRPO();
 }
 
 
@@ -35,15 +59,43 @@ function validate(){
 					<h5 class='modal-title '>Goods Inward Receipt Form</h5>
 				</div>
 				<div class="modal-body">
+				
+				<div class=" form-group">
+
+						<label for="item">For the firm</label>
+						<label for="item" style="margin-left:44%">Warehouse</label><input type="hidden" id="warehouseId"
+							name="warehouseId"><input type="hidden" id="firmId" name="firmId">
+							
+						
+						<div class="row">
+						<div class="col-md-6" >
+						  <select  class="form-control"
+							id="firm" name="firm" onChange="getUserWarehouse('warehouse', this.value,'','${_SessionUser.userId}');">
+							<option value="" selected disabled>Select Firm </option>
+							</select>
+						</div>
+							<div class="col-md-6">
+								<select class="form-control" id="warehouse" name="warehouse" onChange="generateDirectRecieptNo();" required>
+							<option value="" selected disabled>Select Warehouse</option>
+						</select>
+				            
+							</div>
+						</div>
+					</div>
+				
+				
+				
 					<div class="form-group">
-						<label for="item">Purchase Order Number</label> <input type="text" class="form-control"
-							id="orderNo" name="orderNo" readonly="readonly"><input type="hidden" 
+						<label for="item">Goods Reciept Number</label> <input type="text" class="form-control"
+							id="recieptNo" name="recieptNo" readonly="readonly"><input type="hidden" 
 							id="orderId" name="orderId" ><input type="hidden" 
 							id="orderType" name="orderType"  value="PurchaseOrder"><input type="hidden" 
 							id="marking_id" name="marking_id" ><input type="hidden" 
 							id="grpoId" name="grpoId" >
+							<input type="hidden" id="grType" name="grType" >
+							
 					</div>
-
+<!--
 					<div class="form-group">
 						<label for="item">For the firm</label> <input type="hidden" id="firm"
 							name="firm">
@@ -60,17 +112,34 @@ function validate(){
 				               <input type="text" class="form-control" name="dueDate"
 							id="dueDate" placeholder="Due Date (dd/mm/yyyy)"  disabled="disabled"/>
 					</div>
-					<!--  
+					  
 					<div class="form-group" >
 						<label for="orderRemarks" style="vertical-align: top">Order Remarks</label> 
 						<textarea id="orderRemarks"  name="orderRemarks"class="formControl"  style="width: 100%; height:50px;" disabled="disabled"></textarea>
 					</div>
 					-->
-					<div class="form-group">
-						<label for="item">Supplier</label> <select
-							class="form-control" id="vendor" name="vendor" disabled="disabled">
-							<option value="" selected disabled>Select Supplier </option> 
+					<div class=" form-group">
+
+						<label for="item">Vendor</label>
+						
+						<div class="row">
+						<div class="col-md-4" >
+						  <select
+							class="form-control" id="vendor" name="vendor" onChange="getVendorAddress('vendorAddress', this.value)">
+							<option value="" selected disabled>Select Vendor </option>
 						</select>
+						</div>
+							<div class="col-md-8">
+								<select
+							class="form-control" id="vendorAddress" name="vendorAddress">
+							<option value="" selected disabled>Select Vendor Address</option>
+						</select>
+				            
+							</div>
+							
+							
+							
+						</div>
 					</div>
 					
 				    
@@ -161,11 +230,19 @@ function validate(){
 								<tr class="active">
 								<th></th>
 									<th><b>Item Code / Item Name</b></th>
-									<th><b>Order Qty</b></th>
+									<th><b>Original Qty</b></th>
 									<th><b>GR Qty</b></th>
 									<th><b>Unit</b><div class="btn-group" style="float: right">
 											<button type="button" class="btn btn-default"
 												onclick="addRow()" id="addButton">
+												<span class="glyphicon glyphicon-plus"></span>
+											</button>
+											
+											
+											
+										</div><div class="btn-group" style="float: right">
+											<button type="button" class="btn btn-default"
+												onclick="addDirectGRRow()" id="addSecondButton">
 												<span class="glyphicon glyphicon-plus"></span>
 											</button>
 											
@@ -178,15 +255,42 @@ function validate(){
 							</table>
 							<input type="hidden" name="rowhid" id="rowhid" value="0"/>
 							<input type="hidden" name="rowId" id="rowId" value="0"/>
-							<input type="hidden" name="reqid" id="reqid" value=""/>
+							<input type="hidden" name="grLevelRateId" id="grLevelRateId" value="0"/>
+							
 
 						</div>
 					</div>
+					
+					<div class="panel panel-default">
+
+						<div class="panel-heading">GR Level Rates 
+						
+						<div class="btn-group" style="float: right">
+											<button type="button" class="btn btn-default" id="orderLevelButton"
+												onclick="addGrLevelRates()" >
+												<span class="glyphicon glyphicon-plus"></span>
+											</button>
+						</div>
+						<div class="panel-body" style="padding: 0px;">
+						<table id="addMultipleTable" class="table table-bordered ">
+							<tr>
+									<th>Rate Name</th>
+									<th colspan="2">Rate Value</th>
+									
+								</tr>
+							
+							<input type="hidden" name="grLevelTotal" id="grLevelTotal" value="0"/>
+						</table>	
+						<input type="hidden" name="rowId" id="rowId" value="1"/>									
+						</div>
+					</div>
+					
+				</div>
 					 
 					 
 					<div class="form-group" >
 						<label for="rate" style="vertical-align: top">Bill Amount</label> 
-						<input type="number" id="billAmount" name="billAmount" class="form-control" placeholder="Total Bill Amount" >
+						<input type="number" id="grLevelGrandTotal" name="grLevelGrandTotal" class="form-control" placeholder="Total Bill Amount" readonly>
 					</div>
 					
 					
@@ -202,7 +306,7 @@ function validate(){
 					<div class="form-group">
 
 						<button type="button" class="btn btn-success" id="addReqSave"
-							onmouseenter="validate()" onClick="saveGRPO()">
+							onmouseenter="" onClick="validate()">
 							<span class="glyphicon glyphicon-floppy-save"></span>
 						</button>
 

@@ -2,6 +2,7 @@
     pageEncoding="ISO-8859-1"%>
 
 <script type="text/javascript">
+var userRoleData = "";
 $(document).ready(function(){
 
    /*  $('#datetimepicker').datetimepicker({
@@ -15,15 +16,20 @@ $(document).ready(function(){
 			});
 		});
 	$("#requisitions").attr("class","active");
-var w=1000;
-$('#flex1').flexigrid({
-url:'getRequisitions',
-method: 'POST',
-dataType : 'json',
-	  
+
+	//  loadItemCodes();
+	var w = 1000;
+	//var w=screen.width;
+
+
+	$('#flex1').flexigrid({
+	url:'getRequisitions',
+	method: 'POST',
+	dataType : 'json',
+		  
 	  colModel : [
 	       	{display: '', name : 'requisitionId', width:w*0.035, sortable : false, align: 'center'},
-			{display: 'Sr', name : '', width:w*0.035, sortable : false, align: 'center'},
+			{display: 'Sr', name : 'sr', width:w*0.035, sortable : false, align: 'center'},
 			{display: 'Requisition Ref No', name : 'requisitionRefNo', sortable : true, align: 'left',width:120},
 			{display: 'Item(s)', name : '', width:300, sortable : false, align: 'left'},
 			{display: 'Request Date', name : 'requestedDate', width:120, sortable : true, align: 'center'},
@@ -41,6 +47,8 @@ dataType : 'json',
 			 	{separator: true},
 			 	{name: 'Delete', bclass: 'glyphicon glyphicon-remove', onpress : deleteRequisition},
 			 	{separator: true},
+			 	{name: 'PDF', id:'pdf', bclass: 'glyphicon glyphicon-file', onpress : pdf},
+			 	{separator: true},
 			 	
 			 	
       
@@ -54,19 +62,23 @@ dataType : 'json',
 		sortname: "requestedDate",
 		sortorder: "asc",
 		usepager: true,
-		title: 'My Requisitions',
+		title: 'Requisitions',
 		useRp: true,
 		rp: 1000,
 		showTableToggleBtn: false,//toggle button for the whole table
 		resizable: false,
-		width: w,
+		//width: w*.80,
 		height: screen.height*.50,
 
 	});
 //getItems("item");
-getFirms("firm");
-//getWarehouses("warehouse");
+//getFirms("firm");
+var user =${_SessionUser.userId};
 
+getUserFirms("firm",user)
+//getWarehouses("warehouse");
+var userRoleId = ${_SessionUser.userRole.roleId};
+getUserByRoleId(userRoleId);
    
 });
 
@@ -77,10 +89,172 @@ getFirms("firm");
 
 	}
 	
+	function pdf() {
+		var recordId = $("input[name='requisitionId']:checked").val();
+		populatePdfPopup(recordId, 'getRequisitionById');
+
+	}
 	
+	
+	
+	
+	
+	function populatePdfPopup(recordId, url) {
+
+		var jsonRecord = {};
+		if(url==null){
+			url = 'getRequisitionByRefNo';
+		}
+		jsonRecord.id = recordId;
+		$.ajax({
+			url : url,
+			type : 'POST',
+			data : JSON.stringify(jsonRecord),
+			contentType : 'application/json',
+			
+			success : function(data) {
+				
+				
+				var firmInfor = data.requestedForFirm;
+				$("#firmLocation").html(firmInfor.firmLocation);
+				$("#firmLocation1").html(firmInfor.firmLocation1);
+				$("#firmName").html(firmInfor.firmName);
+				$("#firmPhone").html(firmInfor.firmPhone);
+				$("#firmEmail").html(firmInfor.firmEmail);
+				$("#firmFax").html(firmInfor.firmFax);
+	
+				var img = firmInfor.firmLogo;
+				document.getElementById("imageId").src="http://tender.railtechindia.in/images/"+img;
+				
+					  $("#store").html(data.requestedAtWareHouse.warehouseName);
+					  $("#reqRefNo").html(data.requisitionRefNo);
+					  $("#requestedBy").html(data.requestedByUser.userName);
+					  $("#remarks").html(" "+data.remarks);
+					  $("#duDate").html(dateConversion(myDateFormatter(data.dueDate)));
+					  $("#reqDate").html(dateConversion(myDateFormatter(data.requestedDate)));
+					  
+					  var count = $("#rowhid").val();
+					  var tbl = document.getElementById("itemTable");
+						//$("#itemTable").find("tr:gt(0)").remove();
+						// $('#reqItemTable tr:last-child').remove();
+						
+						for(var r=0;r<data.requisitionItems.length;r++){
+							var lastRow = tbl.rows.length;
+							var newRow = tbl.insertRow(lastRow);
+							
+							var content = "<td>";
+							
+							content+="<div id=\"sr"+count+"\" align=\"center\"></div></td>"
+									+ " <td ><div id=\"code"+count+"\" style=\"float:left;font-weight:bold;\"></div><div style=\"float:left;\">&nbsp;-&nbsp;</div><div id=\"codedesc"+count+"\" style=\"float:left;\"></div></td>"
+									+ " <td align=\"right\"><div id=\"qty"+count+"\" style=\"float:left;width:65%\"></div><div id=\"unit"+count+"\"></div></td>"
+									
+
+							$(newRow).html(content);
+							$(newRow).attr("id", "itemTableRow" + count);
+							//getUnits('unit' + count);
+							//$("#unit"+ count).val(data.requisitionItems[r].unit.unitName);
+							$("#codedesc"+count).html(data.requisitionItems[r].itemCode.codeDesc);
+							$("#sr"+count).html(r+1);
+							$("#code"+count).html(data.requisitionItems[r].itemCode.code);
+							$("#unit"+count).html(data.requisitionItems[r].unit.unitName);
+							$("#qty"+count).html(data.requisitionItems[r].qty);
+							$("#rowhid").val(++count);
+				
+						}
+						$('#firmDetail').modal({
+							keyboard : true
+						});
+						$('#firmDetail').modal("show");
+			},
+			error : function(data) {
+				BootstrapDialog.alert('Error Pulling Requistion' + data);
+			
+			}
+
+		});
+	}
+	
+	
+	function dateConversion(dateCon){
+		
+		var monthNames = [
+		                  "Jan", "Feb", "Mar",
+		                  "Apr", "May", "June", "July",
+		                  "Aug", "Sep", "Oct",
+		                  "Nov", "Dec"
+		                ];
+		                var d = (dateCon).split('/');
+		                var day = d[0];
+		                var monthIndex = d[1];
+		                while(monthIndex.charAt(0) === '0')
+		                	monthIndex = monthIndex.substr(1);
+		                var year = d[2];
+		                var con = day + '-' + monthNames[monthIndex-1] + '-' + year
+		                return con;
+	}
 
 	function deleteRequisition() {
 		var recordId = $("input[name='requisitionId']:checked").val();
+		var modelRequest = {};
+        		modelRequest.id = recordId
+        		
+        		$.ajax({
+        			url : 'getRequisitionById',
+        			type : 'POST',
+        			dataType : 'JSON',
+        			data : JSON.stringify(modelRequest),
+        			contentType : 'application/json',
+
+        			success : function(data) {
+        				
+        				var role = "";
+        				var userAccessCheck = null;
+        				if(userRoleData != null){
+        					role = userRoleData;
+        				}
+        				for(var u=0;u<role.access.length;u++){
+        					var userAccessLevel = role.access[u].accessLevel;
+        					if(parseInt(role.access[u].menu.menuId) == 501 && (userAccessLevel == 'E')){
+        						userAccessCheck++;
+        					}
+        				}
+        				if(userAccessCheck != null){
+        				
+        				if(data.currentStatus == "R"){
+        					deleteReq();
+        				}else{
+        					BootstrapDialog
+    						.alert('Requisition can not be delete');
+        				}
+        				
+        				$('#flex1').flexOptions({
+        					url : "getRequisitions",
+        					newp : 1
+        				}).flexReload();
+        			}
+        				else{
+        					BootstrapDialog.alert('Access Denied');
+        					return;
+        				}
+        			},
+        			error : function(data) {
+        				BootstrapDialog
+        						.alert('Error unable to delete the requisition');
+        				//BootstrapDialog
+						//.alert('Requisition successfully deleted');
+        				$('#flex1').flexOptions({
+        					url : "getRequisitions",
+        					newp : 1
+        				}).flexReload();
+        			}
+        		});
+            
+       
+
+	}
+	
+	function deleteReq() {
+		
 		BootstrapDialog.confirm('Are you sure you want to delete?', function(result){
             if(result) {
             	var modelRequest = {};
@@ -102,10 +276,10 @@ getFirms("firm");
         				}).flexReload();
         			},
         			error : function(data) {
-        				//BootstrapDialog
-        						//.alert('Error unable to delete the requisition');
         				BootstrapDialog
-						.alert('Requisition successfully deleted');
+        						.alert('Error unable to delete the requisition');
+        				//BootstrapDialog
+						//.alert('Requisition successfully deleted');
         				$('#flex1').flexOptions({
         					url : "getRequisitions",
         					newp : 1
@@ -119,7 +293,41 @@ getFirms("firm");
 
 	}
 	
+	function getUserByRoleId(userRoleId){
+		var modelRequest = {};
+		modelRequest.id = userRoleId
+		$.ajax({
+			url : 'getUserRoleByRoleId',
+			type : 'POST',
+			data : JSON.stringify(modelRequest),
+			contentType : 'application/json',
+			dataType : 'json',
+			success : function(data) {
+				if (data != null) {
+					userRoleData = data;
+					//alert(userRoleData);
+                         }
+							},
+			error : function(data) {
+				BootstrapDialog.alert('Error Unable to pull the item list');
+			}
+		});
+	
+	}
+	
 	function add() {
+		var role = "";
+		var userAccessCheck = null;
+		if(userRoleData != null){
+			role = userRoleData;
+		}
+		for(var u=0;u<role.access.length;u++){
+			var userAccessLevel = role.access[u].accessLevel;
+			if(parseInt(role.access[u].menu.menuId) == 501 && (userAccessLevel == 'E' || userAccessLevel == 'W')){
+				userAccessCheck++;
+			}
+		}
+		if(userAccessCheck != null){
 		$('#modal-add-req').modal({
 			keyboard : true
 		});
@@ -132,10 +340,15 @@ getFirms("firm");
 		$('#modal-add-req').modal("show");
 		$("#reqItemTable").find("tr:gt(0)").remove();
 		addRow();
+		}
+		else{
+			BootstrapDialog.alert('Access Denied');
+			return;
+		}
 	}
 	
 	function saveUpdateRequisition() {
-		$('.close').click();
+		
 		$.ajax({
 			url : 'saveRequisition',
 			type : "POST",
@@ -154,6 +367,7 @@ getFirms("firm");
 				return;
 			}
 		});
+		$('.close').click();
 
 	}
 	
@@ -173,6 +387,20 @@ getFirms("firm");
 			contentType : 'application/json',
 			
 			success : function(data) {
+				
+				var role = "";
+				var userAccessCheck = null;
+				if(userRoleData != null){
+					role = userRoleData;
+				}
+				for(var u=0;u<role.access.length;u++){
+					var userAccessLevel = role.access[u].accessLevel;
+					if(parseInt(role.access[u].menu.menuId) == 501 && (userAccessLevel == 'E')){
+						userAccessCheck++;
+					}
+				}
+				if(userAccessCheck != null){
+				
 				$("#requisitionId").val(data.requisitionId);
 				//$("#qty").val(data.qty);
 				
@@ -223,18 +451,15 @@ getFirms("firm");
 					+" 	class=\"form-control\" value=\""+data.requisitionItems[r].itemCode.codeDesc+" \"/></td>"
 							+ " <td><input type=\"text\" class=\"form-control\""
 					+" 	id=\"qty"+count+"\" name=\"qty"+count+"\" placeholder=\"Quantity\" value=\""+data.requisitionItems[r].qty+"\"  onkeypress=\"return numbersonly(this,event, true);\"></td>"
-							+ " <td><input type=\"hidden\" class=\"form-control\""
-							+" 	id=\"unit"+count+"\" name=\"unit"+count+"\"  value=\""+data.requisitionItems[r].unit.unitId+"\" ><span class=\"form-control\" id=\"unit1"+count+"\""
-							+" 	name=\"unit1"+count+"\" value=\"\">"
-								+ " </span> "
-
+							+ " <td><select class=\"form-control\" id=\"unit"+count+"\""
+							+" 	name=\"unit"+count+"\">"
+							+ " </select> "
 							+ " </td>"
 
 					$(newRow).html(content);
 					$(newRow).attr("id", "reqItemTableRow" + count);
-					//getUnits('unit' + count);
-					//$("#unit"+ count).val(data.requisitionItems[r].unit.unitName);
-					$("#unit1"+count).html(data.requisitionItems[r].unit.unitName);
+					getUnits('unit' + count,data.requisitionItems[r].unit.unitId);
+					
 					$("#rowhid").val(++count);
 
 					$("#warehouse").val(data.requestedAtWareHouse.wareId);
@@ -254,6 +479,11 @@ getFirms("firm");
 					keyboard : true
 				});
 				$('#modal-add-req').modal("show");
+				}
+				else{
+					BootstrapDialog.alert('Access Denied');
+					return;
+				}
 			},
 			error : function(data) {
 				BootstrapDialog.alert('Error Pulling Requistion' + data);
@@ -301,15 +531,6 @@ getFirms("firm");
 		});
 	}
 
-
-
-	function push(id, plNo, desc) {
-		dlg.close();
-		$('#item_desc' + selectedCounter).val(desc);
-		$('#pl_no' + selectedCounter).val(plNo);
-		$('#codeId' + selectedCounter).val(id);
-	}
-
 	function addRow() {
 		var count = $("#rowhid").val();
 		var tbl = document.getElementById("reqItemTable");
@@ -337,9 +558,9 @@ getFirms("firm");
 				+ count
 				+ "\" onclick=\"popPicker('"
 				+ count
-				+ "')\" / placeHolder=\"Click to pick item\"></td>"
+				+ "')\" / placeHolder=\"Click to pick item\"   ></td>"
 				+ " 	<td><input type=\"text\" name=\"pl_no"+count+"\""
-		+" 	id=\"pl_no"+count+"\" class=\"form-control\" placeholder=\"PL No\" /></td>"
+		+" 	id=\"pl_no"+count+"\" class=\"form-control\" placeholder=\"PL No\" onchange=\"itemCheck();\"/></td>"
 				+ " <td><input type=\"text\" placeholder=\"Item Description\""
 		+" 	name=\"item_desc"+count+"\" id=\"item_desc"+count+"\""
 		+" 	class=\"form-control\" /></td>"
@@ -356,6 +577,28 @@ getFirms("firm");
 		getUnits('unit' + count);
 		$("#rowhid").val(++count);
 	}
+
+	function push(id, plNo, desc) {
+		dlg.close();
+		$('#item_desc' + selectedCounter).val(desc);
+		$('#pl_no' + selectedCounter).val(plNo);
+		$('#codeId' + selectedCounter).val(id);
+	}
+	
+	
+	function itemCheck(){
+		var count = document.getElementById('rowhid').value;
+		for(var m=0;m<count;m++){
+			for(var n=0;n<count;n++){
+				if( document.getElementById('codeId'+m).value == document.getElementById('codeId'+n).value && m != n){
+					BootstrapDialog.alert('Two items can not be same');
+					return false;
+				}	
+			}
+			
+		}
+	}
+	
 	function removeRow(count) {
 		$("#reqItemTableRow" + count).remove();
 	}
@@ -393,7 +636,9 @@ getFirms("firm");
 </script>
 
 <table width="100%" id="flex1"></table>
+<div id="itemCodeList" style="display:none"></div>
 <%@ include file="include/addReq.jsp" %>
+<%@ include file="include/reqPDF.jsp" %>
 <script>
 $(document).ready(function() {
      $('#dateRangePicker')
@@ -403,6 +648,5 @@ $(document).ready(function() {
             defaultDate: new Date(),
             "autoclose": true
         }) 
-
 });
       </script>

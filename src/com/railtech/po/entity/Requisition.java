@@ -55,7 +55,7 @@ public class Requisition implements Serializable {
 
 	private Date requestedDate;
 	
-	
+	private String currentStatus;
 	
 	
 	@ManyToOne
@@ -133,6 +133,20 @@ public class Requisition implements Serializable {
 
 	public void setRequestedDate(Date requestedDate) {
 		this.requestedDate = requestedDate;
+	}
+
+	/**
+	 * @return the currentStatus
+	 */
+	public String getCurrentStatus() {
+		return currentStatus;
+	}
+
+	/**
+	 * @param currentStatus the currentStatus to set
+	 */
+	public void setCurrentStatus(String currentStatus) {
+		this.currentStatus = currentStatus;
 	}
 
 	/**

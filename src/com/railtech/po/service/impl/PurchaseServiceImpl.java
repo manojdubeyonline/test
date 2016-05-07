@@ -7,6 +7,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Hibernate;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -19,6 +20,8 @@ import com.railtech.po.entity.FlexiBean;
 import com.railtech.po.entity.JobWork;
 import com.railtech.po.entity.PurchaseOrder;
 import com.railtech.po.entity.PurchaseOrderItem;
+import com.railtech.po.entity.Rate;
+import com.railtech.po.entity.RateApplied;
 import com.railtech.po.service.MasterInfoService;
 import com.railtech.po.service.PurchaseService;
 @Repository(value = "PurchaseServiceImpl")
@@ -41,6 +44,39 @@ public class PurchaseServiceImpl implements PurchaseService {
 		PurchaseOrder order = (PurchaseOrder) query.uniqueResult();
 		logger.info("exiting getOrderById. Return val:"+order);
 		return order;
+	}
+	
+	@Override
+	public RateApplied getRateAppliedById(Integer rateAppliedId) {
+		logger.info("entering getRateAppliedById. Param rateAppliedId:"+rateAppliedId);
+		Session session = sessionFactory.getCurrentSession();
+		Query query  = session.createQuery("from RateApplied rateApplied where rateApplied.rateAppliedId=:rateAppliedId").setInteger("rateAppliedId", rateAppliedId);
+		RateApplied rateApplied = (RateApplied) query.uniqueResult();
+		if(null!=rateApplied){
+			Hibernate.initialize(rateApplied.getRate());
+		}
+		logger.info("exiting getRateAppliedById. Return val:"+rateApplied);
+		return rateApplied;
+	}
+	
+	@Override
+	public PurchaseOrder getOrderByIdForGRPO(Integer orderId) {
+		logger.info("entering getOrderByIdForGRPO. Param orderId:"+orderId);
+		Session session = sessionFactory.getCurrentSession();
+		Query query  = session.createQuery("from PurchaseOrder purchaseOrder where purchaseOrder.orderId=:orderId").setInteger("orderId", orderId);
+		PurchaseOrder order = (PurchaseOrder) query.uniqueResult();
+		logger.info("exiting getOrderByIdForGRPO. Return val:"+order);
+		return order;
+	}
+	
+	@Override
+	public Rate getrateById(Integer rateId) {
+		logger.info("entering getrateById. Param rateId:"+rateId);
+		Session session = sessionFactory.getCurrentSession();
+		Query query  = session.createQuery("from Rate rate where rate.rateId=:rateId").setInteger("rateId", rateId);
+		Rate rate = (Rate) query.uniqueResult();
+		logger.info("exiting getrateById. Return val:"+rate);
+		return rate;
 	}
 	
 	@Override
@@ -79,6 +115,15 @@ public class PurchaseServiceImpl implements PurchaseService {
 		Session session = sessionFactory.getCurrentSession();
 		session.saveOrUpdate(purchase);
 		logger.info("exiting savePurchaseOrder");
+		
+	}
+	
+	@Override
+	public void saveRate(Rate rate) {
+		logger.info("entering saveRate");
+		Session session = sessionFactory.getCurrentSession();
+		session.saveOrUpdate(rate);
+		logger.info("exiting saveRate");
 		
 	}
 	
@@ -214,7 +259,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 		logger.info("entering getOrderList");
 		Session session = sessionFactory.getCurrentSession();
 		Query query = session
-				.createQuery("from PurchaseOrder purchaseOrder");
+				.createQuery("from PurchaseOrder purchaseOrder order by purchaseOrder.dueDate desc");
 		
 		List<PurchaseOrder> orders = new ArrayList<PurchaseOrder>(
 				query.list());
@@ -261,21 +306,18 @@ public class PurchaseServiceImpl implements PurchaseService {
 
 	}
 
-	
-	
 	@Override
-	public Double getOrderQtyById(Integer markingId) {
-		logger.info("entering getOrderQtyById");
-		Session session = sessionFactory.getCurrentSession();
-		Query query  = session.createQuery("from PurchaseOrderItem purchaseOrderItem where purchaseOrderItem.itemKey=:markingId").setInteger("markingId", markingId);
-		PurchaseOrderItem orderItem = (PurchaseOrderItem) query.uniqueResult();
-		Double Qty = 0.0;
-		if(orderItem != null){
-			Qty = orderItem.getQty();
-		}
-		logger.info("exiting getOrderQtyById");
-		return Qty;
-	}
+	public List<PurchaseOrderItem> getOrderByProcurementId(Integer markingId) {
+	logger.info("entering getOrderByProcurementId");
+	Session session = sessionFactory.getCurrentSession();
+	Query query  = session.createQuery("from PurchaseOrderItem purchaseOrderItem where purchaseOrderItem.procurementMarking.markingId=:markingId").setInteger("markingId", markingId);
+	List<PurchaseOrderItem> orderItem = new ArrayList<PurchaseOrderItem>(query.list());
+	
+	logger.info("entering getOrderByProcurementId");
+	return orderItem;
+}
+
+
 
 
 }

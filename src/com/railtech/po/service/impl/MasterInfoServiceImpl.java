@@ -3,7 +3,10 @@
  */
 package com.railtech.po.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -16,15 +19,20 @@ import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.railtech.po.entity.Code;
 import com.railtech.po.entity.Firm;
+import com.railtech.po.entity.FlexiBean;
 import com.railtech.po.entity.Item;
 import com.railtech.po.entity.PL;
 import com.railtech.po.entity.PurchaseOrder;
+import com.railtech.po.entity.Rate;
+import com.railtech.po.entity.Role;
 import com.railtech.po.entity.Unit;
 import com.railtech.po.entity.User;
 import com.railtech.po.entity.Vendor;
+import com.railtech.po.entity.VendorDetails;
 import com.railtech.po.entity.Warehouse;
 import com.railtech.po.exeception.RailtechException;
 import com.railtech.po.service.MasterInfoService;
@@ -161,6 +169,20 @@ public class MasterInfoServiceImpl implements MasterInfoService {
 		return wareHouses;
 
 	}
+	
+	@Override
+	public Set<VendorDetails> getAddresses(String vendorId) throws RailtechException {
+		logger.info("entering getAddresses");
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from VendorDetails vendorDetails where vendorDetails.vendorId=:vendorId order by vendorDetails.clientCity").setInteger("vendorId", Integer.valueOf(vendorId));
+		@SuppressWarnings("unchecked")
+		Set <VendorDetails> addresses = new HashSet<VendorDetails>(query.list());
+		logger.debug("returnVal No of addresses:"+addresses.size());
+		logger.info("exiting getAddresses");
+		return addresses;
+
+	}
+	
 
 	@Override
 	public Item getItemById(String itemId) throws RailtechException {
@@ -193,6 +215,17 @@ public class MasterInfoServiceImpl implements MasterInfoService {
 		logger.debug("returnVal No of user:"+user.toString());
 		logger.info("exiting getUserById");
 		return user;
+	}
+	
+	@Override
+	public Role getUserRoleByRoleId(String roleId) throws RailtechException {
+		logger.info("entering getUserRoleByRoleId");
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from Role role where role.roleId =:roleId").setLong("roleId", Long.parseLong(roleId));
+		Role role = (Role)query.uniqueResult();
+		logger.debug("returnVal No of user:"+role.toString());
+		logger.info("exiting getUserRoleByRoleId");
+		return role;
 	}
 	
 	
@@ -242,12 +275,12 @@ public class MasterInfoServiceImpl implements MasterInfoService {
 		return code;
 	}
 	@Override
-	public Set<Vendor> getVendors() throws RailtechException {
+	public List<Vendor> getVendors() throws RailtechException {
 		logger.info("entering getVendors");
 		Session session = sessionFactory.getCurrentSession();
-		Query query = session.createQuery("from Vendor vendor");
+		Query query = session.createQuery("from Vendor vendor where vendor.purchase =:purchase order by vendor.vendorName").setString("purchase", "Y");
 		@SuppressWarnings("unchecked")
-		Set <Vendor> vendorList = new HashSet<Vendor>(query.list());
+		List <Vendor> vendorList = new LinkedList<Vendor>(query.list());
 		logger.debug("returnVal No of users:"+vendorList);
 		logger.info("exiting getVendors");
 		return vendorList;
@@ -264,6 +297,86 @@ public class MasterInfoServiceImpl implements MasterInfoService {
 		logger.debug("returnVal  of code:"+code);
 		logger.info("exiting getVendorById");
 		return code;
+	}
+	
+	@Override
+	public VendorDetails getVendorDetailsById(String locationId) {
+		logger.info("entering getVendorDetailsById. Param:"+locationId);
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from VendorDetails vendorDetails where vendorDetails.locationId =:locationId").setInteger("locationId", Integer.parseInt(locationId));
+		VendorDetails code = (VendorDetails)query.uniqueResult();
+		logger.debug("returnVal  of code:"+code);
+		logger.info("exiting getVendorDetailsById");
+		return code;
+	}
+	
+	@Override
+	public Rate getRateById(Integer rateId) {
+		logger.info("entering getRateById. Param:"+rateId);
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from Rate rate where rate.rateId =:rateId").setInteger("rateId", rateId);
+		Rate rate = (Rate)query.uniqueResult();
+		logger.debug("returnVal  of rate:"+rate);
+		logger.info("exiting getRateById");
+		return rate;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Rate> getRates() {
+		logger.info("entering getRates.");
+		List<Rate> rates = null;
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from Rate rate");
+		rates = new ArrayList<Rate>(
+				query.list());
+		logger.debug("returnVal  of rates:"+rates);
+		logger.info("exiting getRates");
+		return rates;
+	}
+
+	@Override
+	public User getUserById(String userId, boolean loadDetails) throws RailtechException {
+		logger.info("entering getUserById");
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from User user where user.userId =:userId").setLong("userId", Long.parseLong(userId));
+		User user = (User)query.uniqueResult();
+		if(user!=null && user.getUserRole()!=null && loadDetails){
+			Hibernate.initialize(user.getUserRole().getAccess());
+			logger.debug("returnVal No of user:"+user.toString());
+		}
+		if(user!=null &&  loadDetails){
+			Hibernate.initialize(user.getUserWarehouses());
+			logger.debug("returnVal No of user:"+user.toString());
+		}
+		
+		logger.info("exiting getUserById");
+		return user;
+	}
+	
+	@Override
+	public List<Code> getCodeList(FlexiBean requestParams) {
+		logger.info("entering getCodeList");
+		Session session = sessionFactory.getCurrentSession();
+		String strQry = "from Code code";
+		
+		Query query  =null;
+		if(!StringUtils.isEmpty(requestParams.getQuery())){
+			query = session.createQuery(strQry+ " where code."+requestParams.getQtype()+" like:"+requestParams.getQtype()).setString(requestParams.getQtype(), "%" + requestParams.getQuery() + "%");
+		}else{
+			query = session.createQuery(strQry);
+		}
+		
+		
+		Query qry = query.setMaxResults(requestParams.getRp());
+		qry.setFirstResult(requestParams.getRp()*(requestParams.getPage()-1));
+		
+		@SuppressWarnings("unchecked")
+		List <Code> codeList = new ArrayList<Code>(qry.list());
+		//codeList.size();
+		logger.debug("returnVal No of codes:"+codeList.size());
+		logger.info("exiting getCodeList");
+		return codeList;
 	}
 
 

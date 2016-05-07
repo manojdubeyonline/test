@@ -11,6 +11,7 @@ function validate(){
 		BootstrapDialog.alert('Please select procurement method');
 		return false;
 	}
+	saveProcurement()
 }
 
 function numbersonly(form_element, e, decimal) {
@@ -131,7 +132,7 @@ function numbersonly(form_element, e, decimal) {
 					<div class="form-group">
 
 						<button type="button" class="btn btn-success" id="addReqSave"
-						onmouseenter="validate()"	onClick="saveProcurement()">
+						onmouseenter=""	onClick="validate()">
 							<span class="glyphicon glyphicon-floppy-save">Save </span>
 						</button>
 

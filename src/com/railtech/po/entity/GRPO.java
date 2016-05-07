@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import javax.persistence.*;
 
+import org.codehaus.jackson.annotate.JsonBackReference;
+
 import java.util.Date;
 import java.util.Set;
 import java.sql.Timestamp;
@@ -23,11 +25,25 @@ public class GRPO implements Serializable {
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Integer grpoId;
 
-	
+	@Column(name="goods_reciept_number")
+	private String goodsRecieptNo;
 
 	@ManyToOne
 	@JoinColumn(name="order_id")
 	private PurchaseOrder orderId;
+	
+	
+	
+	@ManyToOne
+	@JoinColumn(name="firm_id")
+	private Firm firm;
+	
+	
+	
+	@ManyToOne
+	@JoinColumn(name="ware_id")
+	private Warehouse warehouse;
+	
 	
 	@ManyToOne
 	@JoinColumn(name="inward_added_by")
@@ -62,8 +78,15 @@ public class GRPO implements Serializable {
 	
 	private String isdisbursed;
 	
-	@Column(name="vendor_details")
-	private String vendorDetails;
+	private String grType;
+	
+	@ManyToOne
+	@JoinColumn(name="vendor_id")
+	private Vendor vendor;
+	
+	@ManyToOne
+	@JoinColumn(name="location_id")
+	private VendorDetails vendorDetail;
 	
 	@Column(name="vendor_invoice_no")
 	private String vendorInvoiceNo;
@@ -84,7 +107,8 @@ public class GRPO implements Serializable {
 	@Column(name="last_updated")
 	private Timestamp lastUpdated;
 
-	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy ="grId", cascade=CascadeType.ALL)
+	private Set<GRRateApplied> grLevelRates;
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "grpo", cascade=CascadeType.ALL)
 	private Set<GRPOReceiptEntry> grpoReceiptItems;
@@ -107,6 +131,20 @@ public class GRPO implements Serializable {
 	}
 
 	/**
+	 * @return the goodsRecieptNo
+	 */
+	public String getGoodsRecieptNo() {
+		return goodsRecieptNo;
+	}
+
+	/**
+	 * @param goodsRecieptNo the goodsRecieptNo to set
+	 */
+	public void setGoodsRecieptNo(String goodsRecieptNo) {
+		this.goodsRecieptNo = goodsRecieptNo;
+	}
+
+	/**
 	 * @return the orderId
 	 */
 	public PurchaseOrder getOrderId() {
@@ -120,7 +158,34 @@ public class GRPO implements Serializable {
 		this.orderId = orderId;
 	}
 
-	
+		
+	/**
+	 * @return the firm
+	 */
+	public Firm getFirm() {
+		return firm;
+	}
+
+	/**
+	 * @param firm the firm to set
+	 */
+	public void setFirm(Firm firm) {
+		this.firm = firm;
+	}
+
+	/**
+	 * @return the warehouse
+	 */
+	public Warehouse getWarehouse() {
+		return warehouse;
+	}
+
+	/**
+	 * @param warehouse the warehouse to set
+	 */
+	public void setWarehouse(Warehouse warehouse) {
+		this.warehouse = warehouse;
+	}
 
 	/**
 	 * @return the addedBy
@@ -304,6 +369,42 @@ public class GRPO implements Serializable {
 		this.isdisbursed = isdisbursed;
 	}
 
+	public String getGrType() {
+		return grType;
+	}
+
+	public void setGrType(String grType) {
+		this.grType = grType;
+	}
+
+	/**
+	 * @return the vendor
+	 */
+	public Vendor getVendor() {
+		return vendor;
+	}
+
+	/**
+	 * @param vendor the vendor to set
+	 */
+	public void setVendor(Vendor vendor) {
+		this.vendor = vendor;
+	}
+
+	/**
+	 * @return the vendorDetail
+	 */
+	public VendorDetails getVendorDetail() {
+		return vendorDetail;
+	}
+
+	/**
+	 * @param vendorDetail the vendorDetail to set
+	 */
+	public void setVendorDetail(VendorDetails vendorDetail) {
+		this.vendorDetail = vendorDetail;
+	}
+
 	/**
 	 * @return the lastModifiedBy
 	 */
@@ -332,19 +433,24 @@ public class GRPO implements Serializable {
 		this.lastUpdated = lastUpdated;
 	}
 
+
+
+
 	/**
-	 * @return the vendorDetails
+	 * @return the grLevelRates
 	 */
-	public String getVendorDetails() {
-		return vendorDetails;
+	public Set<GRRateApplied> getGrLevelRates() {
+		return grLevelRates;
 	}
 
 	/**
-	 * @param vendorDetails the vendorDetails to set
+	 * @param grLevelRates the grLevelRates to set
 	 */
-	public void setVendorDetails(String vendorDetails) {
-		this.vendorDetails = vendorDetails;
+	public void setGrLevelRates(Set<GRRateApplied> grLevelRates) {
+		this.grLevelRates = grLevelRates;
 	}
+
+	
 
 	/**
 	 * @return the grpoReceiptItems

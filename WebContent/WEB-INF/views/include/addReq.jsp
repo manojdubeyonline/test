@@ -7,7 +7,7 @@ function validate(){
 	}
 	var warehouse = document.getElementById('warehouse').value;
 	if(warehouse == '') {
-		BootstrapDialog.alert('Please select Store');
+		BootstrapDialog.alert('Please select Warehouse');
 		return false;
 	}
 	var dueDate = document.getElementById('dueDate').value;
@@ -15,9 +15,9 @@ function validate(){
 		BootstrapDialog.alert('Please select Date');
 		return false;
 	}
-	var count = document.getElementById('rowhid').value;
-	count = count - 1;
-	for(i = 0; i <= count; i++){
+	var count = $('#rowhid').val();
+	//count = count - 1;
+	for(i = 0; i <count; i++){
 		var codeId = document.getElementById('codeId'+i).value;
 		if(codeId == ''){
 			BootstrapDialog.alert('Please Pick item');
@@ -29,7 +29,18 @@ function validate(){
 			return false;
 		}
 	}
+	var counter = document.getElementById('rowhid').value;
+	for(var m=0;m<counter;m++){
+		for(var n=0;n<counter;n++){
+			if( document.getElementById('codeId'+m).value == document.getElementById('codeId'+n).value && m != n){
+				BootstrapDialog.alert('Two items can not be same');
+				return false;
+			}	
+		}
+		
+	}
 	
+	saveUpdateRequisition();
 }
 </script><div class="modal fade" id="modal-add-req" role="dialog"
 	aria-hidden="true">
@@ -47,13 +58,13 @@ function validate(){
 				<div class="modal-body">
 					<div class="form-group">
 						<select class="form-control" id="firm" name="firm"
-							onChange="getFirmWarehouses('warehouse', this.value,'') " required>
+							onChange="getUserWarehouse('warehouse', this.value,'','${_SessionUser.userId}') " required>
 							<option value="" selected>For the Firm</option>
 						</select>
 					</div>
 					<div class="form-group">
 						<select class="form-control" id="warehouse" name="warehouse" onchange="generateRefNo();" required>
-							<option value="" selected>Store</option>
+							<option value="" selected>Warehouse</option>
 						</select>
 					</div>
 					
@@ -86,7 +97,7 @@ function validate(){
 											</button>
 											
 											<button type="button" class="btn btn-default" id="addReqSave"
-											onmouseenter="validate()"	onClick="saveUpdateRequisition()"><span class="glyphicon glyphicon-floppy-save"></span></button>
+										    onClick="validate();  "><span class="glyphicon glyphicon-floppy-save"></span></button>
 											
 										</div>
 					</div>
@@ -111,9 +122,15 @@ function validate(){
 							<input type="hidden" name="reqid" id="reqid" value=""/>
 
 						</div>
+						
+						
 					</div>
 					
 						
+					<div class="form-group" >
+						<label for="reqRemarks" style="vertical-align: top">Remarks</label> 
+						<textarea id="remaks"  name="remaks"class="formControl"  style="width: 100%; height:50px;" ></textarea>
+					</div>
 					
 
 				</div>
@@ -129,13 +146,3 @@ function validate(){
     width:90%;
 }
 </style>
-<script>
-function viewPDF(internal_ref_no, reqId){
-	document.forms[0].pdf_ref_no.value=internal_ref_no;
-	document.forms[0].reqid.value = reqId;
-	document.forms[0].action="PdfBuilder";
-	doucment.forms[0].submit();
-	
-}
-
-</script>

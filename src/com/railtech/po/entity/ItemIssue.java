@@ -22,6 +22,9 @@ public class ItemIssue implements Serializable {
 	@Column(name="item_issue_id")
 	private Integer itemIssueId;
 	
+	@Column(name="issueRefNo")
+	private String issueRefNo;
+	
 	@ManyToOne
 	@JoinColumn(name="requisition_id")
 	private Requisition requisition;
@@ -50,6 +53,20 @@ public class ItemIssue implements Serializable {
 
 	public void setItemIssueId(Integer itemIssueId) {
 		this.itemIssueId = itemIssueId;
+	}
+
+	/**
+	 * @return the issueRefNo
+	 */
+	public String getIssueRefNo() {
+		return issueRefNo;
+	}
+
+	/**
+	 * @param issueRefNo the issueRefNo to set
+	 */
+	public void setIssueRefNo(String issueRefNo) {
+		this.issueRefNo = issueRefNo;
 	}
 
 	public Requisition getRequisition() {

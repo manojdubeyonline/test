@@ -12,44 +12,89 @@
 					<div class="form-group">
 					<label for="item">From the firm</label>
 						<select class="form-control" id="fromFirm" name="fromFirm"
-							onChange="getWarehouseFirm('fromWarehouse', this.value) " required>
+							onChange="getUserWarehouse('fromWarehouse', this.value,'','${_SessionUser.userId}') " required>
 							<option value="" selected disabled>From Firm</option>
 						</select>
 						
 				</div>
 					<div class="form-group">
 					<label for="item">From the warehouse</label>
-						<select class="form-control" id="fromWarehouse" name="fromWarehouse" required>
+						<select class="form-control" id="fromWarehouse" name="fromWarehouse" onchange="generateWarehouseRefNo();" required>
 						<option value="" selected disabled>From Warehouse</option>
 						</select>
 					</div>
 
-					
+					<div class="form-group">
+						<input type="text" class="form-control" name="warehouseRefNo"
+							id="warehouseRefNo" placeholder=" Warehouse Reference Number" readonly  required/>
+							<input type="hidden" id="requisitionId" name="requisitionId">
+							
+					</div>
 
 					<div class="form-group">
-						<label for="item">To the firm</label> <input type="hidden" id="firm2"
-							name="firm2">
+						<label for="item">To the firm</label> <input type="hidden" id="firmId"
+							name="firmId">
 							
 							
 							<input type="text" class="form-control"
-							id="firm1" name="firm1"  readonly="readonly">
+							id="firmName" name="firmName"  readonly="readonly">
 							
 							
 							
 					</div>
 					
 					<div class="form-group">
-						<label for="item">To the warehouse</label> <input type="hidden" id="warehouse2"
-							name="warehouse2">
+						<label for="item">To the warehouse</label> <input type="hidden" id="warehouseId"
+							name="warehouseId">
 							
 							
-							<input type="text" class="form-control" id="warehouse1"
-							name="warehouse1" readonly="readonly">
+							<input type="text" class="form-control" id="warehouseName"
+							name="warehouseName" readonly="readonly">
 							
 							
 							
 					</div>
 					
+					<div class="form-group">
+				        <label for="item">Expected Delivery Date</label> 
+				        <div class="date">
+				            <div class="input-group input-append date" id="dateRangePicker1">
+				               <input type="text" class="form-control" name="dueDate"
+							id="dueDate" placeholder="Due Date (dd/mm/yyyy)" />
+				                <span class="input-group-addon add-on"><span class="glyphicon glyphicon-calendar"></span></span>
+				            </div>
+				        </div>
+				    </div>
+				    
+				     <div class="panel-body" style="padding: 0px;">
+
+							<table class="table table-bordered table-hover" id="reqItemTable" style="margin-top: 0px; width:100%; valign:top;">
+								
+								<tr class="active">
+									
+									<th>Item Code</th>
+									<th>Item Name</th>
+									<th>Original Qty</th>
+									<th>Borrow Qty</th>
+									<th>Unit</th>
+									
+									
+								</tr>
+								
+								
+								
+								
+							
+							</table>
+							<input type="hidden" name="rowhid" id="rowhid" value="0"/>
+						
+							
+
+						</div>
+				    
+				    
+				    
+					<!--  
 					<div class="form-group">
 						<label for="item">Item</label> <input type="hidden" id="itemCode"
 							name="itemCode"><input type="text" class="form-control"
@@ -74,6 +119,8 @@
 							</div>
 						</div>
 					</div>
+					-->
+					
 					<div class="form-group">
 						<label for="item">Status</label> <select
 							class="form-control" id="status" name="status">
@@ -84,16 +131,10 @@
 					
 					
 					
-					<div class="form-group">
-				        <label for="item">Expected Delivery Date</label> 
-				        <div class="date">
-				            <div class="input-group input-append date" id="dateRangePicker">
-				               <input type="text" class="form-control" name="dueDate"
-							id="dueDate" placeholder="Due Date (dd/mm/yyyy)" />
-				                <span class="input-group-addon add-on"><span class="glyphicon glyphicon-calendar"></span></span>
-				            </div>
-				        </div>
-				    </div>
+					<div class="form-group" >
+						<label for="wareRemarks" style="vertical-align: top">Remarks</label> 
+						<textarea id="remaks"  name="remaks" class="formControl"  style="width: 100%; height:50px;" ></textarea>
+					</div>
 					
 					
 					

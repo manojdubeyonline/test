@@ -6,14 +6,14 @@ import com.railtech.po.entity.FlexiBean;
 import com.railtech.po.entity.JobWork;
 import com.railtech.po.entity.PurchaseOrder;
 import com.railtech.po.entity.PurchaseOrderItem;
+import com.railtech.po.entity.Rate;
+import com.railtech.po.entity.RateApplied;
 
 
 public interface PurchaseService {
 
 	public PurchaseOrder getOrderById(Integer parseInt);
 
-	public Double getOrderQtyById(Integer markingId);
-	
 	public void savePurchaseOrder(PurchaseOrder purchase);
 
 	public String generatePurchaseOrderNo(String firmId);
@@ -35,5 +35,15 @@ public interface PurchaseService {
 	public JobWork getJobWorkById(Integer jobId);
 
 	public void deleteJob(JobWork jobWork);
+
+	public Rate getrateById(Integer rateId);
+
+	public void saveRate(Rate rate);
+
+	public List<PurchaseOrderItem> getOrderByProcurementId(Integer markingId);
+
+	public PurchaseOrder getOrderByIdForGRPO(Integer orderId);
+
+	public RateApplied getRateAppliedById(Integer rateAppliedId);
 
 }

@@ -40,16 +40,14 @@ public class PurchaseOrderItem implements Serializable {
 	
 	
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="requisitionId")
-	@JsonBackReference
 	private Requisition requisition;
 	
 
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="requisitionItemId")
-	@JsonBackReference
 	private RequisitionItem requisitionItem;
 	
 	@ManyToOne
@@ -59,7 +57,7 @@ public class PurchaseOrderItem implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name="marking_id")
-	private Procurement ProcurementMarking;
+	private Procurement procurementMarking;
 	
 	
 	@Column(name="last_modified")
@@ -139,18 +137,20 @@ public class PurchaseOrderItem implements Serializable {
 	}
 
 	
+	
+
 	/**
 	 * @return the procurementMarking
 	 */
 	public Procurement getProcurementMarking() {
-		return ProcurementMarking;
+		return procurementMarking;
 	}
 
 	/**
 	 * @param procurementMarking the procurementMarking to set
 	 */
 	public void setProcurementMarking(Procurement procurementMarking) {
-		ProcurementMarking = procurementMarking;
+		this.procurementMarking = procurementMarking;
 	}
 
 	/**

@@ -24,8 +24,8 @@ function validateQty(){
 	}
 	
 	var count = document.getElementById('rowhid').value;
-	count = --count;
-	for(i = 1; i <= count; i++){
+
+	for(i =0 ; i <count; i++){
 		
 		var codeId = document.getElementById('codeId'+i).value;
 		if(codeId == '')
@@ -67,22 +67,27 @@ function validateQty(){
 					<h5 class='modal-title '>Item Issue</h5>
 				</div>
 				<div class="modal-body">
+					
+					<!--  
 					<div class="form-group">
-						<select class="form-control" id="user" name="user" required onchange="getUserFirms('firm',this.value)">
+						<select class="form-control" id="user" name="user" required onchange="getUserFirms('firm',this.value,'')">
 							<option value="" selected disabled>Issued To the User</option>
 						</select>
 					</div>
-					
+					-->
 					<div class="form-group">
 						<select class="form-control" id="firm" name="firm"
-							onChange="getFirmWarehouses('warehouse', this.value) " required>
+							onChange="getUserWarehouse('warehouse', this.value,'','${_SessionUser.userId}') " required>
 							<option value="" selected disabled>For the Firm</option>
 						</select>
+						<input type="hidden" id="firmId" name="firmId" >
+						<input type="hidden" id="warehouseId" name="warehouseId" >
 					</div>
 					<div class="form-group">
-						<select class="form-control" id="warehouse" name="warehouse" onchange="generateRefNo();" required>
-							<option value="" selected disabled>Store</option>
+						<select class="form-control" id="warehouse" name="warehouse" onchange="generateIssuesRefNo(),generateRefNo();"  required>
+							<option value="" selected disabled>Warehouse</option>
 						</select>
+						
 					</div>
 
 					 <div class="form-group">
@@ -91,16 +96,17 @@ function validateQty(){
 				            <div class="input-group input-append date" id="dateRangePicker">
 				               <input type="text" class="form-control" name="dueDate"
 							id="dueDate" placeholder="Issue Date (dd/mm/yyyy)" />
-							<input type="hidden" 
-							id="issueStatus" name="issueStatus"  value="N">
+							<input type="hidden" id="issueStatus" name="issueStatus"  value="N">
 				                <span class="input-group-addon add-on"><span class="glyphicon glyphicon-calendar"></span></span>
 				            </div>
 				        </div>
 				    </div>
 
 					<div class="form-group">
-						<input type="text" class="form-control" name="requisitionRefNo"
-							id="requisitionRefNo" placeholder=" Reference Number" readonly  required/>
+						<input type="text" class="form-control" name="issueRefNo"
+							id="issueRefNo" placeholder=" Issue Reference Number" readonly  required/>
+							<input type="hidden" class="form-control" name="requisitionRefNo"
+							id="requisitionRefNo" placeholder=" Issue Reference Number" readonly  required/>
 					</div>
 					
 					<input type="hidden" name="requisitionId" id="requisitionId"  />
@@ -110,12 +116,12 @@ function validateQty(){
 					<div class="panel-heading"> Requisition Items
 					<div class="btn-group" style="float: right">
 											<button type="button" class="btn btn-default"
-												onclick="addRow()">
-												<span class="glyphicon glyphicon-plus"></span>
+												onclick="addRow()" id="addItem">
+												<span class="glyphicon glyphicon-plus">Add Item</span>
 											</button>
 											
 											<button type="button" class="btn btn-default" id="addReqSave"
-											onmouseenter="validateQty();" onClick="saveItemIssue()"><span class="glyphicon glyphicon-floppy-save"></span></button>
+											onmouseenter="validateQty();" onClick="saveItemIssue()"><span class="glyphicon glyphicon-floppy-save">Issue</span></button>
 											
 										</div>
 					</div>

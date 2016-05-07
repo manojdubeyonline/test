@@ -77,7 +77,7 @@
 	{
 	border-left: 1px solid #eef8ff;
 }
-
+/* Hide/Show Column
 .flexigrid div.nBtn {
 	position: absolute;
 	height: 24px;
@@ -93,6 +93,7 @@
 	display: none;
 }
 
+
 .flexigrid div.nBtn div {
 	height: 24px;
 	width: 12px;
@@ -100,7 +101,7 @@
 	float: left;
 	background: url(images/ddn.png) no-repeat center;
 }
-
+*/
 .flexigrid div.nBtn.srtd {
 	background: url(images/wbg.gif) repeat-x 0px -1px;
 }

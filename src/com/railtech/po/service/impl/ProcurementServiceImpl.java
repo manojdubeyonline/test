@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.railtech.po.entity.FlexiBean;
 import com.railtech.po.entity.ItemStock;
@@ -27,7 +28,7 @@ import com.railtech.po.entity.Procurement;
 import com.railtech.po.exeception.RailtechException;
 import com.railtech.po.service.MasterInfoService;
 import com.railtech.po.service.ProcurementService;
-import com.sun.org.apache.xalan.internal.xsltc.util.IntegerArray;
+
 
 /**
  * @author MANOJ
@@ -70,20 +71,21 @@ public class ProcurementServiceImpl implements ProcurementService {
 		return procurement;
 	}
 	
+	
+
 	@Override
-	public Double getProcureQtyByReqItemId(Integer requisitionItemId) {
+	public List<Procurement> getProcureQtyByReqItemId(Integer requisitionItemId) {
 		logger.info("entering getProcureQtyByReqItemId");
 		Session session = sessionFactory.getCurrentSession();
 		Query query = session.createQuery("from Procurement procurement where procurement.requisitionItemId.itemKey=:requisitionItemId").setInteger("requisitionItemId", requisitionItemId);
-		Procurement procurement = (Procurement)query.uniqueResult();
-		Double Qty = 0.0;
-		if(procurement != null){
-			Qty = procurement.getProcurementQty();
-		}
+		//ItemIssue itemIssue = (ItemIssue) query.uniqueResult();
+		List<Procurement> procurement = new ArrayList<Procurement>(query.list());
+		
 		logger.info("entering getProcureQtyByReqItemId");
-		return Qty;
+		return procurement;
 	}
-
+	
+	
 
 	@Override
 	public void saveProcurementMarking(Procurement procurement){
@@ -93,21 +95,61 @@ public class ProcurementServiceImpl implements ProcurementService {
 
 
 	@Override
-	public List<Procurement> getProcurements(FlexiBean requestParams)
+	public List<Procurement> getProcurements()
 			throws RailtechException {
-		logger.info("entering getRequisitions");
+		logger.info("entering getProcurements");
 		Session session = sessionFactory.getCurrentSession();
-		Query query = session
-				.createQuery("from Procurement procurement");
+	Query query  = session
+				.createQuery("from Procurement procurement order by procurement.dueDate desc");
+	
 		@SuppressWarnings("unchecked")
 		List<Procurement> markingList = new ArrayList<Procurement>(
 				query.list());
 		logger.debug("returnVal of markingList:" + markingList);
 		
-		logger.info("exiting getRequisitions");
+		logger.info("exiting getProcurements");
 		return markingList;
 
 	}
+	
+	@Override
+	public List<Procurement> getProcurements(FlexiBean requestParams)
+			throws RailtechException {
+		logger.info("entering getProcurements");
+		Session session = sessionFactory.getCurrentSession();
+		Query query = null;
+		if(!StringUtils.isEmpty(requestParams.getQuery())){
+			query = session
+					.createQuery("from Procurement procurement where procurement.requisitionItemId.itemCode."+requestParams.getQtype().trim()+" like:"+requestParams.getQtype().trim()).setString(requestParams.getQtype().trim(), "%"+requestParams.getQuery()+"%");
+			
+		
+		}
+		else{
+		query = session
+				.createQuery("from Procurement procurement order by procurement.markingDate desc");
+		}
+		@SuppressWarnings("unchecked")
+		List<Procurement> markingList = new ArrayList<Procurement>(
+				query.list());
+		logger.debug("returnVal of markingList:" + markingList);
+		
+		logger.info("exiting getProcurements");
+		return markingList;
+
+	}
+	
+	@Override
+	public List<Procurement> getProcurementQtyByReqItemId(Integer requisitionItemId) {
+		logger.info("entering getProcurementQtyByReqItemId");
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("from Procurement procurement where procurement.requisitionItemId.itemKey=:requisitionItemId").setInteger("requisitionItemId", requisitionItemId);
+		//ItemIssue itemIssue = (ItemIssue) query.uniqueResult();
+		List<Procurement> procurement = new ArrayList<Procurement>(query.list());
+		
+		logger.info("entering getProcurementQtyByReqItemId");
+		return procurement;
+	}
+	
 	
 	@SuppressWarnings({ "unchecked" })
 	@Override

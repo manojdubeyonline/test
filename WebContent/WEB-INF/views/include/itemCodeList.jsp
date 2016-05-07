@@ -1,35 +1,57 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<table id="pltable" class="table table-striped table-bordered">
-	<thead>
-		<tr class="active">
-			<th>Pick</th>
-			<th>Code ID</th>
-			<th>Item Code</th>
-			<th>Description</th>
-			<th>New Item Code</th>
-			<th>New Description</th>
-		</tr>
-	</thead>
-	<tbody>
+<style>
 
-		<c:forEach items="${codeList}" var="code">
-			<tr>
-				<td><a href="#" onclick="push('${code.codeId}','${code.code}','${code.codeDesc}')" ><span class="glyphicon glyphicon-plus-sign" ></span></a></td>
-				<td><c:out value="${code.codeId }"></c:out></td>
-				<td><c:out value="${code.code }"></c:out></td>
-				<td><c:out value="${code.codeDesc }"></c:out></td>
-				<td><c:out value="${code.newItemCode }"></c:out></td>
-				<td><c:out value="${code.newItemDesc }"></c:out></td>
-			</tr>
-		</c:forEach>
-	</tbody>
-
-
+.modal-dialog {
+    width: 75%;
+    margin: 30px auto;
+}</style>
+<table id="pltable" style="width:80%">
 </table>
 
-<script>
+<script type="text/javascript">
 $(document).ready(function(){
-    $('#pltable').DataTable();
-});
+	var w=screen.width;
+	//$("#grpo").attr("class","active");
+		
+		
+		
+		$('#pltable').flexigrid({
+			url:'getCodeList',
+			method: 'POST',
+			dataType : 'json',
+		  
+		  colModel : [
+		       	{display: 'Pick', name : '', width:w*0.035, sortable : false, align: 'center'},
+				{display: 'Code Id', name : '', width:w*0.035, sortable : false, align: 'center'},
+				{display: 'Item Code', name : 'code', width:150, sortable : false, align: 'center'},
+				{display: 'Code Desc', name : 'codeDesc', width:400, sortable : false, align: 'left'},
+				{display: 'New Code', name : '', width:150, sortable : false, align: 'left'},
+				{display: 'New Desc', name : '', width:100, sortable : false, align: 'left'},
+				
+					],
+		  buttons : [
+					
+				 	
+	      ],
+	      searchitems : [
+	                {display: 'Description', name : 'codeDesc'},
+	                {display: 'Item Code', name : 'code'},
+	             
+					
+	      ],
+			sortname: "codeId",
+			sortorder: "asc",
+			usepager: true,
+			newp:1,
+			//title: 'Purchase Orders',
+			useRp: true,
+			rp: 200,
+			showTableToggleBtn: true,//toggle button for the whole table
+			resizable: false,
+			width: 700,
+			height: screen.height*.50,
+			singleSelect: true
 
+		});
+		});
 </script>

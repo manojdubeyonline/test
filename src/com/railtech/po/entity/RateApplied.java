@@ -2,6 +2,7 @@ package com.railtech.po.entity;
 
 import java.io.Serializable;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.codehaus.jackson.annotate.JsonBackReference;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @Entity
 @Table(name="rate_applied")
@@ -25,9 +27,9 @@ public class RateApplied implements Serializable {
 	@Column(name="rate_applied_id")
 	private Integer rateAppliedId;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name="rate_id")
-	@JsonBackReference
 	private Rate rate;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -40,6 +42,8 @@ public class RateApplied implements Serializable {
 	@JsonBackReference
 	private PurchaseOrderItem itemKeyId;
 	private Double appliedAmount;
+	
+	private String levelStatus;
 	/**
 	 * @return the rate
 	 */
@@ -99,6 +103,18 @@ public class RateApplied implements Serializable {
 	 */
 	public void setRateAppliedId(Integer rateAppliedId) {
 		this.rateAppliedId = rateAppliedId;
+	}
+	/**
+	 * @return the levelStatus
+	 */
+	public String getLevelStatus() {
+		return levelStatus;
+	}
+	/**
+	 * @param levelStatus the levelStatus to set
+	 */
+	public void setLevelStatus(String levelStatus) {
+		this.levelStatus = levelStatus;
 	}
 	
 

@@ -96,6 +96,7 @@ public class Code implements Serializable {
 	private Set<ItemStock> itemstocks;
 	
 	@ManyToMany(cascade = { CascadeType.ALL })
+	@JsonIgnore
 	@JoinTable(name = "item_preferred_vendor", joinColumns = { @JoinColumn(name = "item_code_id") }, inverseJoinColumns = { @JoinColumn(name = "vendor_id") })
 	private Set<Vendor> preferredVendors = new HashSet<Vendor>();
 

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE tiles-definitions PUBLIC
-       "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN"
-       "http://tiles.apache.org/dtds/tiles-config_2_1.dtd">
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
 
-<tiles-definitions>
+<tiles-definitions>    
 
   <definition name="main" template="/WEB-INF/template/template.jsp">
   	<put-attribute name="title" value="Railtech......purchase order" type="string" />
@@ -45,6 +45,14 @@
   	<put-attribute name="title" value="Railtech......Requisition" type="string" />
  	<put-attribute name="header" value="/WEB-INF/template/layouts/header.jsp" />
     <put-attribute name="body" value="/WEB-INF/views/purchaseOrder.jsp" />
+    <put-attribute name="footer" value="/WEB-INF/template/layouts/footer.jsp" />
+  </definition>
+  
+  
+   <definition name="stockAllocation" template="/WEB-INF/template/template.jsp">
+  	<put-attribute name="title" value="Railtech......Requisition" type="string" />
+ 	<put-attribute name="header" value="/WEB-INF/template/layouts/header.jsp" />
+    <put-attribute name="body" value="/WEB-INF/views/stockAllocation.jsp" />
     <put-attribute name="footer" value="/WEB-INF/template/layouts/footer.jsp" />
   </definition>
   
